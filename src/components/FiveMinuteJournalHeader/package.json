@@ -1,0 +1,6 @@
+{
+  "name": "FiveMinuteJournalHeader",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./FiveMinuteJournalHeader.js"
+}

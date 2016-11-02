@@ -1,0 +1,22 @@
+.root {
+  background: #4F4C47;
+  color: #fff;
+  width: 100%;
+}
+
+.container {
+  margin: 0 auto;
+  width: 100%;
+}
+
+.banner {
+  text-align: center;
+}
+
+.bannerTitle {
+  margin: 0;
+  padding: 10px;
+  font-family: 'Lobster', cursive;
+  font-weight: 300;
+  font-size: 30px;
+}
