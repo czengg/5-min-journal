@@ -12,13 +12,38 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Layout from '../../components/Layout';
 import s from './Register.css';
 
-function Register({ title }) {
+function Register() {
   return (
-    <Layout>
+    <Layout header="fiveMinuteJournal">
       <div className={s.root}>
         <div className={s.container}>
-          <h1>{title}</h1>
-          <p>...</p>
+          <h1 className={s.lead}>Sign Up</h1>
+          <form method="post">
+            <div className={s.formGroup}>
+              <input
+                className={s.input}
+                id="usernameOrEmail"
+                type="text"
+                name="usernameOrEmail"
+                placeholder="username"
+                autoFocus
+              />
+            </div>
+            <div className={s.formGroup}>
+              <input
+                className={s.input}
+                id="password"
+                type="password"
+                name="password"
+                placeholder="password"
+              />
+            </div>
+            <div className={s.formGroup}>
+              <button className={s.button} type="submit">
+                Register &rarr;
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </Layout>

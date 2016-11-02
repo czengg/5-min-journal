@@ -159,7 +159,7 @@ module.exports =
   
   var _routes2 = _interopRequireDefault(_routes);
   
-  var _assets = __webpack_require__(112);
+  var _assets = __webpack_require__(102);
   
   var _assets2 = _interopRequireDefault(_assets);
   
@@ -2443,10 +2443,10 @@ module.exports =
     path: '/',
   
     // Keep in mind, routes are evaluated in order
-    children: [__webpack_require__(62).default, __webpack_require__(87).default, __webpack_require__(91).default, __webpack_require__(95).default, __webpack_require__(99).default,
+    children: [__webpack_require__(62).default, __webpack_require__(77).default, __webpack_require__(81).default, __webpack_require__(85).default, __webpack_require__(89).default,
   
     // place new routes before...
-    __webpack_require__(104).default, __webpack_require__(108).default],
+    __webpack_require__(94).default, __webpack_require__(98).default],
   
     action: function action(_ref) {
       var _this = this;
@@ -2495,10 +2495,6 @@ module.exports =
   
   var _regenerator2 = _interopRequireDefault(_regenerator);
   
-  var _stringify = __webpack_require__(34);
-  
-  var _stringify2 = _interopRequireDefault(_stringify);
-  
   var _asyncToGenerator2 = __webpack_require__(6);
   
   var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
@@ -2516,7 +2512,11 @@ module.exports =
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _Home = __webpack_require__(63);
+  var _moment = __webpack_require__(63);
+  
+  var _moment2 = _interopRequireDefault(_moment);
+  
+  var _Home = __webpack_require__(64);
   
   var _Home2 = _interopRequireDefault(_Home);
   
@@ -2534,53 +2534,22 @@ module.exports =
       var _this = this;
   
       return (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
-        var resp, _ref, data;
-  
+        var date;
         return _regenerator2.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _context.next = 2;
-                return (0, _fetch2.default)('/graphql', {
-                  method: 'post',
-                  headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json'
-                  },
-                  body: (0, _stringify2.default)({
-                    query: '{news{title,link,contentSnippet}}'
-                  }),
-                  credentials: 'include'
-                });
-  
-              case 2:
-                resp = _context.sent;
-                _context.next = 5;
-                return resp.json();
-  
-              case 5:
-                _ref = _context.sent;
-                data = _ref.data;
-  
-                if (!(!data || !data.news)) {
-                  _context.next = 9;
-                  break;
-                }
-  
-                throw new Error('Failed to load the news feed.');
-  
-              case 9:
+                date = (0, _moment2.default)();
                 return _context.abrupt('return', {
-                  title: 'React Starter Kit',
-                  component: _react2.default.createElement(_Home2.default, { news: data.news, __source: {
+                  component: _react2.default.createElement(_Home2.default, { date: date, __source: {
                       fileName: _jsxFileName,
-                      lineNumber: 34
+                      lineNumber: 22
                     },
                     __self: _this
                   })
                 });
   
-              case 10:
+              case 2:
               case 'end':
                 return _context.stop();
             }
@@ -2592,6 +2561,12 @@ module.exports =
 
 /***/ },
 /* 63 */
+/***/ function(module, exports) {
+
+  module.exports = require("moment");
+
+/***/ },
+/* 64 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -2616,27 +2591,28 @@ module.exports =
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _Layout = __webpack_require__(64);
+  var _Layout = __webpack_require__(65);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _Home = __webpack_require__(85);
+  var _MorningRoutine = __webpack_require__(71);
+  
+  var _MorningRoutine2 = _interopRequireDefault(_MorningRoutine);
+  
+  var _Home = __webpack_require__(75);
   
   var _Home2 = _interopRequireDefault(_Home);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
   function Home(_ref) {
-    var _this = this;
-  
-    var news = _ref.news;
+    var date = _ref.date;
   
     return _react2.default.createElement(
       _Layout2.default,
-      {
-        __source: {
+      { header: 'fiveMinuteJournal', __source: {
           fileName: _jsxFileName,
-          lineNumber: 17
+          lineNumber: 18
         },
         __self: this
       },
@@ -2644,7 +2620,7 @@ module.exports =
         'div',
         { className: _Home2.default.root, __source: {
             fileName: _jsxFileName,
-            lineNumber: 18
+            lineNumber: 19
           },
           __self: this
         },
@@ -2652,76 +2628,29 @@ module.exports =
           'div',
           { className: _Home2.default.container, __source: {
               fileName: _jsxFileName,
-              lineNumber: 19
+              lineNumber: 20
             },
             __self: this
           },
-          _react2.default.createElement(
-            'h1',
-            { className: _Home2.default.title, __source: {
-                fileName: _jsxFileName,
-                lineNumber: 20
-              },
-              __self: this
+          _react2.default.createElement(_MorningRoutine2.default, { date: date, __source: {
+              fileName: _jsxFileName,
+              lineNumber: 21
             },
-            'React.js News'
-          ),
-          _react2.default.createElement(
-            'ul',
-            { className: _Home2.default.news, __source: {
-                fileName: _jsxFileName,
-                lineNumber: 21
-              },
-              __self: this
-            },
-            news.map(function (item, index) {
-              return _react2.default.createElement(
-                'li',
-                { key: index, className: _Home2.default.newsItem, __source: {
-                    fileName: _jsxFileName,
-                    lineNumber: 23
-                  },
-                  __self: _this
-                },
-                _react2.default.createElement(
-                  'a',
-                  { href: item.link, className: _Home2.default.newsTitle, __source: {
-                      fileName: _jsxFileName,
-                      lineNumber: 24
-                    },
-                    __self: _this
-                  },
-                  item.title
-                ),
-                _react2.default.createElement('span', {
-                  className: _Home2.default.newsDesc,
-                  dangerouslySetInnerHTML: { __html: item.contentSnippet },
-                  __source: {
-                    fileName: _jsxFileName,
-                    lineNumber: 25
-                  },
-                  __self: _this
-                })
-              );
-            })
-          )
+            __self: this
+          })
         )
       )
     );
   }
   
   Home.propTypes = {
-    news: _react.PropTypes.arrayOf(_react.PropTypes.shape({
-      title: _react.PropTypes.string.isRequired,
-      link: _react.PropTypes.string.isRequired,
-      contentSnippet: _react.PropTypes.string
-    })).isRequired
+    date: _react.PropTypes.object.isRequired
   };
   
   exports.default = (0, _withStyles2.default)(_Home2.default)(Home);
 
 /***/ },
-/* 64 */
+/* 65 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -2746,11 +2675,11 @@ module.exports =
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _Layout = __webpack_require__(65);
+  var _Layout = __webpack_require__(66);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _FiveMinuteJournalHeader = __webpack_require__(113);
+  var _FiveMinuteJournalHeader = __webpack_require__(68);
   
   var _FiveMinuteJournalHeader2 = _interopRequireDefault(_FiveMinuteJournalHeader);
   
@@ -2787,11 +2716,11 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_Layout2.default)(Layout);
 
 /***/ },
-/* 65 */
+/* 66 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(66);
+      var content = __webpack_require__(67);
       var insertCss = __webpack_require__(32);
   
       if (typeof content === 'string') {
@@ -2821,7 +2750,7 @@ module.exports =
     
 
 /***/ },
-/* 66 */
+/* 67 */
 /***/ function(module, exports, __webpack_require__) {
 
   exports = module.exports = __webpack_require__(31)();
@@ -2837,29 +2766,275 @@ module.exports =
   };
 
 /***/ },
-/* 67 */,
-/* 68 */,
-/* 69 */,
-/* 70 */,
-/* 71 */,
-/* 72 */,
-/* 73 */,
-/* 74 */,
-/* 75 */,
-/* 76 */,
-/* 77 */,
-/* 78 */,
-/* 79 */,
-/* 80 */,
-/* 81 */,
-/* 82 */,
-/* 83 */,
-/* 84 */,
-/* 85 */
+/* 68 */
+/***/ function(module, exports, __webpack_require__) {
+
+  'use strict';
+  
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/components/FiveMinuteJournalHeader/FiveMinuteJournalHeader.js';
+  
+  var _react = __webpack_require__(15);
+  
+  var _react2 = _interopRequireDefault(_react);
+  
+  var _withStyles = __webpack_require__(28);
+  
+  var _withStyles2 = _interopRequireDefault(_withStyles);
+  
+  var _FiveMinuteJournalHeader = __webpack_require__(69);
+  
+  var _FiveMinuteJournalHeader2 = _interopRequireDefault(_FiveMinuteJournalHeader);
+  
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+  
+  function Header() {
+    return _react2.default.createElement(
+      'div',
+      { className: _FiveMinuteJournalHeader2.default.root, __source: {
+          fileName: _jsxFileName,
+          lineNumber: 7
+        },
+        __self: this
+      },
+      _react2.default.createElement(
+        'div',
+        { className: _FiveMinuteJournalHeader2.default.container, __source: {
+            fileName: _jsxFileName,
+            lineNumber: 8
+          },
+          __self: this
+        },
+        _react2.default.createElement(
+          'div',
+          { className: _FiveMinuteJournalHeader2.default.banner, __source: {
+              fileName: _jsxFileName,
+              lineNumber: 9
+            },
+            __self: this
+          },
+          _react2.default.createElement(
+            'h1',
+            { className: _FiveMinuteJournalHeader2.default.bannerTitle, __source: {
+                fileName: _jsxFileName,
+                lineNumber: 10
+              },
+              __self: this
+            },
+            'The Five-Minute Journal'
+          )
+        )
+      )
+    );
+  }
+  
+  exports.default = (0, _withStyles2.default)(_FiveMinuteJournalHeader2.default)(Header);
+
+/***/ },
+/* 69 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(86);
+      var content = __webpack_require__(70);
+      var insertCss = __webpack_require__(32);
+  
+      if (typeof content === 'string') {
+        content = [[module.id, content, '']];
+      }
+  
+      module.exports = content.locals || {};
+      module.exports._getCss = function() { return content.toString(); };
+      module.exports._insertCss = function(options) { return insertCss(content, options) };
+    
+      // Hot Module Replacement
+      // https://webpack.github.io/docs/hot-module-replacement
+      // Only activated in browser context
+      if (false) {
+        var removeCss = function() {};
+        module.hot.accept("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./FiveMinuteJournalHeader.css", function() {
+          content = require("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./FiveMinuteJournalHeader.css");
+  
+          if (typeof content === 'string') {
+            content = [[module.id, content, '']];
+          }
+  
+          removeCss = insertCss(content, { replace: true });
+        });
+        module.hot.dispose(function() { removeCss(); });
+      }
+    
+
+/***/ },
+/* 70 */
+/***/ function(module, exports, __webpack_require__) {
+
+  exports = module.exports = __webpack_require__(31)();
+  // imports
+  
+  
+  // module
+  exports.push([module.id, ".FiveMinuteJournalHeader-root-2PU2l {\n  background: #4F4C47;\n  color: #fff;\n  width: 100%;\n}\n\n.FiveMinuteJournalHeader-container-1QiIN {\n  margin: 0 auto;\n  width: 100%;\n}\n\n.FiveMinuteJournalHeader-banner-2MlKO {\n  text-align: center;\n}\n\n.FiveMinuteJournalHeader-bannerTitle-1X-Lx {\n  margin: 0;\n  padding: 10px;\n  font-family: 'Lobster', cursive;\n  font-weight: 300;\n  font-size: 30px;\n}\n", "", {"version":3,"sources":["/./components/FiveMinuteJournalHeader/FiveMinuteJournalHeader.css"],"names":[],"mappings":"AAAA;EACE,oBAAoB;EACpB,YAAY;EACZ,YAAY;CACb;;AAED;EACE,eAAe;EACf,YAAY;CACb;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,UAAU;EACV,cAAc;EACd,gCAAgC;EAChC,iBAAiB;EACjB,gBAAgB;CACjB","file":"FiveMinuteJournalHeader.css","sourcesContent":[".root {\n  background: #4F4C47;\n  color: #fff;\n  width: 100%;\n}\n\n.container {\n  margin: 0 auto;\n  width: 100%;\n}\n\n.banner {\n  text-align: center;\n}\n\n.bannerTitle {\n  margin: 0;\n  padding: 10px;\n  font-family: 'Lobster', cursive;\n  font-weight: 300;\n  font-size: 30px;\n}\n"],"sourceRoot":"webpack://"}]);
+  
+  // exports
+  exports.locals = {
+  	"root": "FiveMinuteJournalHeader-root-2PU2l",
+  	"container": "FiveMinuteJournalHeader-container-1QiIN",
+  	"banner": "FiveMinuteJournalHeader-banner-2MlKO",
+  	"bannerTitle": "FiveMinuteJournalHeader-bannerTitle-1X-Lx"
+  };
+
+/***/ },
+/* 71 */
+/***/ function(module, exports, __webpack_require__) {
+
+  'use strict';
+  
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/components/MorningRoutine/MorningRoutine.js';
+  
+  var _react = __webpack_require__(15);
+  
+  var _react2 = _interopRequireDefault(_react);
+  
+  var _withStyles = __webpack_require__(28);
+  
+  var _withStyles2 = _interopRequireDefault(_withStyles);
+  
+  var _MorningRoutine = __webpack_require__(72);
+  
+  var _MorningRoutine2 = _interopRequireDefault(_MorningRoutine);
+  
+  var _sun = __webpack_require__(74);
+  
+  var _sun2 = _interopRequireDefault(_sun);
+  
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+  
+  function MorningRoutine(_ref) {
+    var date = _ref.date;
+  
+    var dateString = date.format('MMMM D, YYYY');
+  
+    return _react2.default.createElement(
+      'div',
+      { className: _MorningRoutine2.default.root, __source: {
+          fileName: _jsxFileName,
+          lineNumber: 10
+        },
+        __self: this
+      },
+      _react2.default.createElement(
+        'div',
+        { className: _MorningRoutine2.default.container, __source: {
+            fileName: _jsxFileName,
+            lineNumber: 11
+          },
+          __self: this
+        },
+        _react2.default.createElement(
+          'div',
+          { className: _MorningRoutine2.default.dateContainer, __source: {
+              fileName: _jsxFileName,
+              lineNumber: 12
+            },
+            __self: this
+          },
+          _react2.default.createElement('img', { className: _MorningRoutine2.default.icon, src: _sun2.default, __source: {
+              fileName: _jsxFileName,
+              lineNumber: 13
+            },
+            __self: this
+          }),
+          _react2.default.createElement(
+            'div',
+            { className: _MorningRoutine2.default.date, __source: {
+                fileName: _jsxFileName,
+                lineNumber: 14
+              },
+              __self: this
+            },
+            dateString
+          )
+        )
+      )
+    );
+  }
+  
+  MorningRoutine.propTypes = {
+    date: _react.PropTypes.object.isRequired
+  };
+  
+  exports.default = (0, _withStyles2.default)(_MorningRoutine2.default)(MorningRoutine);
+
+/***/ },
+/* 72 */
+/***/ function(module, exports, __webpack_require__) {
+
+  
+      var content = __webpack_require__(73);
+      var insertCss = __webpack_require__(32);
+  
+      if (typeof content === 'string') {
+        content = [[module.id, content, '']];
+      }
+  
+      module.exports = content.locals || {};
+      module.exports._getCss = function() { return content.toString(); };
+      module.exports._insertCss = function(options) { return insertCss(content, options) };
+    
+      // Hot Module Replacement
+      // https://webpack.github.io/docs/hot-module-replacement
+      // Only activated in browser context
+      if (false) {
+        var removeCss = function() {};
+        module.hot.accept("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./MorningRoutine.css", function() {
+          content = require("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./MorningRoutine.css");
+  
+          if (typeof content === 'string') {
+            content = [[module.id, content, '']];
+          }
+  
+          removeCss = insertCss(content, { replace: true });
+        });
+        module.hot.dispose(function() { removeCss(); });
+      }
+    
+
+/***/ },
+/* 73 */
+/***/ function(module, exports, __webpack_require__) {
+
+  exports = module.exports = __webpack_require__(31)();
+  // imports
+  
+  
+  // module
+  exports.push([module.id, "\n.MorningRoutine-container-3B86h {\n  padding-top: 5%;\n}\n\n.MorningRoutine-icon-hZ3Ng {\n  width: 50px;\n  height: 50px;\n  vertical-align: middle;\n  margin-right: 2%;\n}\n\n.MorningRoutine-dateContainer-18jQU {\n  height: 50px;\n\n}\n\n.MorningRoutine-date-2tXFI {\n  vertical-align: middle;\n  display: inline-block;\n  font-family: 'Raleway', sans-serif;\n  font-weight: 700;\n  font-size: 20px;\n}\n", "", {"version":3,"sources":["/./components/MorningRoutine/MorningRoutine.css"],"names":[],"mappings":";AACA;EACE,gBAAgB;CACjB;;AAED;EACE,YAAY;EACZ,aAAa;EACb,uBAAuB;EACvB,iBAAiB;CAClB;;AAED;EACE,aAAa;;CAEd;;AAED;EACE,uBAAuB;EACvB,sBAAsB;EACtB,mCAAmC;EACnC,iBAAiB;EACjB,gBAAgB;CACjB","file":"MorningRoutine.css","sourcesContent":["\n.container {\n  padding-top: 5%;\n}\n\n.icon {\n  width: 50px;\n  height: 50px;\n  vertical-align: middle;\n  margin-right: 2%;\n}\n\n.dateContainer {\n  height: 50px;\n\n}\n\n.date {\n  vertical-align: middle;\n  display: inline-block;\n  font-family: 'Raleway', sans-serif;\n  font-weight: 700;\n  font-size: 20px;\n}\n"],"sourceRoot":"webpack://"}]);
+  
+  // exports
+  exports.locals = {
+  	"container": "MorningRoutine-container-3B86h",
+  	"icon": "MorningRoutine-icon-hZ3Ng",
+  	"dateContainer": "MorningRoutine-dateContainer-18jQU",
+  	"date": "MorningRoutine-date-2tXFI"
+  };
+
+/***/ },
+/* 74 */
+/***/ function(module, exports, __webpack_require__) {
+
+  module.exports = __webpack_require__.p + "components/MorningRoutine/sun.png?841b37f448e0f30c20d59cc3b1246a93";
+
+/***/ },
+/* 75 */
+/***/ function(module, exports, __webpack_require__) {
+
+  
+      var content = __webpack_require__(76);
       var insertCss = __webpack_require__(32);
   
       if (typeof content === 'string') {
@@ -2889,7 +3064,7 @@ module.exports =
     
 
 /***/ },
-/* 86 */
+/* 76 */
 /***/ function(module, exports, __webpack_require__) {
 
   exports = module.exports = __webpack_require__(31)();
@@ -2897,7 +3072,7 @@ module.exports =
   
   
   // module
-  exports.push([module.id, "/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n\n/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n\n:root {/*\n   * Typography\n   * ======================================================================== *//*\n   * Layout\n   * ======================================================================== *//*\n   * Media queries breakpoints\n   * ======================================================================== *//* Extra small screen / phone *//* Small screen / tablet *//* Medium screen / desktop *//* Large screen / wide desktop */\n}\n\n.Home-root-2IMq2 {\n  padding-left: 20px;\n  padding-right: 20px;\n}\n\n.Home-container-2Yejq {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  max-width: 1000px;\n}\n\n.Home-news-oTyGp {\n  padding: 0;\n}\n\n.Home-newsItem-3Ob1N {\n  list-style-type: none;\n  padding-bottom: 6px;\n}\n\n.Home-newsTitle-1yWVz {\n  font-size: 1.125em;\n}\n\n.Home-newsTitle-1yWVz,\n.Home-newsDesc-21LXz {\n  display: block;\n}\n", "", {"version":3,"sources":["/./routes/home/Home.css","/./components/variables.css"],"names":[],"mappings":"AAAA;;;;;;;GAOG;;ACPH;;;;;;;GAOG;;AAEH,OACE;;gFAE8E;;gFAMA;;gFAMA,gCAErB,2BACL,6BACE,iCACI;CAC3D;;ADnBD;EACE,mBAAmB;EACnB,oBAAoB;CACrB;;AAED;EACE,eAAe;EACf,kBAAkB;EAClB,kBAAoC;CACrC;;AAED;EACE,WAAW;CACZ;;AAED;EACE,sBAAsB;EACtB,oBAAoB;CACrB;;AAED;EACE,mBAAmB;CACpB;;AAED;;EAEE,eAAe;CAChB","file":"Home.css","sourcesContent":["/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n\n@import '../../components/variables.css';\n\n.root {\n  padding-left: 20px;\n  padding-right: 20px;\n}\n\n.container {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  max-width: var(--max-content-width);\n}\n\n.news {\n  padding: 0;\n}\n\n.newsItem {\n  list-style-type: none;\n  padding-bottom: 6px;\n}\n\n.newsTitle {\n  font-size: 1.125em;\n}\n\n.newsTitle,\n.newsDesc {\n  display: block;\n}\n","/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n\n:root {\n  /*\n   * Typography\n   * ======================================================================== */\n\n  --font-family-base: 'Segoe UI', 'HelveticaNeue-Light', sans-serif;\n\n  /*\n   * Layout\n   * ======================================================================== */\n\n  --max-content-width: 1000px;\n\n  /*\n   * Media queries breakpoints\n   * ======================================================================== */\n\n  --screen-xs-min: 480px;  /* Extra small screen / phone */\n  --screen-sm-min: 768px;  /* Small screen / tablet */\n  --screen-md-min: 992px;  /* Medium screen / desktop */\n  --screen-lg-min: 1200px; /* Large screen / wide desktop */\n}\n"],"sourceRoot":"webpack://"}]);
+  exports.push([module.id, "html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 0%;\n          flex: 1 1 0%;\n}\n\n.Home-root-2IMq2 {\n  margin-top: 5%;\n  width: 90%;\n}\n\n.Home-container-2Yejq {\n  margin: 0 auto;\n  padding: 0 0 40px;\n}\n\n.Home-news-oTyGp {\n  padding: 0;\n}\n\n.Home-newsItem-3Ob1N {\n  list-style-type: none;\n  padding-bottom: 6px;\n}\n\n.Home-newsTitle-1yWVz {\n  font-size: 1.125em;\n}\n\n.Home-newsTitle-1yWVz,\n.Home-newsDesc-21LXz {\n  display: block;\n}\n", "", {"version":3,"sources":["/./routes/home/Home.css"],"names":[],"mappings":"AAAA;EACE,YAAY;EACZ,aAAa;CACd;;AAED;EACE,UAAU;EACV,WAAW;EACX,0BAA0B;EAC1B,qBAAc;EAAd,qBAAc;EAAd,cAAc;EACd,oBAAQ;MAAR,iBAAQ;UAAR,aAAQ;CACT;;AAED;EACE,eAAe;EACf,WAAW;CACZ;;AAED;EACE,eAAe;EACf,kBAAkB;CACnB;;AAED;EACE,WAAW;CACZ;;AAED;EACE,sBAAsB;EACtB,oBAAoB;CACrB;;AAED;EACE,mBAAmB;CACpB;;AAED;;EAEE,eAAe;CAChB","file":"Home.css","sourcesContent":["html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: flex;\n  flex: 1;\n}\n\n.root {\n  margin-top: 5%;\n  width: 90%;\n}\n\n.container {\n  margin: 0 auto;\n  padding: 0 0 40px;\n}\n\n.news {\n  padding: 0;\n}\n\n.newsItem {\n  list-style-type: none;\n  padding-bottom: 6px;\n}\n\n.newsTitle {\n  font-size: 1.125em;\n}\n\n.newsTitle,\n.newsDesc {\n  display: block;\n}\n"],"sourceRoot":"webpack://"}]);
   
   // exports
   exports.locals = {
@@ -2910,7 +3085,7 @@ module.exports =
   };
 
 /***/ },
-/* 87 */
+/* 77 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -2931,7 +3106,7 @@ module.exports =
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _Contact = __webpack_require__(88);
+  var _Contact = __webpack_require__(78);
   
   var _Contact2 = _interopRequireDefault(_Contact);
   
@@ -2957,7 +3132,7 @@ module.exports =
   };
 
 /***/ },
-/* 88 */
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -2982,11 +3157,11 @@ module.exports =
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _Layout = __webpack_require__(64);
+  var _Layout = __webpack_require__(65);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _Contact = __webpack_require__(89);
+  var _Contact = __webpack_require__(79);
   
   var _Contact2 = _interopRequireDefault(_Contact);
   
@@ -3054,11 +3229,11 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_Contact2.default)(Contact);
 
 /***/ },
-/* 89 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(90);
+      var content = __webpack_require__(80);
       var insertCss = __webpack_require__(32);
   
       if (typeof content === 'string') {
@@ -3088,7 +3263,7 @@ module.exports =
     
 
 /***/ },
-/* 90 */
+/* 80 */
 /***/ function(module, exports, __webpack_require__) {
 
   exports = module.exports = __webpack_require__(31)();
@@ -3105,7 +3280,7 @@ module.exports =
   };
 
 /***/ },
-/* 91 */
+/* 81 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -3126,7 +3301,7 @@ module.exports =
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _Login = __webpack_require__(92);
+  var _Login = __webpack_require__(82);
   
   var _Login2 = _interopRequireDefault(_Login);
   
@@ -3152,7 +3327,7 @@ module.exports =
   };
 
 /***/ },
-/* 92 */
+/* 82 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -3177,11 +3352,11 @@ module.exports =
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _Layout = __webpack_require__(64);
+  var _Layout = __webpack_require__(65);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _Login = __webpack_require__(93);
+  var _Login = __webpack_require__(83);
   
   var _Login2 = _interopRequireDefault(_Login);
   
@@ -3305,11 +3480,11 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_Login2.default)(Login);
 
 /***/ },
-/* 93 */
+/* 83 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(94);
+      var content = __webpack_require__(84);
       var insertCss = __webpack_require__(32);
   
       if (typeof content === 'string') {
@@ -3339,7 +3514,7 @@ module.exports =
     
 
 /***/ },
-/* 94 */
+/* 84 */
 /***/ function(module, exports, __webpack_require__) {
 
   exports = module.exports = __webpack_require__(31)();
@@ -3347,7 +3522,7 @@ module.exports =
   
   
   // module
-  exports.push([module.id, "/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n:root {/*\n   * Typography\n   * ======================================================================== *//*\n   * Layout\n   * ======================================================================== *//*\n   * Media queries breakpoints\n   * ======================================================================== *//* Extra small screen / phone *//* Small screen / tablet *//* Medium screen / desktop *//* Large screen / wide desktop */\n}\n\nhtml {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 0%;\n          flex: 1 1 0%;\n}\n\n.Login-root-rQNQN {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.Login-container-2BVuU {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.Login-lead-1mJBN {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.Login-formGroup-25Tio {\n  margin-bottom: 15px;\n}\n\n.Login-input-1bTr- {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.Login-input-1bTr-:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.Login-button-11e1X {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.Login-button-11e1X:focus {\n  padding-top: 13px;\n}\n\n.Login-icon-34kkB {\n  display: inline-block;\n  margin: -2px 12px -2px 0;\n  width: 20px;\n  height: 20px;\n  vertical-align: middle;\n  fill: currentColor;\n}\n", "", {"version":3,"sources":["/./routes/login/Login.css","/./components/variables.css"],"names":[],"mappings":"AAAA;;;;;;;GAOG;ACPH;;;;;;;GAOG;AAEH,OACE;;gFAE8E;;gFAMA;;gFAMA,gCAErB,2BACL,6BACE,iCACI;CAC3D;;ADpBD;EACE,YAAY;EACZ,aAAa;CACd;;AAED;EACE,UAAU;EACV,WAAW;EACX,0BAA0B;EAC1B,qBAAc;EAAd,qBAAc;EAAd,cAAc;EACd,oBAAQ;MAAR,iBAAQ;UAAR,aAAQ;CACT;;AAED;EACE,WAAW;EACX,gBAAgB;CACjB;;AAED;EACE,eAAe;EACf,kBAAkB;EAClB,mBAAmB;CACpB;;AAED;EACE,gCAAgC;EAChC,gBAAgB;EAChB,eAAe;CAChB;;AAED;EACE,oBAAoB;CACrB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,YAAY;EACZ,aAAa;EACb,WAAW;EACX,iBAAiB;EACjB,eAAe;EACf,gBAAgB;EAChB,uBAAuB;EACvB,iFAAyE;EAAzE,yEAAyE;EACzE,aAAa;EACb,iCAAiC;EACjC,uCAAuC;EACvC,wBAAwB;CACzB;;AAED;EACE,kBAAkB;EAClB,kBAAkB;CACnB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,UAAU;EACV,mBAAmB;EACnB,YAAY;EACZ,WAAW;EACX,eAAe;EACf,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,uBAAuB;EACvB,gBAAgB;EAChB,aAAa;EACb,wBAAwB;EACxB,uCAAuC;EACvC,oBAAoB;EACpB,gBAAgB;CACjB;;AAED;EACE,kBAAkB;CACnB;;AAED;EACE,sBAAsB;EACtB,yBAAyB;EACzB,YAAY;EACZ,aAAa;EACb,uBAAuB;EACvB,mBAAmB;CACpB","file":"Login.css","sourcesContent":["/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n@import '../../components/variables.css';\n\nhtml {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: flex;\n  flex: 1;\n}\n\n.root {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.container {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.lead {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.formGroup {\n  margin-bottom: 15px;\n}\n\n.input {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.input:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.button {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.button:focus {\n  padding-top: 13px;\n}\n\n.icon {\n  display: inline-block;\n  margin: -2px 12px -2px 0;\n  width: 20px;\n  height: 20px;\n  vertical-align: middle;\n  fill: currentColor;\n}\n","/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n\n:root {\n  /*\n   * Typography\n   * ======================================================================== */\n\n  --font-family-base: 'Segoe UI', 'HelveticaNeue-Light', sans-serif;\n\n  /*\n   * Layout\n   * ======================================================================== */\n\n  --max-content-width: 1000px;\n\n  /*\n   * Media queries breakpoints\n   * ======================================================================== */\n\n  --screen-xs-min: 480px;  /* Extra small screen / phone */\n  --screen-sm-min: 768px;  /* Small screen / tablet */\n  --screen-md-min: 992px;  /* Medium screen / desktop */\n  --screen-lg-min: 1200px; /* Large screen / wide desktop */\n}\n"],"sourceRoot":"webpack://"}]);
+  exports.push([module.id, "html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 0%;\n          flex: 1 1 0%;\n}\n\n.Login-root-rQNQN {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.Login-container-2BVuU {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.Login-lead-1mJBN {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.Login-formGroup-25Tio {\n  margin-bottom: 15px;\n}\n\n.Login-input-1bTr- {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.Login-input-1bTr-:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.Login-button-11e1X {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.Login-button-11e1X:focus {\n  padding-top: 13px;\n}\n", "", {"version":3,"sources":["/./routes/login/Login.css"],"names":[],"mappings":"AAAA;EACE,YAAY;EACZ,aAAa;CACd;;AAED;EACE,UAAU;EACV,WAAW;EACX,0BAA0B;EAC1B,qBAAc;EAAd,qBAAc;EAAd,cAAc;EACd,oBAAQ;MAAR,iBAAQ;UAAR,aAAQ;CACT;;AAED;EACE,WAAW;EACX,gBAAgB;CACjB;;AAED;EACE,eAAe;EACf,kBAAkB;EAClB,mBAAmB;CACpB;;AAED;EACE,gCAAgC;EAChC,gBAAgB;EAChB,eAAe;CAChB;;AAED;EACE,oBAAoB;CACrB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,YAAY;EACZ,aAAa;EACb,WAAW;EACX,iBAAiB;EACjB,eAAe;EACf,gBAAgB;EAChB,uBAAuB;EACvB,iFAAyE;EAAzE,yEAAyE;EACzE,aAAa;EACb,iCAAiC;EACjC,uCAAuC;EACvC,wBAAwB;CACzB;;AAED;EACE,kBAAkB;EAClB,kBAAkB;CACnB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,UAAU;EACV,mBAAmB;EACnB,YAAY;EACZ,WAAW;EACX,eAAe;EACf,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,uBAAuB;EACvB,gBAAgB;EAChB,aAAa;EACb,wBAAwB;EACxB,uCAAuC;EACvC,oBAAoB;EACpB,gBAAgB;CACjB;;AAED;EACE,kBAAkB;CACnB","file":"Login.css","sourcesContent":["html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: flex;\n  flex: 1;\n}\n\n.root {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.container {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.lead {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.formGroup {\n  margin-bottom: 15px;\n}\n\n.input {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.input:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.button {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.button:focus {\n  padding-top: 13px;\n}\n"],"sourceRoot":"webpack://"}]);
   
   // exports
   exports.locals = {
@@ -3356,12 +3531,11 @@ module.exports =
   	"lead": "Login-lead-1mJBN",
   	"formGroup": "Login-formGroup-25Tio",
   	"input": "Login-input-1bTr-",
-  	"button": "Login-button-11e1X",
-  	"icon": "Login-icon-34kkB"
+  	"button": "Login-button-11e1X"
   };
 
 /***/ },
-/* 95 */
+/* 85 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -3382,7 +3556,7 @@ module.exports =
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _Register = __webpack_require__(96);
+  var _Register = __webpack_require__(86);
   
   var _Register2 = _interopRequireDefault(_Register);
   
@@ -3408,7 +3582,7 @@ module.exports =
   };
 
 /***/ },
-/* 96 */
+/* 86 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -3433,23 +3607,20 @@ module.exports =
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _Layout = __webpack_require__(64);
+  var _Layout = __webpack_require__(65);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _Register = __webpack_require__(97);
+  var _Register = __webpack_require__(87);
   
   var _Register2 = _interopRequireDefault(_Register);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
-  function Register(_ref) {
-    var title = _ref.title;
-  
+  function Register() {
     return _react2.default.createElement(
       _Layout2.default,
-      {
-        __source: {
+      { header: 'fiveMinuteJournal', __source: {
           fileName: _jsxFileName,
           lineNumber: 17
         },
@@ -3473,25 +3644,84 @@ module.exports =
           },
           _react2.default.createElement(
             'h1',
-            {
-              __source: {
+            { className: _Register2.default.lead, __source: {
                 fileName: _jsxFileName,
                 lineNumber: 20
               },
               __self: this
             },
-            title
+            'Sign Up'
           ),
           _react2.default.createElement(
-            'p',
-            {
-              __source: {
+            'form',
+            { method: 'post', __source: {
                 fileName: _jsxFileName,
                 lineNumber: 21
               },
               __self: this
             },
-            '...'
+            _react2.default.createElement(
+              'div',
+              { className: _Register2.default.formGroup, __source: {
+                  fileName: _jsxFileName,
+                  lineNumber: 22
+                },
+                __self: this
+              },
+              _react2.default.createElement('input', {
+                className: _Register2.default.input,
+                id: 'usernameOrEmail',
+                type: 'text',
+                name: 'usernameOrEmail',
+                placeholder: 'username',
+                autoFocus: true,
+                __source: {
+                  fileName: _jsxFileName,
+                  lineNumber: 23
+                },
+                __self: this
+              })
+            ),
+            _react2.default.createElement(
+              'div',
+              { className: _Register2.default.formGroup, __source: {
+                  fileName: _jsxFileName,
+                  lineNumber: 32
+                },
+                __self: this
+              },
+              _react2.default.createElement('input', {
+                className: _Register2.default.input,
+                id: 'password',
+                type: 'password',
+                name: 'password',
+                placeholder: 'password',
+                __source: {
+                  fileName: _jsxFileName,
+                  lineNumber: 33
+                },
+                __self: this
+              })
+            ),
+            _react2.default.createElement(
+              'div',
+              { className: _Register2.default.formGroup, __source: {
+                  fileName: _jsxFileName,
+                  lineNumber: 41
+                },
+                __self: this
+              },
+              _react2.default.createElement(
+                'button',
+                { className: _Register2.default.button, type: 'submit', __source: {
+                    fileName: _jsxFileName,
+                    lineNumber: 42
+                  },
+                  __self: this
+                },
+                'Register \u2192'
+              )
+            )
           )
         )
       )
@@ -3503,11 +3733,11 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_Register2.default)(Register);
 
 /***/ },
-/* 97 */
+/* 87 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(98);
+      var content = __webpack_require__(88);
       var insertCss = __webpack_require__(32);
   
       if (typeof content === 'string') {
@@ -3537,7 +3767,7 @@ module.exports =
     
 
 /***/ },
-/* 98 */
+/* 88 */
 /***/ function(module, exports, __webpack_require__) {
 
   exports = module.exports = __webpack_require__(31)();
@@ -3545,16 +3775,20 @@ module.exports =
   
   
   // module
-  exports.push([module.id, "/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n\n/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n\n:root {/*\n   * Typography\n   * ======================================================================== *//*\n   * Layout\n   * ======================================================================== *//*\n   * Media queries breakpoints\n   * ======================================================================== *//* Extra small screen / phone *//* Small screen / tablet *//* Medium screen / desktop *//* Large screen / wide desktop */\n}\n\n.Register-root-1hu0P {\n  padding-left: 20px;\n  padding-right: 20px;\n}\n\n.Register-container-OjhIB {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  max-width: 1000px;\n}\n", "", {"version":3,"sources":["/./routes/register/Register.css","/./components/variables.css"],"names":[],"mappings":"AAAA;;;;;;;GAOG;;ACPH;;;;;;;GAOG;;AAEH,OACE;;gFAE8E;;gFAMA;;gFAMA,gCAErB,2BACL,6BACE,iCACI;CAC3D;;ADnBD;EACE,mBAAmB;EACnB,oBAAoB;CACrB;;AAED;EACE,eAAe;EACf,kBAAkB;EAClB,kBAAoC;CACrC","file":"Register.css","sourcesContent":["/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n\n@import '../../components/variables.css';\n\n.root {\n  padding-left: 20px;\n  padding-right: 20px;\n}\n\n.container {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  max-width: var(--max-content-width);\n}\n","/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n\n:root {\n  /*\n   * Typography\n   * ======================================================================== */\n\n  --font-family-base: 'Segoe UI', 'HelveticaNeue-Light', sans-serif;\n\n  /*\n   * Layout\n   * ======================================================================== */\n\n  --max-content-width: 1000px;\n\n  /*\n   * Media queries breakpoints\n   * ======================================================================== */\n\n  --screen-xs-min: 480px;  /* Extra small screen / phone */\n  --screen-sm-min: 768px;  /* Small screen / tablet */\n  --screen-md-min: 992px;  /* Medium screen / desktop */\n  --screen-lg-min: 1200px; /* Large screen / wide desktop */\n}\n"],"sourceRoot":"webpack://"}]);
+  exports.push([module.id, "html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 0%;\n          flex: 1 1 0%;\n}\n\n.Register-root-1hu0P {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.Register-container-OjhIB {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.Register-lead-2Uwpf {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.Register-formGroup-3ZVSx {\n  margin-bottom: 15px;\n}\n\n.Register-input-2b_qn {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.Register-input-2b_qn:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.Register-button-3N6JT {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.Register-button-3N6JT:focus {\n  padding-top: 13px;\n}\n", "", {"version":3,"sources":["/./routes/register/Register.css"],"names":[],"mappings":"AAAA;EACE,YAAY;EACZ,aAAa;CACd;;AAED;EACE,UAAU;EACV,WAAW;EACX,0BAA0B;EAC1B,qBAAc;EAAd,qBAAc;EAAd,cAAc;EACd,oBAAQ;MAAR,iBAAQ;UAAR,aAAQ;CACT;;AAED;EACE,WAAW;EACX,gBAAgB;CACjB;;AAED;EACE,eAAe;EACf,kBAAkB;EAClB,mBAAmB;CACpB;;AAED;EACE,gCAAgC;EAChC,gBAAgB;EAChB,eAAe;CAChB;;AAED;EACE,oBAAoB;CACrB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,YAAY;EACZ,aAAa;EACb,WAAW;EACX,iBAAiB;EACjB,eAAe;EACf,gBAAgB;EAChB,uBAAuB;EACvB,iFAAyE;EAAzE,yEAAyE;EACzE,aAAa;EACb,iCAAiC;EACjC,uCAAuC;EACvC,wBAAwB;CACzB;;AAED;EACE,kBAAkB;EAClB,kBAAkB;CACnB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,UAAU;EACV,mBAAmB;EACnB,YAAY;EACZ,WAAW;EACX,eAAe;EACf,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,uBAAuB;EACvB,gBAAgB;EAChB,aAAa;EACb,wBAAwB;EACxB,uCAAuC;EACvC,oBAAoB;EACpB,gBAAgB;CACjB;;AAED;EACE,kBAAkB;CACnB","file":"Register.css","sourcesContent":["html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: flex;\n  flex: 1;\n}\n\n.root {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.container {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.lead {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.formGroup {\n  margin-bottom: 15px;\n}\n\n.input {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.input:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.button {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.button:focus {\n  padding-top: 13px;\n}\n"],"sourceRoot":"webpack://"}]);
   
   // exports
   exports.locals = {
   	"root": "Register-root-1hu0P",
-  	"container": "Register-container-OjhIB"
+  	"container": "Register-container-OjhIB",
+  	"lead": "Register-lead-2Uwpf",
+  	"formGroup": "Register-formGroup-3ZVSx",
+  	"input": "Register-input-2b_qn",
+  	"button": "Register-button-3N6JT"
   };
 
 /***/ },
-/* 99 */
+/* 89 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -3567,7 +3801,7 @@ module.exports =
   
   var _regenerator2 = _interopRequireDefault(_regenerator);
   
-  var _promise = __webpack_require__(100);
+  var _promise = __webpack_require__(90);
   
   var _promise2 = _interopRequireDefault(_promise);
   
@@ -3617,7 +3851,7 @@ module.exports =
                 _context.next = 4;
                 return new _promise2.default(function (resolve) {
                   !/* require.ensure */(function (require) {
-                    return resolve(__webpack_require__(101).default);
+                    return resolve(__webpack_require__(91).default);
                   }(__webpack_require__));
                 });
   
@@ -3645,13 +3879,13 @@ module.exports =
   };
 
 /***/ },
-/* 100 */
+/* 90 */
 /***/ function(module, exports) {
 
   module.exports = require("babel-runtime/core-js/promise");
 
 /***/ },
-/* 101 */
+/* 91 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -3676,11 +3910,11 @@ module.exports =
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _Layout = __webpack_require__(64);
+  var _Layout = __webpack_require__(65);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _Admin = __webpack_require__(102);
+  var _Admin = __webpack_require__(92);
   
   var _Admin2 = _interopRequireDefault(_Admin);
   
@@ -3748,11 +3982,11 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_Admin2.default)(Admin);
 
 /***/ },
-/* 102 */
+/* 92 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(103);
+      var content = __webpack_require__(93);
       var insertCss = __webpack_require__(32);
   
       if (typeof content === 'string') {
@@ -3782,7 +4016,7 @@ module.exports =
     
 
 /***/ },
-/* 103 */
+/* 93 */
 /***/ function(module, exports, __webpack_require__) {
 
   exports = module.exports = __webpack_require__(31)();
@@ -3799,7 +4033,7 @@ module.exports =
   };
 
 /***/ },
-/* 104 */
+/* 94 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -3837,7 +4071,7 @@ module.exports =
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _Content = __webpack_require__(105);
+  var _Content = __webpack_require__(95);
   
   var _Content2 = _interopRequireDefault(_Content);
   
@@ -3923,7 +4157,7 @@ module.exports =
   };
 
 /***/ },
-/* 105 */
+/* 95 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -3948,11 +4182,11 @@ module.exports =
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _Layout = __webpack_require__(64);
+  var _Layout = __webpack_require__(65);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _Content = __webpack_require__(106);
+  var _Content = __webpack_require__(96);
   
   var _Content2 = _interopRequireDefault(_Content);
   
@@ -4019,11 +4253,11 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_Content2.default)(Content);
 
 /***/ },
-/* 106 */
+/* 96 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(107);
+      var content = __webpack_require__(97);
       var insertCss = __webpack_require__(32);
   
       if (typeof content === 'string') {
@@ -4053,7 +4287,7 @@ module.exports =
     
 
 /***/ },
-/* 107 */
+/* 97 */
 /***/ function(module, exports, __webpack_require__) {
 
   exports = module.exports = __webpack_require__(31)();
@@ -4070,7 +4304,7 @@ module.exports =
   };
 
 /***/ },
-/* 108 */
+/* 98 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -4091,7 +4325,7 @@ module.exports =
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _NotFound = __webpack_require__(109);
+  var _NotFound = __webpack_require__(99);
   
   var _NotFound2 = _interopRequireDefault(_NotFound);
   
@@ -4118,7 +4352,7 @@ module.exports =
   };
 
 /***/ },
-/* 109 */
+/* 99 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -4143,11 +4377,11 @@ module.exports =
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _Layout = __webpack_require__(64);
+  var _Layout = __webpack_require__(65);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _NotFound = __webpack_require__(110);
+  var _NotFound = __webpack_require__(100);
   
   var _NotFound2 = _interopRequireDefault(_NotFound);
   
@@ -4214,11 +4448,11 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_NotFound2.default)(NotFound);
 
 /***/ },
-/* 110 */
+/* 100 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(111);
+      var content = __webpack_require__(101);
       var insertCss = __webpack_require__(32);
   
       if (typeof content === 'string') {
@@ -4248,7 +4482,7 @@ module.exports =
     
 
 /***/ },
-/* 111 */
+/* 101 */
 /***/ function(module, exports, __webpack_require__) {
 
   exports = module.exports = __webpack_require__(31)();
@@ -4265,130 +4499,10 @@ module.exports =
   };
 
 /***/ },
-/* 112 */
+/* 102 */
 /***/ function(module, exports) {
 
   module.exports = require("./assets");
-
-/***/ },
-/* 113 */
-/***/ function(module, exports, __webpack_require__) {
-
-  'use strict';
-  
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/components/FiveMinuteJournalHeader/FiveMinuteJournalHeader.js';
-  
-  var _react = __webpack_require__(15);
-  
-  var _react2 = _interopRequireDefault(_react);
-  
-  var _withStyles = __webpack_require__(28);
-  
-  var _withStyles2 = _interopRequireDefault(_withStyles);
-  
-  var _FiveMinuteJournalHeader = __webpack_require__(114);
-  
-  var _FiveMinuteJournalHeader2 = _interopRequireDefault(_FiveMinuteJournalHeader);
-  
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-  
-  function Header() {
-    return _react2.default.createElement(
-      'div',
-      { className: _FiveMinuteJournalHeader2.default.root, __source: {
-          fileName: _jsxFileName,
-          lineNumber: 7
-        },
-        __self: this
-      },
-      _react2.default.createElement(
-        'div',
-        { className: _FiveMinuteJournalHeader2.default.container, __source: {
-            fileName: _jsxFileName,
-            lineNumber: 8
-          },
-          __self: this
-        },
-        _react2.default.createElement(
-          'div',
-          { className: _FiveMinuteJournalHeader2.default.banner, __source: {
-              fileName: _jsxFileName,
-              lineNumber: 9
-            },
-            __self: this
-          },
-          _react2.default.createElement(
-            'h1',
-            { className: _FiveMinuteJournalHeader2.default.bannerTitle, __source: {
-                fileName: _jsxFileName,
-                lineNumber: 10
-              },
-              __self: this
-            },
-            'The Five-Minute Journal'
-          )
-        )
-      )
-    );
-  }
-  
-  exports.default = (0, _withStyles2.default)(_FiveMinuteJournalHeader2.default)(Header);
-
-/***/ },
-/* 114 */
-/***/ function(module, exports, __webpack_require__) {
-
-  
-      var content = __webpack_require__(115);
-      var insertCss = __webpack_require__(32);
-  
-      if (typeof content === 'string') {
-        content = [[module.id, content, '']];
-      }
-  
-      module.exports = content.locals || {};
-      module.exports._getCss = function() { return content.toString(); };
-      module.exports._insertCss = function(options) { return insertCss(content, options) };
-    
-      // Hot Module Replacement
-      // https://webpack.github.io/docs/hot-module-replacement
-      // Only activated in browser context
-      if (false) {
-        var removeCss = function() {};
-        module.hot.accept("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./FiveMinuteJournalHeader.css", function() {
-          content = require("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./FiveMinuteJournalHeader.css");
-  
-          if (typeof content === 'string') {
-            content = [[module.id, content, '']];
-          }
-  
-          removeCss = insertCss(content, { replace: true });
-        });
-        module.hot.dispose(function() { removeCss(); });
-      }
-    
-
-/***/ },
-/* 115 */
-/***/ function(module, exports, __webpack_require__) {
-
-  exports = module.exports = __webpack_require__(31)();
-  // imports
-  
-  
-  // module
-  exports.push([module.id, ".FiveMinuteJournalHeader-root-2PU2l {\n  background: #4F4C47;\n  color: #fff;\n  width: 100%;\n}\n\n.FiveMinuteJournalHeader-container-1QiIN {\n  margin: 0 auto;\n  width: 100%;\n}\n\n.FiveMinuteJournalHeader-banner-2MlKO {\n  text-align: center;\n}\n\n.FiveMinuteJournalHeader-bannerTitle-1X-Lx {\n  margin: 0;\n  padding: 10px;\n  font-family: 'Lobster', cursive;\n  font-weight: 300;\n  font-size: 30px;\n}\n", "", {"version":3,"sources":["/./components/FiveMinuteJournalHeader/FiveMinuteJournalHeader.css"],"names":[],"mappings":"AAAA;EACE,oBAAoB;EACpB,YAAY;EACZ,YAAY;CACb;;AAED;EACE,eAAe;EACf,YAAY;CACb;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,UAAU;EACV,cAAc;EACd,gCAAgC;EAChC,iBAAiB;EACjB,gBAAgB;CACjB","file":"FiveMinuteJournalHeader.css","sourcesContent":[".root {\n  background: #4F4C47;\n  color: #fff;\n  width: 100%;\n}\n\n.container {\n  margin: 0 auto;\n  width: 100%;\n}\n\n.banner {\n  text-align: center;\n}\n\n.bannerTitle {\n  margin: 0;\n  padding: 10px;\n  font-family: 'Lobster', cursive;\n  font-weight: 300;\n  font-size: 30px;\n}\n"],"sourceRoot":"webpack://"}]);
-  
-  // exports
-  exports.locals = {
-  	"root": "FiveMinuteJournalHeader-root-2PU2l",
-  	"container": "FiveMinuteJournalHeader-container-1QiIN",
-  	"banner": "FiveMinuteJournalHeader-banner-2MlKO",
-  	"bannerTitle": "FiveMinuteJournalHeader-bannerTitle-1X-Lx"
-  };
 
 /***/ }
 /******/ ]);
