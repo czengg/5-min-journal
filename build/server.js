@@ -113,57 +113,65 @@ module.exports =
   
   var _jsonwebtoken2 = _interopRequireDefault(_jsonwebtoken);
   
-  var _react = __webpack_require__(15);
+  var _mysql = __webpack_require__(15);
+  
+  var _mysql2 = _interopRequireDefault(_mysql);
+  
+  var _moment = __webpack_require__(16);
+  
+  var _moment2 = _interopRequireDefault(_moment);
+  
+  var _react = __webpack_require__(17);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _server = __webpack_require__(16);
+  var _server = __webpack_require__(18);
   
   var _server2 = _interopRequireDefault(_server);
   
-  var _universalRouter = __webpack_require__(17);
+  var _universalRouter = __webpack_require__(19);
   
   var _universalRouter2 = _interopRequireDefault(_universalRouter);
   
-  var _prettyError = __webpack_require__(18);
+  var _prettyError = __webpack_require__(20);
   
   var _prettyError2 = _interopRequireDefault(_prettyError);
   
-  var _App = __webpack_require__(19);
+  var _App = __webpack_require__(21);
   
   var _App2 = _interopRequireDefault(_App);
   
-  var _Html = __webpack_require__(30);
+  var _Html = __webpack_require__(33);
   
   var _Html2 = _interopRequireDefault(_Html);
   
-  var _ErrorPage = __webpack_require__(32);
+  var _ErrorPage = __webpack_require__(35);
   
-  var _ErrorPage2 = __webpack_require__(34);
+  var _ErrorPage2 = __webpack_require__(37);
   
   var _ErrorPage3 = _interopRequireDefault(_ErrorPage2);
   
-  var _passport = __webpack_require__(42);
+  var _passport = __webpack_require__(44);
   
   var _passport2 = _interopRequireDefault(_passport);
   
-  var _models = __webpack_require__(45);
+  var _models = __webpack_require__(47);
   
   var _models2 = _interopRequireDefault(_models);
   
-  var _schema = __webpack_require__(52);
+  var _schema = __webpack_require__(54);
   
   var _schema2 = _interopRequireDefault(_schema);
   
-  var _routes = __webpack_require__(66);
+  var _routes = __webpack_require__(68);
   
   var _routes2 = _interopRequireDefault(_routes);
   
-  var _assets = __webpack_require__(112);
+  var _assets = __webpack_require__(110);
   
   var _assets2 = _interopRequireDefault(_assets);
   
-  var _config = __webpack_require__(31);
+  var _config = __webpack_require__(34);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
@@ -201,6 +209,51 @@ module.exports =
     var expiresIn = 60 * 60 * 24 * 180; // 180 days
     var token = _jsonwebtoken2.default.sign(req.user, _config.auth.jwt.secret, { expiresIn: expiresIn });
     res.cookie('id_token', token, { maxAge: 1000 * expiresIn, httpOnly: true });
+    res.redirect('/');
+  });
+  
+  app.post('/login', function (req, res) {
+    var query = connection.query('SELECT * FROM users WHERE email="' + req.body.email + '"', function (err, result) {
+      if (err) {
+        res.redirect('/error');
+      } else {
+        if (result[0].password === req.body.password) {
+          req.session = req.session || {};
+          req.session.user = result[0];
+          res.redirect('/');
+        } else {
+          res.redirect('/error');
+        }
+      }
+    });
+  });
+  
+  app.post('/register', function (req, res) {
+    var user = { email: req.body.email, password: req.body.password };
+    var query = connection.query('INSERT INTO users SET ?', user, function (err, result) {
+      if (err) {
+        res.redirect('/error');
+      } else {
+        req.session = req.session || {};
+        req.session.user = user;
+        res.redirect('/');
+      }
+    });
+  });
+  
+  //
+  // Database connection
+  // -----------------------------------------------------------------------------
+  var connection = _mysql2.default.createConnection({
+    host: 'fiveMinJournal.db.10477243.hostedresource.com',
+    user: 'fiveMinJournal',
+    password: 'JLpJTPrMDBBm@Ee9WJ',
+    database: 'fiveMinJournal'
+  });
+  
+  app.get('/save/:date', function (req, res) {
+  
+    console.log(req.params.date);
     res.redirect('/');
   });
   
@@ -279,7 +332,7 @@ module.exports =
                           _App2.default,
                           { context: context, __source: {
                               fileName: _jsxFileName,
-                              lineNumber: 112
+                              lineNumber: 159
                             },
                             __self: undefined
                           },
@@ -291,7 +344,7 @@ module.exports =
                         html = _server2.default.renderToStaticMarkup(_react2.default.createElement(_Html2.default, (0, _extends3.default)({}, data, {
                           __source: {
                             fileName: _jsxFileName,
-                            lineNumber: 116
+                            lineNumber: 163
                           },
                           __self: undefined
                         })));
@@ -359,13 +412,13 @@ module.exports =
         style: _ErrorPage3.default._getCss() // eslint-disable-line no-underscore-dangle
         , __source: {
           fileName: _jsxFileName,
-          lineNumber: 135
+          lineNumber: 182
         },
         __self: undefined
       },
       _server2.default.renderToString(_react2.default.createElement(_ErrorPage.ErrorPageWithoutStyle, { error: err, __source: {
           fileName: _jsxFileName,
-          lineNumber: 140
+          lineNumber: 187
         },
         __self: undefined
       }))
@@ -475,28 +528,40 @@ module.exports =
 /* 15 */
 /***/ function(module, exports) {
 
-  module.exports = require("react");
+  module.exports = require("mysql");
 
 /***/ },
 /* 16 */
 /***/ function(module, exports) {
 
-  module.exports = require("react-dom/server");
+  module.exports = require("moment");
 
 /***/ },
 /* 17 */
 /***/ function(module, exports) {
 
-  module.exports = require("universal-router");
+  module.exports = require("react");
 
 /***/ },
 /* 18 */
 /***/ function(module, exports) {
 
-  module.exports = require("pretty-error");
+  module.exports = require("react-dom/server");
 
 /***/ },
 /* 19 */
+/***/ function(module, exports) {
+
+  module.exports = require("universal-router");
+
+/***/ },
+/* 20 */
+/***/ function(module, exports) {
+
+  module.exports = require("pretty-error");
+
+/***/ },
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -505,23 +570,23 @@ module.exports =
     value: true
   });
   
-  var _getPrototypeOf = __webpack_require__(20);
+  var _getPrototypeOf = __webpack_require__(22);
   
   var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
   
-  var _classCallCheck2 = __webpack_require__(21);
+  var _classCallCheck2 = __webpack_require__(23);
   
   var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
   
-  var _createClass2 = __webpack_require__(22);
+  var _createClass2 = __webpack_require__(24);
   
   var _createClass3 = _interopRequireDefault(_createClass2);
   
-  var _possibleConstructorReturn2 = __webpack_require__(23);
+  var _possibleConstructorReturn2 = __webpack_require__(25);
   
   var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
   
-  var _inherits2 = __webpack_require__(24);
+  var _inherits2 = __webpack_require__(26);
   
   var _inherits3 = _interopRequireDefault(_inherits2);
   
@@ -534,15 +599,15 @@ module.exports =
                                                                                                                          * LICENSE.txt file in the root directory of this source tree.
                                                                                                                          */
   
-  var _react = __webpack_require__(15);
+  var _react = __webpack_require__(17);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _reactRedux = __webpack_require__(25);
+  var _reactRedux = __webpack_require__(27);
   
-  var _redux = __webpack_require__(26);
+  var _redux = __webpack_require__(28);
   
-  var _index = __webpack_require__(27);
+  var _index = __webpack_require__(29);
   
   var _index2 = _interopRequireDefault(_index);
   
@@ -613,49 +678,49 @@ module.exports =
   exports.default = App;
 
 /***/ },
-/* 20 */
+/* 22 */
 /***/ function(module, exports) {
 
   module.exports = require("babel-runtime/core-js/object/get-prototype-of");
 
 /***/ },
-/* 21 */
+/* 23 */
 /***/ function(module, exports) {
 
   module.exports = require("babel-runtime/helpers/classCallCheck");
 
 /***/ },
-/* 22 */
+/* 24 */
 /***/ function(module, exports) {
 
   module.exports = require("babel-runtime/helpers/createClass");
 
 /***/ },
-/* 23 */
+/* 25 */
 /***/ function(module, exports) {
 
   module.exports = require("babel-runtime/helpers/possibleConstructorReturn");
 
 /***/ },
-/* 24 */
+/* 26 */
 /***/ function(module, exports) {
 
   module.exports = require("babel-runtime/helpers/inherits");
 
 /***/ },
-/* 25 */
+/* 27 */
 /***/ function(module, exports) {
 
   module.exports = require("react-redux");
 
 /***/ },
-/* 26 */
+/* 28 */
 /***/ function(module, exports) {
 
   module.exports = require("redux");
 
 /***/ },
-/* 27 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -664,9 +729,9 @@ module.exports =
     value: true
   });
   
-  var _redux = __webpack_require__(26);
+  var _redux = __webpack_require__(28);
   
-  var _journalReducers = __webpack_require__(28);
+  var _journalReducers = __webpack_require__(30);
   
   var _journalReducers2 = _interopRequireDefault(_journalReducers);
   
@@ -679,7 +744,7 @@ module.exports =
   exports.default = appReducer;
 
 /***/ },
-/* 28 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -688,13 +753,13 @@ module.exports =
     value: true
   });
   
-  var _assign = __webpack_require__(38);
+  var _assign = __webpack_require__(31);
   
   var _assign2 = _interopRequireDefault(_assign);
   
   exports.default = journal;
   
-  var _actionTypes = __webpack_require__(29);
+  var _actionTypes = __webpack_require__(32);
   
   var types = _interopRequireWildcard(_actionTypes);
   
@@ -702,21 +767,39 @@ module.exports =
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
+  var defaultState = {
+    showMorningContent: undefined,
+    showEveningContent: undefined
+  };
+  
   function journal() {
-    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultState;
     var action = arguments[1];
   
     switch (action.type) {
       case types.SET_VALUES:
-        console.log(state);
         return (0, _assign2.default)({}, state, action.payload);
+      case types.SHOW_MORNING_ROUTINE:
+        return (0, _assign2.default)({}, state, { showMorningContent: true });
+      case types.HIDE_MORNING_ROUTINE:
+        return (0, _assign2.default)({}, state, { showMorningContent: false });
+      case types.SHOW_EVENING_ROUTINE:
+        return (0, _assign2.default)({}, state, { showEveningContent: true });
+      case types.HIDE_EVENING_ROUTINE:
+        return (0, _assign2.default)({}, state, { showEveningContent: false });
       default:
         return state;
     }
   }
 
 /***/ },
-/* 29 */
+/* 31 */
+/***/ function(module, exports) {
+
+  module.exports = require("babel-runtime/core-js/object/assign");
+
+/***/ },
+/* 32 */
 /***/ function(module, exports) {
 
   'use strict';
@@ -725,9 +808,13 @@ module.exports =
     value: true
   });
   var SET_VALUES = exports.SET_VALUES = 'SET_VALUES';
+  var SHOW_MORNING_ROUTINE = exports.SHOW_MORNING_ROUTINE = 'SHOW_MORNING_ROUTINE';
+  var HIDE_MORNING_ROUTINE = exports.HIDE_MORNING_ROUTINE = 'HIDE_MORNING_ROUTINE';
+  var SHOW_EVENING_ROUTINE = exports.SHOW_EVENING_ROUTINE = 'SHOW_EVENING_ROUTINE';
+  var HIDE_EVENING_ROUTINE = exports.HIDE_EVENING_ROUTINE = 'HIDE_EVENING_ROUTINE';
 
 /***/ },
-/* 30 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -744,11 +831,11 @@ module.exports =
                                                                                                                           * LICENSE.txt file in the root directory of this source tree.
                                                                                                                           */
   
-  var _react = __webpack_require__(15);
+  var _react = __webpack_require__(17);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _config = __webpack_require__(31);
+  var _config = __webpack_require__(34);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
@@ -888,7 +975,7 @@ module.exports =
   exports.default = Html;
 
 /***/ },
-/* 31 */
+/* 34 */
 /***/ function(module, exports) {
 
   'use strict';
@@ -945,7 +1032,7 @@ module.exports =
   };
 
 /***/ },
-/* 32 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -963,15 +1050,15 @@ module.exports =
                                                                                                                                  * LICENSE.txt file in the root directory of this source tree.
                                                                                                                                  */
   
-  var _react = __webpack_require__(15);
+  var _react = __webpack_require__(17);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _withStyles = __webpack_require__(33);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _ErrorPage = __webpack_require__(34);
+  var _ErrorPage = __webpack_require__(37);
   
   var _ErrorPage2 = _interopRequireDefault(_ErrorPage);
   
@@ -1068,18 +1155,18 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_ErrorPage2.default)(ErrorPage);
 
 /***/ },
-/* 33 */
+/* 36 */
 /***/ function(module, exports) {
 
   module.exports = require("isomorphic-style-loader/lib/withStyles");
 
 /***/ },
-/* 34 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(35);
-      var insertCss = __webpack_require__(37);
+      var content = __webpack_require__(38);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -1108,10 +1195,10 @@ module.exports =
     
 
 /***/ },
-/* 35 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(36)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
@@ -1122,7 +1209,7 @@ module.exports =
 
 
 /***/ },
-/* 36 */
+/* 39 */
 /***/ function(module, exports) {
 
   /*
@@ -1178,24 +1265,24 @@ module.exports =
 
 
 /***/ },
-/* 37 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
   
-  var _assign = __webpack_require__(38);
+  var _assign = __webpack_require__(31);
   
   var _assign2 = _interopRequireDefault(_assign);
   
-  var _stringify = __webpack_require__(39);
+  var _stringify = __webpack_require__(41);
   
   var _stringify2 = _interopRequireDefault(_stringify);
   
-  var _slicedToArray2 = __webpack_require__(40);
+  var _slicedToArray2 = __webpack_require__(42);
   
   var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
   
-  var _getIterator2 = __webpack_require__(41);
+  var _getIterator2 = __webpack_require__(43);
   
   var _getIterator3 = _interopRequireDefault(_getIterator2);
   
@@ -1339,31 +1426,25 @@ module.exports =
   module.exports = insertCss;
 
 /***/ },
-/* 38 */
-/***/ function(module, exports) {
-
-  module.exports = require("babel-runtime/core-js/object/assign");
-
-/***/ },
-/* 39 */
+/* 41 */
 /***/ function(module, exports) {
 
   module.exports = require("babel-runtime/core-js/json/stringify");
 
 /***/ },
-/* 40 */
+/* 42 */
 /***/ function(module, exports) {
 
   module.exports = require("babel-runtime/helpers/slicedToArray");
 
 /***/ },
-/* 41 */
+/* 43 */
 /***/ function(module, exports) {
 
   module.exports = require("babel-runtime/core-js/get-iterator");
 
 /***/ },
-/* 42 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -1380,15 +1461,15 @@ module.exports =
   
   var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
   
-  var _passport = __webpack_require__(43);
+  var _passport = __webpack_require__(45);
   
   var _passport2 = _interopRequireDefault(_passport);
   
-  var _passportFacebook = __webpack_require__(44);
+  var _passportFacebook = __webpack_require__(46);
   
-  var _models = __webpack_require__(45);
+  var _models = __webpack_require__(47);
   
-  var _config = __webpack_require__(31);
+  var _config = __webpack_require__(34);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
@@ -1567,19 +1648,19 @@ module.exports =
   exports.default = _passport2.default;
 
 /***/ },
-/* 43 */
+/* 45 */
 /***/ function(module, exports) {
 
   module.exports = require("passport");
 
 /***/ },
-/* 44 */
+/* 46 */
 /***/ function(module, exports) {
 
   module.exports = require("passport-facebook");
 
 /***/ },
-/* 45 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -1589,23 +1670,23 @@ module.exports =
   });
   exports.UserProfile = exports.UserClaim = exports.UserLogin = exports.User = undefined;
   
-  var _sequelize = __webpack_require__(46);
+  var _sequelize = __webpack_require__(48);
   
   var _sequelize2 = _interopRequireDefault(_sequelize);
   
-  var _User = __webpack_require__(48);
+  var _User = __webpack_require__(50);
   
   var _User2 = _interopRequireDefault(_User);
   
-  var _UserLogin = __webpack_require__(49);
+  var _UserLogin = __webpack_require__(51);
   
   var _UserLogin2 = _interopRequireDefault(_UserLogin);
   
-  var _UserClaim = __webpack_require__(50);
+  var _UserClaim = __webpack_require__(52);
   
   var _UserClaim2 = _interopRequireDefault(_UserClaim);
   
-  var _UserProfile = __webpack_require__(51);
+  var _UserProfile = __webpack_require__(53);
   
   var _UserProfile2 = _interopRequireDefault(_UserProfile);
   
@@ -1650,7 +1731,7 @@ module.exports =
   exports.UserProfile = _UserProfile2.default;
 
 /***/ },
-/* 46 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -1659,11 +1740,11 @@ module.exports =
     value: true
   });
   
-  var _sequelize = __webpack_require__(47);
+  var _sequelize = __webpack_require__(49);
   
   var _sequelize2 = _interopRequireDefault(_sequelize);
   
-  var _config = __webpack_require__(31);
+  var _config = __webpack_require__(34);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
@@ -1685,13 +1766,13 @@ module.exports =
   exports.default = sequelize;
 
 /***/ },
-/* 47 */
+/* 49 */
 /***/ function(module, exports) {
 
   module.exports = require("sequelize");
 
 /***/ },
-/* 48 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -1700,11 +1781,11 @@ module.exports =
     value: true
   });
   
-  var _sequelize = __webpack_require__(47);
+  var _sequelize = __webpack_require__(49);
   
   var _sequelize2 = _interopRequireDefault(_sequelize);
   
-  var _sequelize3 = __webpack_require__(46);
+  var _sequelize3 = __webpack_require__(48);
   
   var _sequelize4 = _interopRequireDefault(_sequelize3);
   
@@ -1746,7 +1827,7 @@ module.exports =
   exports.default = User;
 
 /***/ },
-/* 49 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -1755,11 +1836,11 @@ module.exports =
     value: true
   });
   
-  var _sequelize = __webpack_require__(47);
+  var _sequelize = __webpack_require__(49);
   
   var _sequelize2 = _interopRequireDefault(_sequelize);
   
-  var _sequelize3 = __webpack_require__(46);
+  var _sequelize3 = __webpack_require__(48);
   
   var _sequelize4 = _interopRequireDefault(_sequelize3);
   
@@ -1791,7 +1872,7 @@ module.exports =
   exports.default = UserLogin;
 
 /***/ },
-/* 50 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -1800,11 +1881,11 @@ module.exports =
     value: true
   });
   
-  var _sequelize = __webpack_require__(47);
+  var _sequelize = __webpack_require__(49);
   
   var _sequelize2 = _interopRequireDefault(_sequelize);
   
-  var _sequelize3 = __webpack_require__(46);
+  var _sequelize3 = __webpack_require__(48);
   
   var _sequelize4 = _interopRequireDefault(_sequelize3);
   
@@ -1834,7 +1915,7 @@ module.exports =
   exports.default = UserClaim;
 
 /***/ },
-/* 51 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -1843,11 +1924,11 @@ module.exports =
     value: true
   });
   
-  var _sequelize = __webpack_require__(47);
+  var _sequelize = __webpack_require__(49);
   
   var _sequelize2 = _interopRequireDefault(_sequelize);
   
-  var _sequelize3 = __webpack_require__(46);
+  var _sequelize3 = __webpack_require__(48);
   
   var _sequelize4 = _interopRequireDefault(_sequelize3);
   
@@ -1885,7 +1966,7 @@ module.exports =
   exports.default = UserProfile;
 
 /***/ },
-/* 52 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -1894,17 +1975,17 @@ module.exports =
     value: true
   });
   
-  var _graphql = __webpack_require__(53);
+  var _graphql = __webpack_require__(55);
   
-  var _me = __webpack_require__(54);
+  var _me = __webpack_require__(56);
   
   var _me2 = _interopRequireDefault(_me);
   
-  var _content = __webpack_require__(56);
+  var _content = __webpack_require__(58);
   
   var _content2 = _interopRequireDefault(_content);
   
-  var _news = __webpack_require__(62);
+  var _news = __webpack_require__(64);
   
   var _news2 = _interopRequireDefault(_news);
   
@@ -1933,13 +2014,13 @@ module.exports =
   exports.default = schema;
 
 /***/ },
-/* 53 */
+/* 55 */
 /***/ function(module, exports) {
 
   module.exports = require("graphql");
 
 /***/ },
-/* 54 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -1948,7 +2029,7 @@ module.exports =
     value: true
   });
   
-  var _UserType = __webpack_require__(55);
+  var _UserType = __webpack_require__(57);
   
   var _UserType2 = _interopRequireDefault(_UserType);
   
@@ -1976,7 +2057,7 @@ module.exports =
   exports.default = me;
 
 /***/ },
-/* 55 */
+/* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -1985,7 +2066,7 @@ module.exports =
     value: true
   });
   
-  var _graphql = __webpack_require__(53);
+  var _graphql = __webpack_require__(55);
   
   var UserType = new _graphql.GraphQLObjectType({
     name: 'User',
@@ -2005,7 +2086,7 @@ module.exports =
   exports.default = UserType;
 
 /***/ },
-/* 56 */
+/* 58 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -2014,7 +2095,7 @@ module.exports =
     value: true
   });
   
-  var _getIterator2 = __webpack_require__(41);
+  var _getIterator2 = __webpack_require__(43);
   
   var _getIterator3 = _interopRequireDefault(_getIterator2);
   
@@ -2026,7 +2107,7 @@ module.exports =
   
   var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
   
-  var _assign = __webpack_require__(38);
+  var _assign = __webpack_require__(31);
   
   var _assign2 = _interopRequireDefault(_assign);
   
@@ -2175,27 +2256,27 @@ module.exports =
     };
   }();
   
-  var _fs = __webpack_require__(57);
+  var _fs = __webpack_require__(59);
   
   var _fs2 = _interopRequireDefault(_fs);
   
   var _path = __webpack_require__(8);
   
-  var _bluebird = __webpack_require__(58);
+  var _bluebird = __webpack_require__(60);
   
   var _bluebird2 = _interopRequireDefault(_bluebird);
   
-  var _frontMatter = __webpack_require__(59);
+  var _frontMatter = __webpack_require__(61);
   
   var _frontMatter2 = _interopRequireDefault(_frontMatter);
   
-  var _markdownIt = __webpack_require__(60);
+  var _markdownIt = __webpack_require__(62);
   
   var _markdownIt2 = _interopRequireDefault(_markdownIt);
   
-  var _graphql = __webpack_require__(53);
+  var _graphql = __webpack_require__(55);
   
-  var _ContentType = __webpack_require__(61);
+  var _ContentType = __webpack_require__(63);
   
   var _ContentType2 = _interopRequireDefault(_ContentType);
   
@@ -2293,31 +2374,31 @@ module.exports =
   exports.default = content;
 
 /***/ },
-/* 57 */
+/* 59 */
 /***/ function(module, exports) {
 
   module.exports = require("fs");
 
 /***/ },
-/* 58 */
+/* 60 */
 /***/ function(module, exports) {
 
   module.exports = require("bluebird");
 
 /***/ },
-/* 59 */
+/* 61 */
 /***/ function(module, exports) {
 
   module.exports = require("front-matter");
 
 /***/ },
-/* 60 */
+/* 62 */
 /***/ function(module, exports) {
 
   module.exports = require("markdown-it");
 
 /***/ },
-/* 61 */
+/* 63 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -2326,7 +2407,7 @@ module.exports =
     value: true
   });
   
-  var _graphql = __webpack_require__(53);
+  var _graphql = __webpack_require__(55);
   
   var ContentType = new _graphql.GraphQLObjectType({
     name: 'Content',
@@ -2348,7 +2429,7 @@ module.exports =
   exports.default = ContentType;
 
 /***/ },
-/* 62 */
+/* 64 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -2357,13 +2438,13 @@ module.exports =
     value: true
   });
   
-  var _graphql = __webpack_require__(53);
+  var _graphql = __webpack_require__(55);
   
-  var _fetch = __webpack_require__(63);
+  var _fetch = __webpack_require__(65);
   
   var _fetch2 = _interopRequireDefault(_fetch);
   
-  var _NewsItemType = __webpack_require__(65);
+  var _NewsItemType = __webpack_require__(67);
   
   var _NewsItemType2 = _interopRequireDefault(_NewsItemType);
   
@@ -2418,7 +2499,7 @@ module.exports =
   exports.default = news;
 
 /***/ },
-/* 63 */
+/* 65 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -2428,15 +2509,15 @@ module.exports =
   });
   exports.Response = exports.Headers = exports.Request = exports.default = undefined;
   
-  var _bluebird = __webpack_require__(58);
+  var _bluebird = __webpack_require__(60);
   
   var _bluebird2 = _interopRequireDefault(_bluebird);
   
-  var _nodeFetch = __webpack_require__(64);
+  var _nodeFetch = __webpack_require__(66);
   
   var _nodeFetch2 = _interopRequireDefault(_nodeFetch);
   
-  var _config = __webpack_require__(31);
+  var _config = __webpack_require__(34);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
@@ -2473,13 +2554,13 @@ module.exports =
   exports.Response = _nodeFetch.Response;
 
 /***/ },
-/* 64 */
+/* 66 */
 /***/ function(module, exports) {
 
   module.exports = require("node-fetch");
 
 /***/ },
-/* 65 */
+/* 67 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -2488,7 +2569,7 @@ module.exports =
     value: true
   });
   
-  var _graphql = __webpack_require__(53);
+  var _graphql = __webpack_require__(55);
   
   var NewsItemType = new _graphql.GraphQLObjectType({
     name: 'NewsItem',
@@ -2511,7 +2592,7 @@ module.exports =
   exports.default = NewsItemType;
 
 /***/ },
-/* 66 */
+/* 68 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -2547,10 +2628,10 @@ module.exports =
     path: '/',
   
     // Keep in mind, routes are evaluated in order
-    children: [__webpack_require__(67).default, __webpack_require__(87).default, __webpack_require__(91).default, __webpack_require__(95).default, __webpack_require__(99).default,
+    children: [__webpack_require__(69).default, __webpack_require__(93).default, __webpack_require__(97).default, __webpack_require__(101).default,
   
     // place new routes before...
-    __webpack_require__(104).default, __webpack_require__(108).default],
+    __webpack_require__(106).default],
   
     action: function action(_ref) {
       var _this = this;
@@ -2586,7 +2667,7 @@ module.exports =
   };
 
 /***/ },
-/* 67 */
+/* 69 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -2612,21 +2693,17 @@ module.exports =
                                                                                                                             * LICENSE.txt file in the root directory of this source tree.
                                                                                                                             */
   
-  var _react = __webpack_require__(15);
+  var _react = __webpack_require__(17);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _moment = __webpack_require__(68);
+  var _moment = __webpack_require__(16);
   
   var _moment2 = _interopRequireDefault(_moment);
   
-  var _Home = __webpack_require__(69);
+  var _Home = __webpack_require__(70);
   
   var _Home2 = _interopRequireDefault(_Home);
-  
-  var _fetch = __webpack_require__(63);
-  
-  var _fetch2 = _interopRequireDefault(_fetch);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
@@ -2651,7 +2728,7 @@ module.exports =
                 return _context.abrupt('return', {
                   component: _react2.default.createElement(_Home2.default, { date: date, dailyQuote: dailyQuote, __source: {
                       fileName: _jsxFileName,
-                      lineNumber: 27
+                      lineNumber: 26
                     },
                     __self: _this
                   })
@@ -2668,13 +2745,7 @@ module.exports =
   };
 
 /***/ },
-/* 68 */
-/***/ function(module, exports) {
-
-  module.exports = require("moment");
-
-/***/ },
-/* 69 */
+/* 70 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -2691,49 +2762,65 @@ module.exports =
                                                                                                                            * LICENSE.txt file in the root directory of this source tree.
                                                                                                                            */
   
-  var _react = __webpack_require__(15);
+  var _react = __webpack_require__(17);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _withStyles = __webpack_require__(33);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _reactRedux = __webpack_require__(25);
+  var _reactRedux = __webpack_require__(27);
   
-  var _Layout = __webpack_require__(70);
+  var _Layout = __webpack_require__(71);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _MorningRoutine = __webpack_require__(76);
+  var _MorningRoutine = __webpack_require__(77);
   
   var _MorningRoutine2 = _interopRequireDefault(_MorningRoutine);
   
-  var _DateCalendar = __webpack_require__(80);
+  var _EveningRoutine = __webpack_require__(82);
+  
+  var _EveningRoutine2 = _interopRequireDefault(_EveningRoutine);
+  
+  var _DateCalendar = __webpack_require__(86);
   
   var _DateCalendar2 = _interopRequireDefault(_DateCalendar);
   
-  var _Home = __webpack_require__(84);
+  var _Home = __webpack_require__(90);
   
   var _Home2 = _interopRequireDefault(_Home);
   
-  var _journalActions = __webpack_require__(86);
+  var _journalActions = __webpack_require__(92);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
   function Home(_ref) {
     var date = _ref.date,
         dailyQuote = _ref.dailyQuote,
-        setValues = _ref.setValues;
+        setValues = _ref.setValues,
+        showMorningRoutine = _ref.showMorningRoutine,
+        hideMorningRoutine = _ref.hideMorningRoutine,
+        showMorningContent = _ref.showMorningContent,
+        showEveningRoutine = _ref.showEveningRoutine,
+        hideEveningRoutine = _ref.hideEveningRoutine,
+        showEveningContent = _ref.showEveningContent;
     var quote = dailyQuote.quote,
         author = dailyQuote.author;
   
+    var defaultShowMorning = void 0;
+    if (date.get('hour') < 12) {
+      defaultShowMorning = true;
+    } else {
+      defaultShowMorning = false;
+    }
   
     return _react2.default.createElement(
       _Layout2.default,
       { header: 'fiveMinuteJournal', __source: {
           fileName: _jsxFileName,
-          lineNumber: 23
+          lineNumber: 39
         },
         __self: this
       },
@@ -2741,7 +2828,7 @@ module.exports =
         'div',
         { className: _Home2.default.root, __source: {
             fileName: _jsxFileName,
-            lineNumber: 24
+            lineNumber: 40
           },
           __self: this
         },
@@ -2749,13 +2836,13 @@ module.exports =
           'div',
           { className: _Home2.default.container, __source: {
               fileName: _jsxFileName,
-              lineNumber: 25
+              lineNumber: 41
             },
             __self: this
           },
           _react2.default.createElement(_DateCalendar2.default, { date: date, __source: {
               fileName: _jsxFileName,
-              lineNumber: 26
+              lineNumber: 42
             },
             __self: this
           }),
@@ -2763,7 +2850,7 @@ module.exports =
             'div',
             { className: _Home2.default.quoteContainer, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 27
+                lineNumber: 43
               },
               __self: this
             },
@@ -2771,7 +2858,7 @@ module.exports =
               'div',
               { className: _Home2.default.quote, __source: {
                   fileName: _jsxFileName,
-                  lineNumber: 28
+                  lineNumber: 44
                 },
                 __self: this
               },
@@ -2781,16 +2868,34 @@ module.exports =
               'div',
               { className: _Home2.default.author, __source: {
                   fileName: _jsxFileName,
-                  lineNumber: 29
+                  lineNumber: 45
                 },
                 __self: this
               },
               author.toUpperCase()
             )
           ),
-          _react2.default.createElement(_MorningRoutine2.default, { dailyQuote: dailyQuote, onInputChange: setValues, __source: {
+          _react2.default.createElement(_MorningRoutine2.default, {
+            dailyQuote: dailyQuote,
+            onInputChange: setValues,
+            show: showMorningRoutine,
+            hide: hideMorningRoutine,
+            showContent: showMorningContent === undefined ? defaultShowMorning : showMorningContent,
+            __source: {
               fileName: _jsxFileName,
-              lineNumber: 31
+              lineNumber: 47
+            },
+            __self: this
+          }),
+          _react2.default.createElement(_EveningRoutine2.default, {
+            dailyQuote: dailyQuote,
+            onInputChange: setValues,
+            show: showEveningRoutine,
+            hide: hideEveningRoutine,
+            showContent: showEveningContent === undefined ? !defaultShowMorning : showEveningContent,
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 54
             },
             __self: this
           })
@@ -2802,17 +2907,38 @@ module.exports =
   Home.propTypes = {
     date: _react.PropTypes.object.isRequired,
     dailyQuote: _react.PropTypes.object.isRequired,
-    setValues: _react.PropTypes.func.isRequired
+    setValues: _react.PropTypes.func.isRequired,
+    showMorningRoutine: _react.PropTypes.func.isRequired,
+    hideMorningRoutine: _react.PropTypes.func.isRequired,
+    showMorningContent: _react.PropTypes.bool,
+    showEveningRoutine: _react.PropTypes.func.isRequired,
+    hideEveningRoutine: _react.PropTypes.func.isRequired,
+    showEveningContent: _react.PropTypes.bool
   };
   
   function mapStateToProps(state) {
-    return {};
+    return {
+      showMorningContent: state.journal.showMorningContent,
+      showEveningContent: state.journal.showEveningContent
+    };
   }
   
   function actions(dispatch) {
     return {
       setValues: function setValues(key, value) {
         return dispatch((0, _journalActions.setValues)(key, value));
+      },
+      showMorningRoutine: function showMorningRoutine() {
+        return dispatch((0, _journalActions.showMorningRoutine)());
+      },
+      hideMorningRoutine: function hideMorningRoutine() {
+        return dispatch((0, _journalActions.hideMorningRoutine)());
+      },
+      showEveningRoutine: function showEveningRoutine() {
+        return dispatch((0, _journalActions.showEveningRoutine)());
+      },
+      hideEveningRoutine: function hideEveningRoutine() {
+        return dispatch((0, _journalActions.hideEveningRoutine)());
       }
     };
   }
@@ -2820,7 +2946,7 @@ module.exports =
   exports.default = (0, _reactRedux.connect)(mapStateToProps, actions)((0, _withStyles2.default)(_Home2.default)(Home));
 
 /***/ },
-/* 70 */
+/* 71 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -2837,19 +2963,19 @@ module.exports =
                                                                                                                                    * LICENSE.txt file in the root directory of this source tree.
                                                                                                                                    */
   
-  var _react = __webpack_require__(15);
+  var _react = __webpack_require__(17);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _withStyles = __webpack_require__(33);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _Layout = __webpack_require__(71);
+  var _Layout = __webpack_require__(72);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _FiveMinuteJournalHeader = __webpack_require__(73);
+  var _FiveMinuteJournalHeader = __webpack_require__(74);
   
   var _FiveMinuteJournalHeader2 = _interopRequireDefault(_FiveMinuteJournalHeader);
   
@@ -2886,12 +3012,12 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_Layout2.default)(Layout);
 
 /***/ },
-/* 71 */
+/* 72 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(72);
-      var insertCss = __webpack_require__(37);
+      var content = __webpack_require__(73);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -2920,10 +3046,10 @@ module.exports =
     
 
 /***/ },
-/* 72 */
+/* 73 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(36)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
@@ -2936,7 +3062,7 @@ module.exports =
   };
 
 /***/ },
-/* 73 */
+/* 74 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -2946,15 +3072,15 @@ module.exports =
   });
   var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/components/FiveMinuteJournalHeader/FiveMinuteJournalHeader.js';
   
-  var _react = __webpack_require__(15);
+  var _react = __webpack_require__(17);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _withStyles = __webpack_require__(33);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _FiveMinuteJournalHeader = __webpack_require__(74);
+  var _FiveMinuteJournalHeader = __webpack_require__(75);
   
   var _FiveMinuteJournalHeader2 = _interopRequireDefault(_FiveMinuteJournalHeader);
   
@@ -3003,12 +3129,12 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_FiveMinuteJournalHeader2.default)(Header);
 
 /***/ },
-/* 74 */
+/* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(75);
-      var insertCss = __webpack_require__(37);
+      var content = __webpack_require__(76);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -3037,10 +3163,10 @@ module.exports =
     
 
 /***/ },
-/* 75 */
+/* 76 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(36)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
@@ -3056,7 +3182,7 @@ module.exports =
   };
 
 /***/ },
-/* 76 */
+/* 77 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -3066,30 +3192,37 @@ module.exports =
   });
   var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/components/MorningRoutine/MorningRoutine.js';
   
-  var _react = __webpack_require__(15);
+  var _react = __webpack_require__(17);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _reactRedux = __webpack_require__(25);
+  var _reactRedux = __webpack_require__(27);
   
-  var _withStyles = __webpack_require__(33);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _MorningRoutine = __webpack_require__(77);
+  var _MorningRoutine = __webpack_require__(78);
   
   var _MorningRoutine2 = _interopRequireDefault(_MorningRoutine);
   
-  var _reactTextareaAutosize = __webpack_require__(79);
+  var _reactTextareaAutosize = __webpack_require__(80);
   
   var _reactTextareaAutosize2 = _interopRequireDefault(_reactTextareaAutosize);
+  
+  var _arrow = __webpack_require__(81);
+  
+  var _arrow2 = _interopRequireDefault(_arrow);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
   function MorningRoutine(_ref) {
     var _this = this;
   
-    var onInputChange = _ref.onInputChange;
+    var onInputChange = _ref.onInputChange,
+        show = _ref.show,
+        hide = _ref.hide,
+        showContent = _ref.showContent;
   
     var gratefulForSample = ['I\'m grateful for the warm bed that I sleep in.', 'I\'m grateful for my body that is working in perfect harmony.', 'I\'m grateful for the incredible firends in my life.'];
     var todayGreatSample = ['Take extra time for myself before leaving work', 'Give a thank you note to Mom', 'Sleep before 10pm'];
@@ -3099,15 +3232,15 @@ module.exports =
       'div',
       { className: _MorningRoutine2.default.root, __source: {
           fileName: _jsxFileName,
-          lineNumber: 21
+          lineNumber: 22
         },
         __self: this
       },
       _react2.default.createElement(
-        'div',
-        { className: _MorningRoutine2.default.header, __source: {
+        'button',
+        { className: _MorningRoutine2.default.header, onClick: showContent ? hide : show, __source: {
             fileName: _jsxFileName,
-            lineNumber: 22
+            lineNumber: 23
           },
           __self: this
         },
@@ -3115,18 +3248,24 @@ module.exports =
           'div',
           { className: _MorningRoutine2.default.headerTitle, __source: {
               fileName: _jsxFileName,
-              lineNumber: 23
+              lineNumber: 24
             },
             __self: this
           },
           'MORNING ROUTINE'
-        )
-      ),
-      _react2.default.createElement(
-        'div',
-        { className: _MorningRoutine2.default.container, __source: {
+        ),
+        _react2.default.createElement('img', { className: _MorningRoutine2.default.icon, src: _arrow2.default, style: { transform: showContent ? 'rotate(180deg)' : 'rotate(0deg)' }, __source: {
             fileName: _jsxFileName,
             lineNumber: 25
+          },
+          __self: this
+        })
+      ),
+      showContent && _react2.default.createElement(
+        'form',
+        { className: _MorningRoutine2.default.container, method: 'post', __source: {
+            fileName: _jsxFileName,
+            lineNumber: 27
           },
           __self: this
         },
@@ -3134,7 +3273,7 @@ module.exports =
           'div',
           { className: _MorningRoutine2.default.inputContainer, __source: {
               fileName: _jsxFileName,
-              lineNumber: 26
+              lineNumber: 28
             },
             __self: this
           },
@@ -3142,7 +3281,7 @@ module.exports =
             'div',
             { className: _MorningRoutine2.default.inputTitle, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 27
+                lineNumber: 29
               },
               __self: this
             },
@@ -3152,16 +3291,16 @@ module.exports =
             'ol',
             { className: _MorningRoutine2.default.inputs, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 28
+                lineNumber: 30
               },
               __self: this
             },
             gratefulForSample.map(function (placeholder, index) {
               return _react2.default.createElement(
                 'li',
-                { className: _MorningRoutine2.default.input, __source: {
+                { className: _MorningRoutine2.default.input, key: 'grateful' + index, __source: {
                     fileName: _jsxFileName,
-                    lineNumber: 30
+                    lineNumber: 32
                   },
                   __self: _this
                 },
@@ -3173,7 +3312,7 @@ module.exports =
                   },
                   __source: {
                     fileName: _jsxFileName,
-                    lineNumber: 31
+                    lineNumber: 33
                   },
                   __self: _this
                 })
@@ -3185,7 +3324,7 @@ module.exports =
           'div',
           { className: _MorningRoutine2.default.inputContainer, __source: {
               fileName: _jsxFileName,
-              lineNumber: 40
+              lineNumber: 42
             },
             __self: this
           },
@@ -3193,7 +3332,7 @@ module.exports =
             'div',
             { className: _MorningRoutine2.default.inputTitle, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 41
+                lineNumber: 43
               },
               __self: this
             },
@@ -3203,16 +3342,16 @@ module.exports =
             'ol',
             { className: _MorningRoutine2.default.inputs, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 42
+                lineNumber: 44
               },
               __self: this
             },
             todayGreatSample.map(function (placeholder, index) {
               return _react2.default.createElement(
                 'li',
-                { className: _MorningRoutine2.default.input, __source: {
+                { className: _MorningRoutine2.default.input, key: 'great' + index, __source: {
                     fileName: _jsxFileName,
-                    lineNumber: 44
+                    lineNumber: 46
                   },
                   __self: _this
                 },
@@ -3220,11 +3359,11 @@ module.exports =
                   placeholder: placeholder,
                   minRows: 1,
                   onChange: function onChange(e) {
-                    return onInputChange('today' + index, e.target.value);
+                    return onInputChange('great' + index, e.target.value);
                   },
                   __source: {
                     fileName: _jsxFileName,
-                    lineNumber: 45
+                    lineNumber: 47
                   },
                   __self: _this
                 })
@@ -3236,7 +3375,7 @@ module.exports =
           'div',
           { className: _MorningRoutine2.default.inputContainer, __source: {
               fileName: _jsxFileName,
-              lineNumber: 54
+              lineNumber: 56
             },
             __self: this
           },
@@ -3244,7 +3383,7 @@ module.exports =
             'div',
             { className: _MorningRoutine2.default.inputTitle, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 55
+                lineNumber: 57
               },
               __self: this
             },
@@ -3254,7 +3393,7 @@ module.exports =
             'div',
             { className: _MorningRoutine2.default.input, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 56
+                lineNumber: 58
               },
               __self: this
             },
@@ -3266,10 +3405,29 @@ module.exports =
               },
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 57
+                lineNumber: 59
               },
               __self: this
             })
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: _MorningRoutine2.default.inputContainer, __source: {
+              fileName: _jsxFileName,
+              lineNumber: 66
+            },
+            __self: this
+          },
+          _react2.default.createElement(
+            'button',
+            { className: _MorningRoutine2.default.button, type: 'submit', __source: {
+                fileName: _jsxFileName,
+                lineNumber: 67
+              },
+              __self: this
+            },
+            'Save \u2192'
           )
         )
       )
@@ -3277,18 +3435,21 @@ module.exports =
   }
   
   MorningRoutine.propTypes = {
-    onInputChange: _react.PropTypes.func.isRequired
+    onInputChange: _react.PropTypes.func.isRequired,
+    show: _react.PropTypes.func.isRequired,
+    hide: _react.PropTypes.func.isRequired,
+    showContent: _react.PropTypes.bool.isRequired
   };
   
   exports.default = (0, _withStyles2.default)(_MorningRoutine2.default)(MorningRoutine);
 
 /***/ },
-/* 77 */
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(78);
-      var insertCss = __webpack_require__(37);
+      var content = __webpack_require__(79);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -3317,18 +3478,19 @@ module.exports =
     
 
 /***/ },
-/* 78 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(36)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
   // module
-  exports.push([module.id, "\n.MorningRoutine-container-3B86h {\n  padding-top: 1%;\n  padding-left: 3%;\n}\n\n.MorningRoutine-icon-hZ3Ng {\n  width: 50px;\n  height: 50px;\n  vertical-align: middle;\n  margin-right: 2%;\n}\n\n.MorningRoutine-header-3yisq {\n  border-bottom: 1px solid #979797;\n}\n\n.MorningRoutine-headerTitle-3gEQL {\n  font-family: 'Raleway';\n  font-size: 20px;\n}\n\n.MorningRoutine-inputContainer-LzQ0d {\n  margin-bottom: 30px;\n  margin-top: 10px;\n}\n\n.MorningRoutine-inputTitle-1CbwI {\n  font-family: 'Playfair Display', cursive;\n  font-size: 24px;\n  color: #616161;\n  font-style: italic;\n}\n\n.MorningRoutine-inputs-3gzjC {\n  margin-left: 5px;\n  font-family: 'Playfair Display', serif;\n  font-size: 18px;\n  color: #616161;\n}\n\ndiv.MorningRoutine-input-36VfP {\n  padding-left: 20px;\n}\n\n.MorningRoutine-input-36VfP textarea {\n  box-sizing: border-box;\n  width: 100%;\n  outline: 0;\n  border-radius: 0;\n  color: #000;\n  font-size: 18px;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n  padding: 5px;\n  margin-top: 10px;\n}\n\n.MorningRoutine-input-36VfP textarea:focus {\n  border-width: 2px;\n  padding-bottom: 5px;\n}\n\n", "", {"version":3,"sources":["/./components/MorningRoutine/MorningRoutine.css"],"names":[],"mappings":";AACA;EACE,gBAAgB;EAChB,iBAAiB;CAClB;;AAED;EACE,YAAY;EACZ,aAAa;EACb,uBAAuB;EACvB,iBAAiB;CAClB;;AAED;EACE,iCAAiC;CAClC;;AAED;EACE,uBAAuB;EACvB,gBAAgB;CACjB;;AAED;EACE,oBAAoB;EACpB,iBAAiB;CAClB;;AAED;EACE,yCAAyC;EACzC,gBAAgB;EAChB,eAAe;EACf,mBAAmB;CACpB;;AAED;EACE,iBAAiB;EACjB,uCAAuC;EACvC,gBAAgB;EAChB,eAAe;CAChB;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,uBAAuB;EACvB,YAAY;EACZ,WAAW;EACX,iBAAiB;EACjB,YAAY;EACZ,gBAAgB;EAChB,aAAa;EACb,iCAAiC;EACjC,uCAAuC;EACvC,wBAAwB;EACxB,aAAa;EACb,iBAAiB;CAClB;;AAED;EACE,kBAAkB;EAClB,oBAAoB;CACrB","file":"MorningRoutine.css","sourcesContent":["\n.container {\n  padding-top: 1%;\n  padding-left: 3%;\n}\n\n.icon {\n  width: 50px;\n  height: 50px;\n  vertical-align: middle;\n  margin-right: 2%;\n}\n\n.header {\n  border-bottom: 1px solid #979797;\n}\n\n.headerTitle {\n  font-family: 'Raleway';\n  font-size: 20px;\n}\n\n.inputContainer {\n  margin-bottom: 30px;\n  margin-top: 10px;\n}\n\n.inputTitle {\n  font-family: 'Playfair Display', cursive;\n  font-size: 24px;\n  color: #616161;\n  font-style: italic;\n}\n\n.inputs {\n  margin-left: 5px;\n  font-family: 'Playfair Display', serif;\n  font-size: 18px;\n  color: #616161;\n}\n\ndiv.input {\n  padding-left: 20px;\n}\n\n.input textarea {\n  box-sizing: border-box;\n  width: 100%;\n  outline: 0;\n  border-radius: 0;\n  color: #000;\n  font-size: 18px;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n  padding: 5px;\n  margin-top: 10px;\n}\n\n.input textarea:focus {\n  border-width: 2px;\n  padding-bottom: 5px;\n}\n\n"],"sourceRoot":"webpack://"}]);
+  exports.push([module.id, ".MorningRoutine-root-2LInD {\n  margin-bottom: 2%;\n}\n\n.MorningRoutine-container-3B86h {\n  padding-top: 1%;\n  padding-left: 3%;\n}\n\n.MorningRoutine-icon-hZ3Ng {\n  width: 10px;\n  height: 5px;\n  vertical-align: middle;\n  margin-left: 1%;\n  display: inline-block;\n}\n\n.MorningRoutine-header-3yisq {\n  border: none;\n  border-bottom: 1px solid #979797;\n  cursor: pointer;\n  padding-bottom: 1px;\n  width: 100%;\n  text-align: left;\n  background: transparent;\n}\n\n.MorningRoutine-header-3yisq:hover .MorningRoutine-headerTitle-3gEQL {\n  font-weight: 700;\n}\n\n.MorningRoutine-header-3yisq:focus {\n  outline: none;\n}\n\n.MorningRoutine-header-3yisq:hover {\n  border-width: 2px;\n  padding-bottom: 0px;\n}\n\n.MorningRoutine-headerTitle-3gEQL {\n  font-family: 'Raleway';\n  font-size: 20px;\n  font-weight: 400;\n  display: inline-block;\n}\n\n.MorningRoutine-inputContainer-LzQ0d {\n  margin-bottom: 30px;\n  margin-top: 10px;\n}\n\n.MorningRoutine-inputTitle-1CbwI {\n  font-family: 'Playfair Display', cursive;\n  font-size: 24px;\n  color: #616161;\n  font-style: italic;\n}\n\n.MorningRoutine-inputs-3gzjC {\n  margin-left: 5px;\n  font-family: 'Playfair Display', serif;\n  font-size: 18px;\n  color: #616161;\n}\n\ndiv.MorningRoutine-input-36VfP {\n  padding-left: 20px;\n}\n\n.MorningRoutine-input-36VfP textarea {\n  box-sizing: border-box;\n  width: 100%;\n  outline: 0;\n  border-radius: 0;\n  color: #000;\n  font-size: 18px;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n  padding: 5px;\n  margin-top: 10px;\n}\n\n.MorningRoutine-input-36VfP textarea:focus {\n  border-width: 2px;\n  padding-bottom: 5px;\n}\n\n.MorningRoutine-button-1LDcq {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.MorningRoutine-button-1LDcq:focus, .MorningRoutine-button-1LDcq:hover {\n  color: #979797;\n}\n", "", {"version":3,"sources":["/./components/MorningRoutine/MorningRoutine.css"],"names":[],"mappings":"AAAA;EACE,kBAAkB;CACnB;;AAED;EACE,gBAAgB;EAChB,iBAAiB;CAClB;;AAED;EACE,YAAY;EACZ,YAAY;EACZ,uBAAuB;EACvB,gBAAgB;EAChB,sBAAsB;CACvB;;AAED;EACE,aAAa;EACb,iCAAiC;EACjC,gBAAgB;EAChB,oBAAoB;EACpB,YAAY;EACZ,iBAAiB;EACjB,wBAAwB;CACzB;;AAED;EACE,iBAAiB;CAClB;;AAED;EACE,cAAc;CACf;;AAED;EACE,kBAAkB;EAClB,oBAAoB;CACrB;;AAED;EACE,uBAAuB;EACvB,gBAAgB;EAChB,iBAAiB;EACjB,sBAAsB;CACvB;;AAED;EACE,oBAAoB;EACpB,iBAAiB;CAClB;;AAED;EACE,yCAAyC;EACzC,gBAAgB;EAChB,eAAe;EACf,mBAAmB;CACpB;;AAED;EACE,iBAAiB;EACjB,uCAAuC;EACvC,gBAAgB;EAChB,eAAe;CAChB;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,uBAAuB;EACvB,YAAY;EACZ,WAAW;EACX,iBAAiB;EACjB,YAAY;EACZ,gBAAgB;EAChB,aAAa;EACb,iCAAiC;EACjC,uCAAuC;EACvC,wBAAwB;EACxB,aAAa;EACb,iBAAiB;CAClB;;AAED;EACE,kBAAkB;EAClB,oBAAoB;CACrB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,UAAU;EACV,mBAAmB;EACnB,YAAY;EACZ,WAAW;EACX,eAAe;EACf,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,uBAAuB;EACvB,gBAAgB;EAChB,aAAa;EACb,wBAAwB;EACxB,uCAAuC;EACvC,oBAAoB;EACpB,gBAAgB;CACjB;;AAED;EACE,eAAe;CAChB","file":"MorningRoutine.css","sourcesContent":[".root {\n  margin-bottom: 2%;\n}\n\n.container {\n  padding-top: 1%;\n  padding-left: 3%;\n}\n\n.icon {\n  width: 10px;\n  height: 5px;\n  vertical-align: middle;\n  margin-left: 1%;\n  display: inline-block;\n}\n\n.header {\n  border: none;\n  border-bottom: 1px solid #979797;\n  cursor: pointer;\n  padding-bottom: 1px;\n  width: 100%;\n  text-align: left;\n  background: transparent;\n}\n\n.header:hover .headerTitle {\n  font-weight: 700;\n}\n\n.header:focus {\n  outline: none;\n}\n\n.header:hover {\n  border-width: 2px;\n  padding-bottom: 0px;\n}\n\n.headerTitle {\n  font-family: 'Raleway';\n  font-size: 20px;\n  font-weight: 400;\n  display: inline-block;\n}\n\n.inputContainer {\n  margin-bottom: 30px;\n  margin-top: 10px;\n}\n\n.inputTitle {\n  font-family: 'Playfair Display', cursive;\n  font-size: 24px;\n  color: #616161;\n  font-style: italic;\n}\n\n.inputs {\n  margin-left: 5px;\n  font-family: 'Playfair Display', serif;\n  font-size: 18px;\n  color: #616161;\n}\n\ndiv.input {\n  padding-left: 20px;\n}\n\n.input textarea {\n  box-sizing: border-box;\n  width: 100%;\n  outline: 0;\n  border-radius: 0;\n  color: #000;\n  font-size: 18px;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n  padding: 5px;\n  margin-top: 10px;\n}\n\n.input textarea:focus {\n  border-width: 2px;\n  padding-bottom: 5px;\n}\n\n.button {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.button:focus, .button:hover {\n  color: #979797;\n}\n"],"sourceRoot":"webpack://"}]);
   
   // exports
   exports.locals = {
+  	"root": "MorningRoutine-root-2LInD",
   	"container": "MorningRoutine-container-3B86h",
   	"icon": "MorningRoutine-icon-hZ3Ng",
   	"header": "MorningRoutine-header-3yisq",
@@ -3336,17 +3498,289 @@ module.exports =
   	"inputContainer": "MorningRoutine-inputContainer-LzQ0d",
   	"inputTitle": "MorningRoutine-inputTitle-1CbwI",
   	"inputs": "MorningRoutine-inputs-3gzjC",
-  	"input": "MorningRoutine-input-36VfP"
+  	"input": "MorningRoutine-input-36VfP",
+  	"button": "MorningRoutine-button-1LDcq"
   };
 
 /***/ },
-/* 79 */
+/* 80 */
 /***/ function(module, exports) {
 
   module.exports = require("react-textarea-autosize");
 
 /***/ },
-/* 80 */
+/* 81 */
+/***/ function(module, exports) {
+
+  module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAKCAYAAAC0VX7mAAAAAXNSR0IArs4c6QAAAORJREFUKBWdkT8LQWEUh1+RkCQyWGwGq1Jmm80XMPkI8iGkGCmT3aBkMkhKSRaTzWCSjZQiPG/dUydd+XPq6fzec37ndLvHGGM6cIAmeOHX8DHQArujbYen8HAYkAPwbQQxDkHm7S4Th4UqTtAR+BRRDDOQZXN0TIbCiLFqrtAJabrkJLU1yLIROvTq81PoK9MGnXo18U7DFmRZD23/o2vYo3RBzDt0Rjmz6L3qN9Ae1X8r62rIXi8HBTg69Tu5Cj9FDbd86Ql9cd5Xchn+igpTN5DFZ3Txr01qqIS2B1pCXtVd5RNIED0bdIaaMQAAAABJRU5ErkJggg=="
+
+/***/ },
+/* 82 */
+/***/ function(module, exports, __webpack_require__) {
+
+  'use strict';
+  
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/components/EveningRoutine/EveningRoutine.js';
+  
+  var _react = __webpack_require__(17);
+  
+  var _react2 = _interopRequireDefault(_react);
+  
+  var _reactRedux = __webpack_require__(27);
+  
+  var _withStyles = __webpack_require__(36);
+  
+  var _withStyles2 = _interopRequireDefault(_withStyles);
+  
+  var _EveningRoutine = __webpack_require__(83);
+  
+  var _EveningRoutine2 = _interopRequireDefault(_EveningRoutine);
+  
+  var _reactTextareaAutosize = __webpack_require__(80);
+  
+  var _reactTextareaAutosize2 = _interopRequireDefault(_reactTextareaAutosize);
+  
+  var _arrow = __webpack_require__(85);
+  
+  var _arrow2 = _interopRequireDefault(_arrow);
+  
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+  
+  function EveningRoutine(_ref) {
+    var _this = this;
+  
+    var onInputChange = _ref.onInputChange,
+        show = _ref.show,
+        hide = _ref.hide,
+        showContent = _ref.showContent;
+  
+    var happenedSample = ['I remembered to floss.', 'A friend recommended a wonderful book for me.', 'I saw a cute stranger at the cafe'];
+    var betterSample = ['I wake up right when the alarm goes off.', 'I go to the gym in the morning.'];
+  
+    return _react2.default.createElement(
+      'div',
+      { className: _EveningRoutine2.default.root, __source: {
+          fileName: _jsxFileName,
+          lineNumber: 20
+        },
+        __self: this
+      },
+      _react2.default.createElement(
+        'button',
+        { className: _EveningRoutine2.default.header, onClick: showContent ? hide : show, __source: {
+            fileName: _jsxFileName,
+            lineNumber: 21
+          },
+          __self: this
+        },
+        _react2.default.createElement(
+          'div',
+          { className: _EveningRoutine2.default.headerTitle, __source: {
+              fileName: _jsxFileName,
+              lineNumber: 22
+            },
+            __self: this
+          },
+          'EVENING ROUTINE'
+        ),
+        _react2.default.createElement('img', { className: _EveningRoutine2.default.icon, src: _arrow2.default, style: { transform: showContent ? 'rotate(180deg)' : 'rotate(0deg)' }, __source: {
+            fileName: _jsxFileName,
+            lineNumber: 23
+          },
+          __self: this
+        })
+      ),
+      showContent && _react2.default.createElement(
+        'div',
+        { className: _EveningRoutine2.default.container, __source: {
+            fileName: _jsxFileName,
+            lineNumber: 25
+          },
+          __self: this
+        },
+        _react2.default.createElement(
+          'div',
+          { className: _EveningRoutine2.default.inputContainer, __source: {
+              fileName: _jsxFileName,
+              lineNumber: 26
+            },
+            __self: this
+          },
+          _react2.default.createElement(
+            'div',
+            { className: _EveningRoutine2.default.inputTitle, __source: {
+                fileName: _jsxFileName,
+                lineNumber: 27
+              },
+              __self: this
+            },
+            '3 Amazing things that happened today...'
+          ),
+          _react2.default.createElement(
+            'ol',
+            { className: _EveningRoutine2.default.inputs, __source: {
+                fileName: _jsxFileName,
+                lineNumber: 28
+              },
+              __self: this
+            },
+            happenedSample.map(function (placeholder, index) {
+              return _react2.default.createElement(
+                'li',
+                { className: _EveningRoutine2.default.input, key: 'happened' + index, __source: {
+                    fileName: _jsxFileName,
+                    lineNumber: 30
+                  },
+                  __self: _this
+                },
+                _react2.default.createElement(_reactTextareaAutosize2.default, {
+                  placeholder: placeholder,
+                  minRows: 1,
+                  onChange: function onChange(e) {
+                    return onInputChange('happened' + index, e.target.value);
+                  },
+                  __source: {
+                    fileName: _jsxFileName,
+                    lineNumber: 31
+                  },
+                  __self: _this
+                })
+              );
+            })
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: _EveningRoutine2.default.inputContainer, __source: {
+              fileName: _jsxFileName,
+              lineNumber: 40
+            },
+            __self: this
+          },
+          _react2.default.createElement(
+            'div',
+            { className: _EveningRoutine2.default.inputTitle, __source: {
+                fileName: _jsxFileName,
+                lineNumber: 41
+              },
+              __self: this
+            },
+            'How could I have made today even better?'
+          ),
+          _react2.default.createElement(
+            'ol',
+            { className: _EveningRoutine2.default.inputs, __source: {
+                fileName: _jsxFileName,
+                lineNumber: 42
+              },
+              __self: this
+            },
+            betterSample.map(function (placeholder, index) {
+              return _react2.default.createElement(
+                'li',
+                { className: _EveningRoutine2.default.input, key: 'better' + index, __source: {
+                    fileName: _jsxFileName,
+                    lineNumber: 44
+                  },
+                  __self: _this
+                },
+                _react2.default.createElement(_reactTextareaAutosize2.default, {
+                  placeholder: placeholder,
+                  minRows: 1,
+                  onChange: function onChange(e) {
+                    return onInputChange('better' + index, e.target.value);
+                  },
+                  __source: {
+                    fileName: _jsxFileName,
+                    lineNumber: 45
+                  },
+                  __self: _this
+                })
+              );
+            })
+          )
+        )
+      )
+    );
+  }
+  
+  EveningRoutine.propTypes = {
+    onInputChange: _react.PropTypes.func.isRequired,
+    show: _react.PropTypes.func.isRequired,
+    hide: _react.PropTypes.func.isRequired,
+    showContent: _react.PropTypes.bool.isRequired
+  };
+  
+  exports.default = (0, _withStyles2.default)(_EveningRoutine2.default)(EveningRoutine);
+
+/***/ },
+/* 83 */
+/***/ function(module, exports, __webpack_require__) {
+
+  
+      var content = __webpack_require__(84);
+      var insertCss = __webpack_require__(40);
+  
+      if (typeof content === 'string') {
+        content = [[module.id, content, '']];
+      }
+  
+      module.exports = content.locals || {};
+      module.exports._getCss = function() { return content.toString(); };
+      module.exports._insertCss = function(options) { return insertCss(content, options) };
+    
+      // Hot Module Replacement
+      // https://webpack.github.io/docs/hot-module-replacement
+      // Only activated in browser context
+      if (false) {
+        var removeCss = function() {};
+        module.hot.accept("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./EveningRoutine.css", function() {
+          content = require("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./EveningRoutine.css");
+  
+          if (typeof content === 'string') {
+            content = [[module.id, content, '']];
+          }
+  
+          removeCss = insertCss(content, { replace: true });
+        });
+        module.hot.dispose(function() { removeCss(); });
+      }
+    
+
+/***/ },
+/* 84 */
+/***/ function(module, exports, __webpack_require__) {
+
+  exports = module.exports = __webpack_require__(39)();
+  // imports
+  
+  
+  // module
+  exports.push([module.id, "\n.EveningRoutine-container-2evGO {\n  padding-top: 1%;\n  padding-left: 3%;\n}\n\n.EveningRoutine-icon-3vDUw {\n  width: 10px;\n  height: 5px;\n  vertical-align: middle;\n  margin-left: 1%;\n  display: inline-block;\n}\n\n.EveningRoutine-header-3KkET {\n  border: none;\n  border-bottom: 1px solid #979797;\n  cursor: pointer;\n  padding-bottom: 1px;\n  width: 100%;\n  text-align: left;\n  background: transparent;\n}\n\n.EveningRoutine-header-3KkET:hover .EveningRoutine-headerTitle-2ri6- {\n  font-weight: 700;\n}\n\n.EveningRoutine-header-3KkET:focus {\n  outline: none;\n}\n\n.EveningRoutine-header-3KkET:hover {\n  border-width: 2px;\n  padding-bottom: 0px;\n}\n\n.EveningRoutine-headerTitle-2ri6- {\n  font-family: 'Raleway';\n  font-size: 20px;\n  font-weight: 400;\n  display: inline-block;\n}\n\n.EveningRoutine-inputContainer-2pNvJ {\n  margin-bottom: 30px;\n  margin-top: 10px;\n}\n\n.EveningRoutine-inputTitle-3s5a_ {\n  font-family: 'Playfair Display', cursive;\n  font-size: 24px;\n  color: #616161;\n  font-style: italic;\n}\n\n.EveningRoutine-inputs-23FWt {\n  margin-left: 5px;\n  font-family: 'Playfair Display', serif;\n  font-size: 18px;\n  color: #616161;\n}\n\ndiv.EveningRoutine-input-7gDA5 {\n  padding-left: 20px;\n}\n\n.EveningRoutine-input-7gDA5 textarea {\n  box-sizing: border-box;\n  width: 100%;\n  outline: 0;\n  border-radius: 0;\n  color: #000;\n  font-size: 18px;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n  padding: 5px;\n  margin-top: 10px;\n}\n\n.EveningRoutine-input-7gDA5 textarea:focus {\n  border-width: 2px;\n  padding-bottom: 5px;\n}\n\n", "", {"version":3,"sources":["/./components/EveningRoutine/EveningRoutine.css"],"names":[],"mappings":";AACA;EACE,gBAAgB;EAChB,iBAAiB;CAClB;;AAED;EACE,YAAY;EACZ,YAAY;EACZ,uBAAuB;EACvB,gBAAgB;EAChB,sBAAsB;CACvB;;AAED;EACE,aAAa;EACb,iCAAiC;EACjC,gBAAgB;EAChB,oBAAoB;EACpB,YAAY;EACZ,iBAAiB;EACjB,wBAAwB;CACzB;;AAED;EACE,iBAAiB;CAClB;;AAED;EACE,cAAc;CACf;;AAED;EACE,kBAAkB;EAClB,oBAAoB;CACrB;;AAED;EACE,uBAAuB;EACvB,gBAAgB;EAChB,iBAAiB;EACjB,sBAAsB;CACvB;;AAED;EACE,oBAAoB;EACpB,iBAAiB;CAClB;;AAED;EACE,yCAAyC;EACzC,gBAAgB;EAChB,eAAe;EACf,mBAAmB;CACpB;;AAED;EACE,iBAAiB;EACjB,uCAAuC;EACvC,gBAAgB;EAChB,eAAe;CAChB;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,uBAAuB;EACvB,YAAY;EACZ,WAAW;EACX,iBAAiB;EACjB,YAAY;EACZ,gBAAgB;EAChB,aAAa;EACb,iCAAiC;EACjC,uCAAuC;EACvC,wBAAwB;EACxB,aAAa;EACb,iBAAiB;CAClB;;AAED;EACE,kBAAkB;EAClB,oBAAoB;CACrB","file":"EveningRoutine.css","sourcesContent":["\n.container {\n  padding-top: 1%;\n  padding-left: 3%;\n}\n\n.icon {\n  width: 10px;\n  height: 5px;\n  vertical-align: middle;\n  margin-left: 1%;\n  display: inline-block;\n}\n\n.header {\n  border: none;\n  border-bottom: 1px solid #979797;\n  cursor: pointer;\n  padding-bottom: 1px;\n  width: 100%;\n  text-align: left;\n  background: transparent;\n}\n\n.header:hover .headerTitle {\n  font-weight: 700;\n}\n\n.header:focus {\n  outline: none;\n}\n\n.header:hover {\n  border-width: 2px;\n  padding-bottom: 0px;\n}\n\n.headerTitle {\n  font-family: 'Raleway';\n  font-size: 20px;\n  font-weight: 400;\n  display: inline-block;\n}\n\n.inputContainer {\n  margin-bottom: 30px;\n  margin-top: 10px;\n}\n\n.inputTitle {\n  font-family: 'Playfair Display', cursive;\n  font-size: 24px;\n  color: #616161;\n  font-style: italic;\n}\n\n.inputs {\n  margin-left: 5px;\n  font-family: 'Playfair Display', serif;\n  font-size: 18px;\n  color: #616161;\n}\n\ndiv.input {\n  padding-left: 20px;\n}\n\n.input textarea {\n  box-sizing: border-box;\n  width: 100%;\n  outline: 0;\n  border-radius: 0;\n  color: #000;\n  font-size: 18px;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n  padding: 5px;\n  margin-top: 10px;\n}\n\n.input textarea:focus {\n  border-width: 2px;\n  padding-bottom: 5px;\n}\n\n"],"sourceRoot":"webpack://"}]);
+  
+  // exports
+  exports.locals = {
+  	"container": "EveningRoutine-container-2evGO",
+  	"icon": "EveningRoutine-icon-3vDUw",
+  	"header": "EveningRoutine-header-3KkET",
+  	"headerTitle": "EveningRoutine-headerTitle-2ri6-",
+  	"inputContainer": "EveningRoutine-inputContainer-2pNvJ",
+  	"inputTitle": "EveningRoutine-inputTitle-3s5a_",
+  	"inputs": "EveningRoutine-inputs-23FWt",
+  	"input": "EveningRoutine-input-7gDA5"
+  };
+
+/***/ },
+/* 85 */
+/***/ function(module, exports) {
+
+  module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAKCAYAAAC0VX7mAAAAAXNSR0IArs4c6QAAAORJREFUKBWdkT8LQWEUh1+RkCQyWGwGq1Jmm80XMPkI8iGkGCmT3aBkMkhKSRaTzWCSjZQiPG/dUydd+XPq6fzec37ndLvHGGM6cIAmeOHX8DHQArujbYen8HAYkAPwbQQxDkHm7S4Th4UqTtAR+BRRDDOQZXN0TIbCiLFqrtAJabrkJLU1yLIROvTq81PoK9MGnXo18U7DFmRZD23/o2vYo3RBzDt0Rjmz6L3qN9Ae1X8r62rIXi8HBTg69Tu5Cj9FDbd86Ql9cd5Xchn+igpTN5DFZ3Txr01qqIS2B1pCXtVd5RNIED0bdIaaMQAAAABJRU5ErkJggg=="
+
+/***/ },
+/* 86 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -3356,19 +3790,19 @@ module.exports =
   });
   var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/components/DateCalendar/DateCalendar.js';
   
-  var _react = __webpack_require__(15);
+  var _react = __webpack_require__(17);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _withStyles = __webpack_require__(33);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _DateCalendar = __webpack_require__(81);
+  var _DateCalendar = __webpack_require__(87);
   
   var _DateCalendar2 = _interopRequireDefault(_DateCalendar);
   
-  var _calendar = __webpack_require__(83);
+  var _calendar = __webpack_require__(89);
   
   var _calendar2 = _interopRequireDefault(_calendar);
   
@@ -3413,12 +3847,12 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_DateCalendar2.default)(DateCalendar);
 
 /***/ },
-/* 81 */
+/* 87 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(82);
-      var insertCss = __webpack_require__(37);
+      var content = __webpack_require__(88);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -3447,10 +3881,10 @@ module.exports =
     
 
 /***/ },
-/* 82 */
+/* 88 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(36)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
@@ -3464,18 +3898,18 @@ module.exports =
   };
 
 /***/ },
-/* 83 */
+/* 89 */
 /***/ function(module, exports) {
 
   module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEQAAABGCAYAAAB12zK5AAAAAXNSR0IArs4c6QAAB1dJREFUeAHtnH1o1VUYx3fv5ta2yJlzvqAlLI0Cw9LNEqMwTNqbU3OiuZT+mIQoREpWEBpotTCR9SKVuKC1wthi02GZmH8Ytg3fSCiHqdgQba5S5zbdS5/nds+Pc4+7u7/7grjtHDj3PM9znvM853x/z3n5/fj9ricuBik3N7cAM8Uej2fn7t2762Jg0rUJfK9FeZrX691YW1v7m+uGQRQTgshdizds2JDQ0NBQ2dvbm0KeQx4BML2uDUShWFBQML2rq+t9MdHd3T2cIicKc76m3mgNHDlyJFnA8NsZXlRUNCxam27bA0a6pjtKoyMmowYkYs93aMOgU4ar7iEkR1Im6X1PTk6+tmvXrn91WX80c1ymkIqg/lRD1uG7Fd/tIRX9CvR/dE9PT8AYWWuu1NTUXA1mI0CZ9cDb2Ni4DCPL8/LyZgFGotmwra2tl7q1LJ4fmHUmn5OTsxkbr5PNqoj46yQAztuzZ8+B/gwsWrQonn7+wJSabeoxtjj61Yp8L+BsYxz1uo4zZfLz8+9jcWygwRcozO4LDH9DD3Uv6kb6oZf0Uxd2FX5l4Z4XqiFgjEfnFjC0dvdCL2WsvwDw9pKSEmfd8wGyYMGC8azSh3H2mNYojlDvge/UM7IW+Hd1vWA0uqXkv/X2UdKnuao7g/lT8rq6unP4/Qy+rQ9/Ss1XMuaVzc3N38rsEIFvynR2dn4DPdanwQ/GPiXvSE9PP1FeXt6h5OGWhPYntJF82xO+S3AqOSDNnz9/JOPNQvg2Wco4QClgcqyDfC+BqVJIdMyUCkkAsQRjX//PDb7f6urqy4xqL+vMPpakcsBYJqOkfAPZdi/z6AU1bMCoGMxgqHFKyW7VnZaWtooxN/vl9wBQvhdkHtcUKzU6JFlYWDiR6NqkK7a3t29kTXKmn14XS5qdYgb21iibDOwBdr9VxcXFqUoWqqyoqLiCjnOrIVjIQjJGNUxISDih6FAlq/NLN27caMLIal2XiFvf0dFxhg4X6fJY0bL44ftj7B0mP6fs0o80fH/Y2tp6ivPHI0oeqgTI45rOGAHEOYuwgl/XKoOSDLaYDuzQ2xrKSTiqZH1aaMijZuvr6z/C98vBDFE3jqg9SLRMCqajy9F3Dnr0eZhvq9EVQtEsPHfT0HdD5dc9RbkY2RTKpeTTIseRl45tXbFixV3CxyJx5R/FzkrN1r74+Pi5XMip+H8FuUwB8S3RUqrpuSad6HDbgoVnIQ5Hiz6duJiYmDjTv3KL6Fe2tf1MpZPoyI3XhJaWFjlIybYedQJgiQyPGML3AU6ZcynVMfg4EXkUHTnFik6hnK+qqqr+FH23KewIwbBEgkpfamD4ZPCXIJxtG2B0fdUuolK3BRBlGhg+ezwPOQhxTBm/efNm2L7DBoROjVIO6dBlRRul3CuolKGIaEv8ObaYEn36RsfxjY6j79Z32IAwX88o44DzrKJViUzCdY7i6aCjr2RRlH+otti9xTe7zwj8T1c60GH7DhsQnFWTe8UpDp+mE5vkqZnwcpPE6l6K/Anh6XQP9HdCxyhVaXbW4et5xcuRHFrOUcP9sgvZ2dk/q3q3pYct1Dc4aZCUlJRurgl9GaIj2wjHNaqOgcsNn+w2DwKAdEylUm60XlNMtKXc1rOoH8KHHMpUOov/izBTkDvPXZDN49Rdo5SClXKeop0cIeQC1kQSIXE8qFlP+0PKCQbTyTPJDhgY/ykzM/MtpROLUo7bbLPLsXVeszcRvzPIOhhb3ICh2XDIiACRp1apqalPMWgBps2xBoHsGuvMq1lZWc+UlZXJo4OYJp52/Y5v2T124qvbMH4e37mAsdaQu2YjmjK6dcI4maN6NldoFNPoUkZGRn00jwx026Fozh3p+JyGnty/nOMiHGU9k2c4rpM5ZcI+mJme/M84Zf+/7Ylzh6xd3yvHRIYiIy4jmjIRexsADQMihCP3ZnaQjgHQ75h1kan+sG4sABAqS8h6/ZCj7ZQxLnlAhLCNbaHe1TMRw86AZZkRU+l8vhpAACDcyr/j5qSqGg+G0r/tOoDYKWNcVQuIBcRAwGBthFhADAQM1kaIBcRAwGBthFhADAQM1kaIBcRAwGBthFhADAQM1kaIBcRAwGBthFhADAQM1kaIBcRAwGBthFhADAQM1kaIBcRAwGBthFhADAQM1kaIBcRAwGBthFhADAQM1kZIf4Dwnau8lj3Ukj7mXokQ52V5Pq3IHGpo8MKMM2boVi9vDTUpEKBnKXqolPqYeem3SSJEfx/8zdvxAeGdAjZvXC4mKp5U/QGcGm9KSsp2iH9ESOUIPvLdzxvCWUppsJa8SiVvXH6ujY/3gGtP+hYUvohYQsVXqhKAulGWLzSPEUZXlXwwlIxrHOPIorxfG89fIvN9Iq+EILYaeiuK8Uo2RMoLfJ5bwEcFjTJeZ/BNTU31kydP/pHoeAj5hCEARhdjLWeci/mYUb718SV9D1ayOBabSUSKLDZjyQF/qOIoDVziCkCcZXz7+VhA/rkiIP0HWYznlOaAeaQAAAAASUVORK5CYII="
 
 /***/ },
-/* 84 */
+/* 90 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(85);
-      var insertCss = __webpack_require__(37);
+      var content = __webpack_require__(91);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -3504,10 +3938,10 @@ module.exports =
     
 
 /***/ },
-/* 85 */
+/* 91 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(36)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
@@ -3524,7 +3958,7 @@ module.exports =
   };
 
 /***/ },
-/* 86 */
+/* 92 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -3533,8 +3967,12 @@ module.exports =
     value: true
   });
   exports.setValues = setValues;
+  exports.showMorningRoutine = showMorningRoutine;
+  exports.hideMorningRoutine = hideMorningRoutine;
+  exports.showEveningRoutine = showEveningRoutine;
+  exports.hideEveningRoutine = hideEveningRoutine;
   
-  var _actionTypes = __webpack_require__(29);
+  var _actionTypes = __webpack_require__(32);
   
   var types = _interopRequireWildcard(_actionTypes);
   
@@ -3549,204 +3987,33 @@ module.exports =
       payload: obj
     };
   }
-
-/***/ },
-/* 87 */
-/***/ function(module, exports, __webpack_require__) {
-
-  'use strict';
   
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/routes/contact/index.js'; /**
-                                                                                                                               * React Starter Kit (https://www.reactstarterkit.com/)
-                                                                                                                               *
-                                                                                                                               * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
-                                                                                                                               *
-                                                                                                                               * This source code is licensed under the MIT license found in the
-                                                                                                                               * LICENSE.txt file in the root directory of this source tree.
-                                                                                                                               */
-  
-  var _react = __webpack_require__(15);
-  
-  var _react2 = _interopRequireDefault(_react);
-  
-  var _Contact = __webpack_require__(88);
-  
-  var _Contact2 = _interopRequireDefault(_Contact);
-  
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-  
-  var title = 'Contact Us';
-  
-  exports.default = {
-  
-    path: '/contact',
-  
-    action: function action() {
-      return {
-        title: title,
-        component: _react2.default.createElement(_Contact2.default, { title: title, __source: {
-            fileName: _jsxFileName,
-            lineNumber: 22
-          },
-          __self: this
-        })
-      };
-    }
-  };
-
-/***/ },
-/* 88 */
-/***/ function(module, exports, __webpack_require__) {
-
-  'use strict';
-  
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/routes/contact/Contact.js'; /**
-                                                                                                                                 * React Starter Kit (https://www.reactstarterkit.com/)
-                                                                                                                                 *
-                                                                                                                                 * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
-                                                                                                                                 *
-                                                                                                                                 * This source code is licensed under the MIT license found in the
-                                                                                                                                 * LICENSE.txt file in the root directory of this source tree.
-                                                                                                                                 */
-  
-  var _react = __webpack_require__(15);
-  
-  var _react2 = _interopRequireDefault(_react);
-  
-  var _withStyles = __webpack_require__(33);
-  
-  var _withStyles2 = _interopRequireDefault(_withStyles);
-  
-  var _Layout = __webpack_require__(70);
-  
-  var _Layout2 = _interopRequireDefault(_Layout);
-  
-  var _Contact = __webpack_require__(89);
-  
-  var _Contact2 = _interopRequireDefault(_Contact);
-  
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-  
-  function Contact(_ref) {
-    var title = _ref.title;
-  
-    return _react2.default.createElement(
-      _Layout2.default,
-      {
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 17
-        },
-        __self: this
-      },
-      _react2.default.createElement(
-        'div',
-        { className: _Contact2.default.root, __source: {
-            fileName: _jsxFileName,
-            lineNumber: 18
-          },
-          __self: this
-        },
-        _react2.default.createElement(
-          'div',
-          { className: _Contact2.default.container, __source: {
-              fileName: _jsxFileName,
-              lineNumber: 19
-            },
-            __self: this
-          },
-          _react2.default.createElement(
-            'h1',
-            {
-              __source: {
-                fileName: _jsxFileName,
-                lineNumber: 20
-              },
-              __self: this
-            },
-            title
-          ),
-          _react2.default.createElement(
-            'p',
-            {
-              __source: {
-                fileName: _jsxFileName,
-                lineNumber: 21
-              },
-              __self: this
-            },
-            '...'
-          )
-        )
-      )
-    );
+  function showMorningRoutine() {
+    return {
+      type: types.SHOW_MORNING_ROUTINE
+    };
   }
   
-  Contact.propTypes = {
-    title: _react.PropTypes.string.isRequired
-  };
+  function hideMorningRoutine() {
+    return {
+      type: types.HIDE_MORNING_ROUTINE
+    };
+  }
   
-  exports.default = (0, _withStyles2.default)(_Contact2.default)(Contact);
+  function showEveningRoutine() {
+    return {
+      type: types.SHOW_EVENING_ROUTINE
+    };
+  }
+  
+  function hideEveningRoutine() {
+    return {
+      type: types.HIDE_EVENING_ROUTINE
+    };
+  }
 
 /***/ },
-/* 89 */
-/***/ function(module, exports, __webpack_require__) {
-
-  
-      var content = __webpack_require__(90);
-      var insertCss = __webpack_require__(37);
-  
-      if (typeof content === 'string') {
-        content = [[module.id, content, '']];
-      }
-  
-      module.exports = content.locals || {};
-      module.exports._getCss = function() { return content.toString(); };
-      module.exports._insertCss = function(options) { return insertCss(content, options) };
-    
-      // Hot Module Replacement
-      // https://webpack.github.io/docs/hot-module-replacement
-      // Only activated in browser context
-      if (false) {
-        var removeCss = function() {};
-        module.hot.accept("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./Contact.css", function() {
-          content = require("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./Contact.css");
-  
-          if (typeof content === 'string') {
-            content = [[module.id, content, '']];
-          }
-  
-          removeCss = insertCss(content, { replace: true });
-        });
-        module.hot.dispose(function() { removeCss(); });
-      }
-    
-
-/***/ },
-/* 90 */
-/***/ function(module, exports, __webpack_require__) {
-
-  exports = module.exports = __webpack_require__(36)();
-  // imports
-  
-  
-  // module
-  exports.push([module.id, "/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n\n/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n\n:root {/*\n   * Typography\n   * ======================================================================== *//*\n   * Layout\n   * ======================================================================== *//*\n   * Media queries breakpoints\n   * ======================================================================== *//* Extra small screen / phone *//* Small screen / tablet *//* Medium screen / desktop *//* Large screen / wide desktop */\n}\n\n.Contact-root-1G9oT {\n  padding-left: 20px;\n  padding-right: 20px;\n}\n\n.Contact-container-2TnCn {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  max-width: 1000px;\n}\n", "", {"version":3,"sources":["/./routes/contact/Contact.css","/./components/variables.css"],"names":[],"mappings":"AAAA;;;;;;;GAOG;;ACPH;;;;;;;GAOG;;AAEH,OACE;;gFAE8E;;gFAMA;;gFAMA,gCAErB,2BACL,6BACE,iCACI;CAC3D;;ADnBD;EACE,mBAAmB;EACnB,oBAAoB;CACrB;;AAED;EACE,eAAe;EACf,kBAAkB;EAClB,kBAAoC;CACrC","file":"Contact.css","sourcesContent":["/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n\n@import '../../components/variables.css';\n\n.root {\n  padding-left: 20px;\n  padding-right: 20px;\n}\n\n.container {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  max-width: var(--max-content-width);\n}\n","/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n\n:root {\n  /*\n   * Typography\n   * ======================================================================== */\n\n  --font-family-base: 'Segoe UI', 'HelveticaNeue-Light', sans-serif;\n\n  /*\n   * Layout\n   * ======================================================================== */\n\n  --max-content-width: 1000px;\n\n  /*\n   * Media queries breakpoints\n   * ======================================================================== */\n\n  --screen-xs-min: 480px;  /* Extra small screen / phone */\n  --screen-sm-min: 768px;  /* Small screen / tablet */\n  --screen-md-min: 992px;  /* Medium screen / desktop */\n  --screen-lg-min: 1200px; /* Large screen / wide desktop */\n}\n"],"sourceRoot":"webpack://"}]);
-  
-  // exports
-  exports.locals = {
-  	"root": "Contact-root-1G9oT",
-  	"container": "Contact-container-2TnCn"
-  };
-
-/***/ },
-/* 91 */
+/* 93 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -3763,11 +4030,15 @@ module.exports =
                                                                                                                              * LICENSE.txt file in the root directory of this source tree.
                                                                                                                              */
   
-  var _react = __webpack_require__(15);
+  var _react = __webpack_require__(17);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _Login = __webpack_require__(92);
+  var _fetch = __webpack_require__(65);
+  
+  var _fetch2 = _interopRequireDefault(_fetch);
+  
+  var _Login = __webpack_require__(94);
   
   var _Login2 = _interopRequireDefault(_Login);
   
@@ -3780,11 +4051,17 @@ module.exports =
     path: '/login',
   
     action: function action() {
+      var _arguments = arguments;
+  
+      var handleSubmit = function handleSubmit() {
+        console.log(_arguments);
+      };
+  
       return {
         title: title,
-        component: _react2.default.createElement(_Login2.default, { title: title, __source: {
+        component: _react2.default.createElement(_Login2.default, { title: title, handleSubmit: handleSubmit, __source: {
             fileName: _jsxFileName,
-            lineNumber: 22
+            lineNumber: 27
           },
           __self: this
         })
@@ -3793,7 +4070,7 @@ module.exports =
   };
 
 /***/ },
-/* 92 */
+/* 94 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -3810,25 +4087,27 @@ module.exports =
                                                                                                                              * LICENSE.txt file in the root directory of this source tree.
                                                                                                                              */
   
-  var _react = __webpack_require__(15);
+  var _react = __webpack_require__(17);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _withStyles = __webpack_require__(33);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _Layout = __webpack_require__(70);
+  var _Layout = __webpack_require__(71);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _Login = __webpack_require__(93);
+  var _Login = __webpack_require__(95);
   
   var _Login2 = _interopRequireDefault(_Login);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
-  function Login() {
+  function Login(_ref) {
+    var handleSubmit = _ref.handleSubmit;
+  
     return _react2.default.createElement(
       _Layout2.default,
       { header: 'fiveMinuteJournal', __source: {
@@ -3865,7 +4144,10 @@ module.exports =
           ),
           _react2.default.createElement(
             'form',
-            { method: 'post', __source: {
+            {
+              method: 'post',
+              onSubmit: handleSubmit,
+              __source: {
                 fileName: _jsxFileName,
                 lineNumber: 21
               },
@@ -3875,20 +4157,20 @@ module.exports =
               'div',
               { className: _Login2.default.formGroup, __source: {
                   fileName: _jsxFileName,
-                  lineNumber: 22
+                  lineNumber: 25
                 },
                 __self: this
               },
               _react2.default.createElement('input', {
                 className: _Login2.default.input,
-                id: 'usernameOrEmail',
+                id: 'email',
                 type: 'text',
-                name: 'usernameOrEmail',
-                placeholder: 'username',
+                name: 'email',
+                placeholder: 'email',
                 autoFocus: true,
                 __source: {
                   fileName: _jsxFileName,
-                  lineNumber: 23
+                  lineNumber: 26
                 },
                 __self: this
               })
@@ -3897,7 +4179,7 @@ module.exports =
               'div',
               { className: _Login2.default.formGroup, __source: {
                   fileName: _jsxFileName,
-                  lineNumber: 32
+                  lineNumber: 35
                 },
                 __self: this
               },
@@ -3909,7 +4191,7 @@ module.exports =
                 placeholder: 'password',
                 __source: {
                   fileName: _jsxFileName,
-                  lineNumber: 33
+                  lineNumber: 36
                 },
                 __self: this
               })
@@ -3918,7 +4200,7 @@ module.exports =
               'div',
               { className: _Login2.default.formGroup, __source: {
                   fileName: _jsxFileName,
-                  lineNumber: 41
+                  lineNumber: 44
                 },
                 __self: this
               },
@@ -3926,7 +4208,7 @@ module.exports =
                 'button',
                 { className: _Login2.default.button, type: 'submit', __source: {
                     fileName: _jsxFileName,
-                    lineNumber: 42
+                    lineNumber: 45
                   },
                   __self: this
                 },
@@ -3940,18 +4222,19 @@ module.exports =
   }
   
   Login.propTypes = {
-    title: _react.PropTypes.string.isRequired
+    title: _react.PropTypes.string.isRequired,
+    handleSubmit: _react.PropTypes.func.isRequired
   };
   
   exports.default = (0, _withStyles2.default)(_Login2.default)(Login);
 
 /***/ },
-/* 93 */
+/* 95 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(94);
-      var insertCss = __webpack_require__(37);
+      var content = __webpack_require__(96);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -3980,15 +4263,15 @@ module.exports =
     
 
 /***/ },
-/* 94 */
+/* 96 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(36)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
   // module
-  exports.push([module.id, "html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 0%;\n          flex: 1 1 0%;\n}\n\n.Login-root-rQNQN {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.Login-container-2BVuU {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.Login-lead-1mJBN {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.Login-formGroup-25Tio {\n  margin-bottom: 15px;\n}\n\n.Login-input-1bTr- {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.Login-input-1bTr-:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.Login-button-11e1X {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.Login-button-11e1X:focus {\n  padding-top: 13px;\n}\n", "", {"version":3,"sources":["/./routes/login/Login.css"],"names":[],"mappings":"AAAA;EACE,YAAY;EACZ,aAAa;CACd;;AAED;EACE,UAAU;EACV,WAAW;EACX,0BAA0B;EAC1B,qBAAc;EAAd,qBAAc;EAAd,cAAc;EACd,oBAAQ;MAAR,iBAAQ;UAAR,aAAQ;CACT;;AAED;EACE,WAAW;EACX,gBAAgB;CACjB;;AAED;EACE,eAAe;EACf,kBAAkB;EAClB,mBAAmB;CACpB;;AAED;EACE,gCAAgC;EAChC,gBAAgB;EAChB,eAAe;CAChB;;AAED;EACE,oBAAoB;CACrB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,YAAY;EACZ,aAAa;EACb,WAAW;EACX,iBAAiB;EACjB,eAAe;EACf,gBAAgB;EAChB,uBAAuB;EACvB,iFAAyE;EAAzE,yEAAyE;EACzE,aAAa;EACb,iCAAiC;EACjC,uCAAuC;EACvC,wBAAwB;CACzB;;AAED;EACE,kBAAkB;EAClB,kBAAkB;CACnB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,UAAU;EACV,mBAAmB;EACnB,YAAY;EACZ,WAAW;EACX,eAAe;EACf,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,uBAAuB;EACvB,gBAAgB;EAChB,aAAa;EACb,wBAAwB;EACxB,uCAAuC;EACvC,oBAAoB;EACpB,gBAAgB;CACjB;;AAED;EACE,kBAAkB;CACnB","file":"Login.css","sourcesContent":["html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: flex;\n  flex: 1;\n}\n\n.root {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.container {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.lead {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.formGroup {\n  margin-bottom: 15px;\n}\n\n.input {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.input:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.button {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.button:focus {\n  padding-top: 13px;\n}\n"],"sourceRoot":"webpack://"}]);
+  exports.push([module.id, "html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 0%;\n          flex: 1 1 0%;\n}\n\n.Login-root-rQNQN {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.Login-container-2BVuU {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.Login-lead-1mJBN {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.Login-formGroup-25Tio {\n  margin-bottom: 15px;\n}\n\n.Login-input-1bTr- {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.Login-input-1bTr-:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.Login-button-11e1X {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.Login-button-11e1X:focus, .Login-button-11e1X:hover {\n  color: #979797;\n}\n", "", {"version":3,"sources":["/./routes/login/Login.css"],"names":[],"mappings":"AAAA;EACE,YAAY;EACZ,aAAa;CACd;;AAED;EACE,UAAU;EACV,WAAW;EACX,0BAA0B;EAC1B,qBAAc;EAAd,qBAAc;EAAd,cAAc;EACd,oBAAQ;MAAR,iBAAQ;UAAR,aAAQ;CACT;;AAED;EACE,WAAW;EACX,gBAAgB;CACjB;;AAED;EACE,eAAe;EACf,kBAAkB;EAClB,mBAAmB;CACpB;;AAED;EACE,gCAAgC;EAChC,gBAAgB;EAChB,eAAe;CAChB;;AAED;EACE,oBAAoB;CACrB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,YAAY;EACZ,aAAa;EACb,WAAW;EACX,iBAAiB;EACjB,eAAe;EACf,gBAAgB;EAChB,uBAAuB;EACvB,iFAAyE;EAAzE,yEAAyE;EACzE,aAAa;EACb,iCAAiC;EACjC,uCAAuC;EACvC,wBAAwB;CACzB;;AAED;EACE,kBAAkB;EAClB,kBAAkB;CACnB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,UAAU;EACV,mBAAmB;EACnB,YAAY;EACZ,WAAW;EACX,eAAe;EACf,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,uBAAuB;EACvB,gBAAgB;EAChB,aAAa;EACb,wBAAwB;EACxB,uCAAuC;EACvC,oBAAoB;EACpB,gBAAgB;CACjB;;AAED;EACE,eAAe;CAChB","file":"Login.css","sourcesContent":["html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: flex;\n  flex: 1;\n}\n\n.root {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.container {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.lead {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.formGroup {\n  margin-bottom: 15px;\n}\n\n.input {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.input:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.button {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.button:focus, .button:hover {\n  color: #979797;\n}\n"],"sourceRoot":"webpack://"}]);
   
   // exports
   exports.locals = {
@@ -4001,7 +4284,7 @@ module.exports =
   };
 
 /***/ },
-/* 95 */
+/* 97 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -4018,11 +4301,11 @@ module.exports =
                                                                                                                                 * LICENSE.txt file in the root directory of this source tree.
                                                                                                                                 */
   
-  var _react = __webpack_require__(15);
+  var _react = __webpack_require__(17);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _Register = __webpack_require__(96);
+  var _Register = __webpack_require__(98);
   
   var _Register2 = _interopRequireDefault(_Register);
   
@@ -4048,7 +4331,7 @@ module.exports =
   };
 
 /***/ },
-/* 96 */
+/* 98 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -4065,19 +4348,19 @@ module.exports =
                                                                                                                                    * LICENSE.txt file in the root directory of this source tree.
                                                                                                                                    */
   
-  var _react = __webpack_require__(15);
+  var _react = __webpack_require__(17);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _withStyles = __webpack_require__(33);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _Layout = __webpack_require__(70);
+  var _Layout = __webpack_require__(71);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _Register = __webpack_require__(97);
+  var _Register = __webpack_require__(99);
   
   var _Register2 = _interopRequireDefault(_Register);
   
@@ -4136,10 +4419,10 @@ module.exports =
               },
               _react2.default.createElement('input', {
                 className: _Register2.default.input,
-                id: 'usernameOrEmail',
+                id: 'email',
                 type: 'text',
-                name: 'usernameOrEmail',
-                placeholder: 'username',
+                name: 'email',
+                placeholder: 'email',
                 autoFocus: true,
                 __source: {
                   fileName: _jsxFileName,
@@ -4199,12 +4482,12 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_Register2.default)(Register);
 
 /***/ },
-/* 97 */
+/* 99 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(98);
-      var insertCss = __webpack_require__(37);
+      var content = __webpack_require__(100);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -4233,15 +4516,15 @@ module.exports =
     
 
 /***/ },
-/* 98 */
+/* 100 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(36)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
   // module
-  exports.push([module.id, "html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 0%;\n          flex: 1 1 0%;\n}\n\n.Register-root-1hu0P {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.Register-container-OjhIB {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.Register-lead-2Uwpf {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.Register-formGroup-3ZVSx {\n  margin-bottom: 15px;\n}\n\n.Register-input-2b_qn {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.Register-input-2b_qn:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.Register-button-3N6JT {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.Register-button-3N6JT:focus {\n  padding-top: 13px;\n}\n", "", {"version":3,"sources":["/./routes/register/Register.css"],"names":[],"mappings":"AAAA;EACE,YAAY;EACZ,aAAa;CACd;;AAED;EACE,UAAU;EACV,WAAW;EACX,0BAA0B;EAC1B,qBAAc;EAAd,qBAAc;EAAd,cAAc;EACd,oBAAQ;MAAR,iBAAQ;UAAR,aAAQ;CACT;;AAED;EACE,WAAW;EACX,gBAAgB;CACjB;;AAED;EACE,eAAe;EACf,kBAAkB;EAClB,mBAAmB;CACpB;;AAED;EACE,gCAAgC;EAChC,gBAAgB;EAChB,eAAe;CAChB;;AAED;EACE,oBAAoB;CACrB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,YAAY;EACZ,aAAa;EACb,WAAW;EACX,iBAAiB;EACjB,eAAe;EACf,gBAAgB;EAChB,uBAAuB;EACvB,iFAAyE;EAAzE,yEAAyE;EACzE,aAAa;EACb,iCAAiC;EACjC,uCAAuC;EACvC,wBAAwB;CACzB;;AAED;EACE,kBAAkB;EAClB,kBAAkB;CACnB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,UAAU;EACV,mBAAmB;EACnB,YAAY;EACZ,WAAW;EACX,eAAe;EACf,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,uBAAuB;EACvB,gBAAgB;EAChB,aAAa;EACb,wBAAwB;EACxB,uCAAuC;EACvC,oBAAoB;EACpB,gBAAgB;CACjB;;AAED;EACE,kBAAkB;CACnB","file":"Register.css","sourcesContent":["html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: flex;\n  flex: 1;\n}\n\n.root {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.container {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.lead {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.formGroup {\n  margin-bottom: 15px;\n}\n\n.input {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.input:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.button {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.button:focus {\n  padding-top: 13px;\n}\n"],"sourceRoot":"webpack://"}]);
+  exports.push([module.id, "html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 0%;\n          flex: 1 1 0%;\n}\n\n.Register-root-1hu0P {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.Register-container-OjhIB {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.Register-lead-2Uwpf {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.Register-formGroup-3ZVSx {\n  margin-bottom: 15px;\n}\n\n.Register-input-2b_qn {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.Register-input-2b_qn:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.Register-button-3N6JT {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.Register-button-3N6JT:focus, .Register-button-3N6JT:hover {\n  color: #979797;\n}\n", "", {"version":3,"sources":["/./routes/register/Register.css"],"names":[],"mappings":"AAAA;EACE,YAAY;EACZ,aAAa;CACd;;AAED;EACE,UAAU;EACV,WAAW;EACX,0BAA0B;EAC1B,qBAAc;EAAd,qBAAc;EAAd,cAAc;EACd,oBAAQ;MAAR,iBAAQ;UAAR,aAAQ;CACT;;AAED;EACE,WAAW;EACX,gBAAgB;CACjB;;AAED;EACE,eAAe;EACf,kBAAkB;EAClB,mBAAmB;CACpB;;AAED;EACE,gCAAgC;EAChC,gBAAgB;EAChB,eAAe;CAChB;;AAED;EACE,oBAAoB;CACrB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,YAAY;EACZ,aAAa;EACb,WAAW;EACX,iBAAiB;EACjB,eAAe;EACf,gBAAgB;EAChB,uBAAuB;EACvB,iFAAyE;EAAzE,yEAAyE;EACzE,aAAa;EACb,iCAAiC;EACjC,uCAAuC;EACvC,wBAAwB;CACzB;;AAED;EACE,kBAAkB;EAClB,kBAAkB;CACnB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,UAAU;EACV,mBAAmB;EACnB,YAAY;EACZ,WAAW;EACX,eAAe;EACf,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,uBAAuB;EACvB,gBAAgB;EAChB,aAAa;EACb,wBAAwB;EACxB,uCAAuC;EACvC,oBAAoB;EACpB,gBAAgB;CACjB;;AAED;EACE,eAAe;CAChB","file":"Register.css","sourcesContent":["html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: flex;\n  flex: 1;\n}\n\n.root {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.container {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.lead {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.formGroup {\n  margin-bottom: 15px;\n}\n\n.input {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.input:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.button {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.button:focus, .button:hover {\n  color: #979797;\n}\n"],"sourceRoot":"webpack://"}]);
   
   // exports
   exports.locals = {
@@ -4254,7 +4537,7 @@ module.exports =
   };
 
 /***/ },
-/* 99 */
+/* 101 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -4267,7 +4550,7 @@ module.exports =
   
   var _regenerator2 = _interopRequireDefault(_regenerator);
   
-  var _promise = __webpack_require__(100);
+  var _promise = __webpack_require__(102);
   
   var _promise2 = _interopRequireDefault(_promise);
   
@@ -4284,7 +4567,7 @@ module.exports =
                                                                                                                              * LICENSE.txt file in the root directory of this source tree.
                                                                                                                              */
   
-  var _react = __webpack_require__(15);
+  var _react = __webpack_require__(17);
   
   var _react2 = _interopRequireDefault(_react);
   
@@ -4317,7 +4600,7 @@ module.exports =
                 _context.next = 4;
                 return new _promise2.default(function (resolve) {
                   !/* require.ensure */(function (require) {
-                    return resolve(__webpack_require__(101).default);
+                    return resolve(__webpack_require__(103).default);
                   }(__webpack_require__));
                 });
   
@@ -4345,13 +4628,13 @@ module.exports =
   };
 
 /***/ },
-/* 100 */
+/* 102 */
 /***/ function(module, exports) {
 
   module.exports = require("babel-runtime/core-js/promise");
 
 /***/ },
-/* 101 */
+/* 103 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -4368,19 +4651,19 @@ module.exports =
                                                                                                                              * LICENSE.txt file in the root directory of this source tree.
                                                                                                                              */
   
-  var _react = __webpack_require__(15);
+  var _react = __webpack_require__(17);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _withStyles = __webpack_require__(33);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _Layout = __webpack_require__(70);
+  var _Layout = __webpack_require__(71);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _Admin = __webpack_require__(102);
+  var _Admin = __webpack_require__(104);
   
   var _Admin2 = _interopRequireDefault(_Admin);
   
@@ -4448,12 +4731,12 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_Admin2.default)(Admin);
 
 /***/ },
-/* 102 */
+/* 104 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(103);
-      var insertCss = __webpack_require__(37);
+      var content = __webpack_require__(105);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -4482,10 +4765,10 @@ module.exports =
     
 
 /***/ },
-/* 103 */
+/* 105 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(36)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
@@ -4499,278 +4782,7 @@ module.exports =
   };
 
 /***/ },
-/* 104 */
-/***/ function(module, exports, __webpack_require__) {
-
-  'use strict';
-  
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  
-  var _regenerator = __webpack_require__(2);
-  
-  var _regenerator2 = _interopRequireDefault(_regenerator);
-  
-  var _extends2 = __webpack_require__(4);
-  
-  var _extends3 = _interopRequireDefault(_extends2);
-  
-  var _stringify = __webpack_require__(39);
-  
-  var _stringify2 = _interopRequireDefault(_stringify);
-  
-  var _asyncToGenerator2 = __webpack_require__(6);
-  
-  var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
-  
-  var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/routes/content/index.js'; /**
-                                                                                                                               * React Starter Kit (https://www.reactstarterkit.com/)
-                                                                                                                               *
-                                                                                                                               * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
-                                                                                                                               *
-                                                                                                                               * This source code is licensed under the MIT license found in the
-                                                                                                                               * LICENSE.txt file in the root directory of this source tree.
-                                                                                                                               */
-  
-  var _react = __webpack_require__(15);
-  
-  var _react2 = _interopRequireDefault(_react);
-  
-  var _Content = __webpack_require__(105);
-  
-  var _Content2 = _interopRequireDefault(_Content);
-  
-  var _fetch = __webpack_require__(63);
-  
-  var _fetch2 = _interopRequireDefault(_fetch);
-  
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-  
-  exports.default = {
-  
-    path: '*',
-  
-    action: function action(_ref) {
-      var _this = this;
-  
-      var path = _ref.path;
-      return (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
-        var resp, _ref2, data;
-  
-        return _regenerator2.default.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                _context.next = 2;
-                return (0, _fetch2.default)('/graphql', {
-                  method: 'post',
-                  headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json'
-                  },
-                  body: (0, _stringify2.default)({
-                    query: '{content(path:"' + path + '"){path,title,content,component}}'
-                  }),
-                  credentials: 'include'
-                });
-  
-              case 2:
-                resp = _context.sent;
-  
-                if (!(resp.status !== 200)) {
-                  _context.next = 5;
-                  break;
-                }
-  
-                throw new Error(resp.statusText);
-  
-              case 5:
-                _context.next = 7;
-                return resp.json();
-  
-              case 7:
-                _ref2 = _context.sent;
-                data = _ref2.data;
-  
-                if (!(!data || !data.content)) {
-                  _context.next = 11;
-                  break;
-                }
-  
-                return _context.abrupt('return', undefined);
-  
-              case 11:
-                return _context.abrupt('return', {
-                  title: data.content.title,
-                  component: _react2.default.createElement(_Content2.default, (0, _extends3.default)({}, data.content, {
-                    __source: {
-                      fileName: _jsxFileName,
-                      lineNumber: 35
-                    },
-                    __self: _this
-                  }))
-                });
-  
-              case 12:
-              case 'end':
-                return _context.stop();
-            }
-          }
-        }, _callee, _this);
-      }))();
-    }
-  };
-
-/***/ },
-/* 105 */
-/***/ function(module, exports, __webpack_require__) {
-
-  'use strict';
-  
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/routes/content/Content.js'; /**
-                                                                                                                                 * React Starter Kit (https://www.reactstarterkit.com/)
-                                                                                                                                 *
-                                                                                                                                 * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
-                                                                                                                                 *
-                                                                                                                                 * This source code is licensed under the MIT license found in the
-                                                                                                                                 * LICENSE.txt file in the root directory of this source tree.
-                                                                                                                                 */
-  
-  var _react = __webpack_require__(15);
-  
-  var _react2 = _interopRequireDefault(_react);
-  
-  var _withStyles = __webpack_require__(33);
-  
-  var _withStyles2 = _interopRequireDefault(_withStyles);
-  
-  var _Layout = __webpack_require__(70);
-  
-  var _Layout2 = _interopRequireDefault(_Layout);
-  
-  var _Content = __webpack_require__(106);
-  
-  var _Content2 = _interopRequireDefault(_Content);
-  
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-  
-  function Content(_ref) {
-    var path = _ref.path,
-        title = _ref.title,
-        content = _ref.content;
-  
-    return _react2.default.createElement(
-      _Layout2.default,
-      {
-        __source: {
-          fileName: _jsxFileName,
-          lineNumber: 17
-        },
-        __self: this
-      },
-      _react2.default.createElement(
-        'div',
-        { className: _Content2.default.root, __source: {
-            fileName: _jsxFileName,
-            lineNumber: 18
-          },
-          __self: this
-        },
-        _react2.default.createElement(
-          'div',
-          { className: _Content2.default.container, __source: {
-              fileName: _jsxFileName,
-              lineNumber: 19
-            },
-            __self: this
-          },
-          title && path !== '/' && _react2.default.createElement(
-            'h1',
-            {
-              __source: {
-                fileName: _jsxFileName,
-                lineNumber: 20
-              },
-              __self: this
-            },
-            title
-          ),
-          _react2.default.createElement('div', { dangerouslySetInnerHTML: { __html: content }, __source: {
-              fileName: _jsxFileName,
-              lineNumber: 21
-            },
-            __self: this
-          })
-        )
-      )
-    );
-  }
-  
-  Content.propTypes = {
-    path: _react.PropTypes.string.isRequired,
-    content: _react.PropTypes.string.isRequired,
-    title: _react.PropTypes.string
-  };
-  
-  exports.default = (0, _withStyles2.default)(_Content2.default)(Content);
-
-/***/ },
 /* 106 */
-/***/ function(module, exports, __webpack_require__) {
-
-  
-      var content = __webpack_require__(107);
-      var insertCss = __webpack_require__(37);
-  
-      if (typeof content === 'string') {
-        content = [[module.id, content, '']];
-      }
-  
-      module.exports = content.locals || {};
-      module.exports._getCss = function() { return content.toString(); };
-      module.exports._insertCss = function(options) { return insertCss(content, options) };
-    
-      // Hot Module Replacement
-      // https://webpack.github.io/docs/hot-module-replacement
-      // Only activated in browser context
-      if (false) {
-        var removeCss = function() {};
-        module.hot.accept("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./Content.css", function() {
-          content = require("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./Content.css");
-  
-          if (typeof content === 'string') {
-            content = [[module.id, content, '']];
-          }
-  
-          removeCss = insertCss(content, { replace: true });
-        });
-        module.hot.dispose(function() { removeCss(); });
-      }
-    
-
-/***/ },
-/* 107 */
-/***/ function(module, exports, __webpack_require__) {
-
-  exports = module.exports = __webpack_require__(36)();
-  // imports
-  
-  
-  // module
-  exports.push([module.id, "/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n\n/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n\n:root {/*\n   * Typography\n   * ======================================================================== *//*\n   * Layout\n   * ======================================================================== *//*\n   * Media queries breakpoints\n   * ======================================================================== *//* Extra small screen / phone *//* Small screen / tablet *//* Medium screen / desktop *//* Large screen / wide desktop */\n}\n\n.Content-root-aWU50 {\n  padding-left: 20px;\n  padding-right: 20px;\n}\n\n.Content-container-2OJNE {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  max-width: 1000px;\n}\n", "", {"version":3,"sources":["/./routes/content/Content.css","/./components/variables.css"],"names":[],"mappings":"AAAA;;;;;;;GAOG;;ACPH;;;;;;;GAOG;;AAEH,OACE;;gFAE8E;;gFAMA;;gFAMA,gCAErB,2BACL,6BACE,iCACI;CAC3D;;ADnBD;EACE,mBAAmB;EACnB,oBAAoB;CACrB;;AAED;EACE,eAAe;EACf,kBAAkB;EAClB,kBAAoC;CACrC","file":"Content.css","sourcesContent":["/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n\n@import '../../components/variables.css';\n\n.root {\n  padding-left: 20px;\n  padding-right: 20px;\n}\n\n.container {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  max-width: var(--max-content-width);\n}\n","/**\n * React Starter Kit (https://www.reactstarterkit.com/)\n *\n * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE.txt file in the root directory of this source tree.\n */\n\n:root {\n  /*\n   * Typography\n   * ======================================================================== */\n\n  --font-family-base: 'Segoe UI', 'HelveticaNeue-Light', sans-serif;\n\n  /*\n   * Layout\n   * ======================================================================== */\n\n  --max-content-width: 1000px;\n\n  /*\n   * Media queries breakpoints\n   * ======================================================================== */\n\n  --screen-xs-min: 480px;  /* Extra small screen / phone */\n  --screen-sm-min: 768px;  /* Small screen / tablet */\n  --screen-md-min: 992px;  /* Medium screen / desktop */\n  --screen-lg-min: 1200px; /* Large screen / wide desktop */\n}\n"],"sourceRoot":"webpack://"}]);
-  
-  // exports
-  exports.locals = {
-  	"root": "Content-root-aWU50",
-  	"container": "Content-container-2OJNE"
-  };
-
-/***/ },
-/* 108 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -4787,11 +4799,11 @@ module.exports =
                                                                                                                                 * LICENSE.txt file in the root directory of this source tree.
                                                                                                                                 */
   
-  var _react = __webpack_require__(15);
+  var _react = __webpack_require__(17);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _NotFound = __webpack_require__(109);
+  var _NotFound = __webpack_require__(107);
   
   var _NotFound2 = _interopRequireDefault(_NotFound);
   
@@ -4818,7 +4830,7 @@ module.exports =
   };
 
 /***/ },
-/* 109 */
+/* 107 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -4835,19 +4847,19 @@ module.exports =
                                                                                                                                    * LICENSE.txt file in the root directory of this source tree.
                                                                                                                                    */
   
-  var _react = __webpack_require__(15);
+  var _react = __webpack_require__(17);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _withStyles = __webpack_require__(33);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _Layout = __webpack_require__(70);
+  var _Layout = __webpack_require__(71);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _NotFound = __webpack_require__(110);
+  var _NotFound = __webpack_require__(108);
   
   var _NotFound2 = _interopRequireDefault(_NotFound);
   
@@ -4914,12 +4926,12 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_NotFound2.default)(NotFound);
 
 /***/ },
-/* 110 */
+/* 108 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(111);
-      var insertCss = __webpack_require__(37);
+      var content = __webpack_require__(109);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -4948,10 +4960,10 @@ module.exports =
     
 
 /***/ },
-/* 111 */
+/* 109 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(36)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
@@ -4965,7 +4977,7 @@ module.exports =
   };
 
 /***/ },
-/* 112 */
+/* 110 */
 /***/ function(module, exports) {
 
   module.exports = require("./assets");

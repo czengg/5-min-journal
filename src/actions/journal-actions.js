@@ -9,3 +9,27 @@ export function setValues(key, value) {
     payload: obj,
   };
 }
+
+export function showMorningRoutine() {
+  return {
+    type: types.SHOW_MORNING_ROUTINE,
+  };
+}
+
+export function hideMorningRoutine() {
+  return {
+    type: types.HIDE_MORNING_ROUTINE,
+  };
+}
+
+export function showEveningRoutine() {
+  return {
+    type: types.SHOW_EVENING_ROUTINE,
+  };
+}
+
+export function hideEveningRoutine() {
+  return {
+    type: types.HIDE_EVENING_ROUTINE,
+  };
+}

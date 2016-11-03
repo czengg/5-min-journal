@@ -15,6 +15,8 @@ import bodyParser from 'body-parser';
 import expressJwt from 'express-jwt';
 import expressGraphQL from 'express-graphql';
 import jwt from 'jsonwebtoken';
+import mysql from 'mysql';
+import moment from 'moment';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import UniversalRouter from 'universal-router';
@@ -69,6 +71,51 @@ app.get('/login/facebook/return',
     res.redirect('/');
   }
 );
+
+app.post('/login', (req, res) => {
+  const query = connection.query('SELECT * FROM users WHERE email="' + req.body.email + '"', (err, result) => {
+    if (err) {
+      res.redirect('/error');
+    } else {
+      if (result[0].password === req.body.password) {
+        req.session = req.session || {};
+        req.session.user = result[0];
+        res.redirect('/');
+      } else {
+        res.redirect('/error');
+      }
+    }
+  });
+});
+
+app.post('/register', (req, res) => {
+  const user  = { email: req.body.email, password: req.body.password };
+  const query = connection.query('INSERT INTO users SET ?', user, (err, result) => {
+    if (err) {
+      res.redirect('/error');
+    } else {
+      req.session = req.session || {};
+      req.session.user = user;
+      res.redirect('/');
+    }
+  });
+});
+
+//
+// Database connection
+// -----------------------------------------------------------------------------
+const connection = mysql.createConnection({
+  host     : 'fiveMinJournal.db.10477243.hostedresource.com',
+  user     : 'fiveMinJournal',
+  password : 'JLpJTPrMDBBm@Ee9WJ',
+  database : 'fiveMinJournal',
+});
+
+app.get('/save/:date', (req, res) => {
+
+  console.log(req.params.date);
+  res.redirect('/');
+});
 
 //
 // Register API middleware

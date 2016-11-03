@@ -3,8 +3,9 @@ import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './MorningRoutine.css';
 import Textarea from 'react-textarea-autosize';
+import icon from './arrow.png';
 
-function MorningRoutine({ onInputChange }) {
+function MorningRoutine({ onInputChange, show, hide, showContent }) {
   const gratefulForSample = [
     'I\'m grateful for the warm bed that I sleep in.',
     'I\'m grateful for my body that is working in perfect harmony.',
@@ -19,15 +20,16 @@ function MorningRoutine({ onInputChange }) {
 
   return (
     <div className={s.root}>
-      <div className={s.header}>
+      <button className={s.header} onClick={showContent ? hide : show}>
         <div className={s.headerTitle}>MORNING ROUTINE</div>
-      </div>
-      <div className={s.container}>
+        <img className={s.icon} src={icon} style={{ transform: showContent ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+      </button>
+      {showContent && <form className={s.container} method="post">
         <div className={s.inputContainer}>
           <div className={s.inputTitle}>I am grateful for...</div>
           <ol className={s.inputs}>
             {gratefulForSample.map((placeholder, index) =>
-              <li className={s.input}>
+              <li className={s.input} key={'grateful' + index}>
                 <Textarea
                   placeholder={placeholder}
                   minRows={1}
@@ -41,11 +43,11 @@ function MorningRoutine({ onInputChange }) {
           <div className={s.inputTitle}>What would make today great?</div>
           <ol className={s.inputs}>
             {todayGreatSample.map((placeholder, index) =>
-              <li className={s.input}>
+              <li className={s.input} key={'great' + index}>
                 <Textarea
                   placeholder={placeholder}
                   minRows={1}
-                  onChange={(e) => onInputChange('today' + index, e.target.value)}
+                  onChange={(e) => onInputChange('great' + index, e.target.value)}
                 />
               </li>
             )}
@@ -61,13 +63,21 @@ function MorningRoutine({ onInputChange }) {
             />
           </div>
         </div>
-      </div>
+        <div className={s.inputContainer}>
+          <button className={s.button} type="submit">
+            Save &rarr;
+          </button>
+        </div>
+      </form>}
     </div>
   );
 }
 
 MorningRoutine.propTypes = {
   onInputChange: PropTypes.func.isRequired,
+  show: PropTypes.func.isRequired,
+  hide: PropTypes.func.isRequired,
+  showContent: PropTypes.bool.isRequired,
 };
 
 export default withStyles(s)(MorningRoutine);

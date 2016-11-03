@@ -12,12 +12,28 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { connect } from 'react-redux';
 import Layout from '../../components/Layout';
 import MorningRoutine from '../../components/MorningRoutine';
+import EveningRoutine from '../../components/EveningRoutine';
 import DateCalendar from '../../components/DateCalendar';
 import s from './Home.css';
-import { setValues } from '../../actions/journal-actions';
+import {
+  setValues,
+  showMorningRoutine,
+  hideMorningRoutine,
+  showEveningRoutine,
+  hideEveningRoutine,
+} from '../../actions/journal-actions';
 
-function Home({ date, dailyQuote, setValues }) {
+function Home({
+  date, dailyQuote, setValues, showMorningRoutine,
+  hideMorningRoutine, showMorningContent, showEveningRoutine,
+  hideEveningRoutine, showEveningContent }) {
   const { quote, author } = dailyQuote;
+  let defaultShowMorning;
+  if (date.get('hour') < 12) {
+    defaultShowMorning = true;
+  } else {
+    defaultShowMorning = false;
+  }
 
   return (
     <Layout header="fiveMinuteJournal">
@@ -28,7 +44,20 @@ function Home({ date, dailyQuote, setValues }) {
             <div className={s.quote}>{quote}</div>
             <div className={s.author}>{author.toUpperCase()}</div>
           </div>
-          <MorningRoutine dailyQuote={dailyQuote} onInputChange={setValues} />
+          <MorningRoutine
+            dailyQuote={dailyQuote}
+            onInputChange={setValues}
+            show={showMorningRoutine}
+            hide={hideMorningRoutine}
+            showContent={showMorningContent === undefined ? defaultShowMorning : showMorningContent}
+          />
+          <EveningRoutine
+            dailyQuote={dailyQuote}
+            onInputChange={setValues}
+            show={showEveningRoutine}
+            hide={hideEveningRoutine}
+            showContent={showEveningContent === undefined ? !defaultShowMorning : showEveningContent}
+          />
         </div>
       </div>
     </Layout>
@@ -39,15 +68,28 @@ Home.propTypes = {
   date: PropTypes.object.isRequired,
   dailyQuote: PropTypes.object.isRequired,
   setValues: PropTypes.func.isRequired,
+  showMorningRoutine: PropTypes.func.isRequired,
+  hideMorningRoutine: PropTypes.func.isRequired,
+  showMorningContent: PropTypes.bool,
+  showEveningRoutine: PropTypes.func.isRequired,
+  hideEveningRoutine: PropTypes.func.isRequired,
+  showEveningContent: PropTypes.bool,
 };
 
 function mapStateToProps(state) {
-  return {};
+  return {
+    showMorningContent: state.journal.showMorningContent,
+    showEveningContent: state.journal.showEveningContent,
+  };
 }
 
 function actions(dispatch) {
   return {
     setValues: (key, value) => dispatch(setValues(key, value)),
+    showMorningRoutine: () => dispatch(showMorningRoutine()),
+    hideMorningRoutine: () => dispatch(hideMorningRoutine()),
+    showEveningRoutine: () => dispatch(showEveningRoutine()),
+    hideEveningRoutine: () => dispatch(hideEveningRoutine()),
   };
 }
 

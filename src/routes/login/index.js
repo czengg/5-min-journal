@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import fetch from '../../core/fetch';
 import Login from './Login';
 
 const title = 'Log In';
@@ -17,9 +18,13 @@ export default {
   path: '/login',
 
   action() {
+    const handleSubmit = () => {
+      console.log(arguments);
+    };
+
     return {
       title,
-      component: <Login title={title} />,
+      component: <Login title={title} handleSubmit={handleSubmit} />,
     };
   },
 

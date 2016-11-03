@@ -22,10 +22,10 @@ function Register() {
             <div className={s.formGroup}>
               <input
                 className={s.input}
-                id="usernameOrEmail"
+                id="email"
                 type="text"
-                name="usernameOrEmail"
-                placeholder="username"
+                name="email"
+                placeholder="email"
                 autoFocus
               />
             </div>

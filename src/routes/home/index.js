@@ -10,7 +10,6 @@
 import React from 'react';
 import moment from 'moment';
 import Home from './Home';
-import fetch from '../../core/fetch';
 
 export default {
 

@@ -12,20 +12,23 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Layout from '../../components/Layout';
 import s from './Login.css';
 
-function Login() {
+function Login({ handleSubmit }) {
   return (
     <Layout header="fiveMinuteJournal">
       <div className={s.root}>
         <div className={s.container}>
           <h1 className={s.lead}>Sign In</h1>
-          <form method="post">
+          <form
+            method="post"
+            onSubmit={handleSubmit}
+          >
             <div className={s.formGroup}>
               <input
                 className={s.input}
-                id="usernameOrEmail"
+                id="email"
                 type="text"
-                name="usernameOrEmail"
-                placeholder="username"
+                name="email"
+                placeholder="email"
                 autoFocus
               />
             </div>
@@ -52,6 +55,7 @@ function Login() {
 
 Login.propTypes = {
   title: PropTypes.string.isRequired,
+  handleSubmit: PropTypes.func.isRequired,
 };
 
 export default withStyles(s)(Login);
