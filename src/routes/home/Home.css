@@ -12,7 +12,7 @@ body {
 }
 
 .root {
-  margin-top: 5%;
+  margin-top: 3%;
   width: 90%;
 }
 
@@ -21,20 +21,21 @@ body {
   padding: 0 0 40px;
 }
 
-.news {
-  padding: 0;
+.quoteContainer {
+  padding-left: 20px;
+  font-size: 20px;
+  font-family: 'Playfair Display', serif;
+  line-height: 34px;
+  margin-top: 20px;
+  margin-bottom: 5%;
+  color: #4A4A4A;
+  border-left: 1px solid #4A4A4A;
 }
 
-.newsItem {
-  list-style-type: none;
-  padding-bottom: 6px;
+.quote {
+  font-style: italic;
 }
 
-.newsTitle {
-  font-size: 1.125em;
-}
-
-.newsTitle,
-.newsDesc {
-  display: block;
+.author {
+  font-style: normal;
 }

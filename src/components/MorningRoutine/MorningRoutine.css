@@ -1,6 +1,7 @@
 
 .container {
-  padding-top: 5%;
+  padding-top: 1%;
+  padding-left: 3%;
 }
 
 .icon {
@@ -10,15 +11,55 @@
   margin-right: 2%;
 }
 
-.dateContainer {
-  height: 50px;
-
+.header {
+  border-bottom: 1px solid #979797;
 }
 
-.date {
-  vertical-align: middle;
-  display: inline-block;
-  font-family: 'Raleway', sans-serif;
-  font-weight: 700;
+.headerTitle {
+  font-family: 'Raleway';
   font-size: 20px;
 }
+
+.inputContainer {
+  margin-bottom: 30px;
+  margin-top: 10px;
+}
+
+.inputTitle {
+  font-family: 'Playfair Display', cursive;
+  font-size: 24px;
+  color: #616161;
+  font-style: italic;
+}
+
+.inputs {
+  margin-left: 5px;
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: #616161;
+}
+
+div.input {
+  padding-left: 20px;
+}
+
+.input textarea {
+  box-sizing: border-box;
+  width: 100%;
+  outline: 0;
+  border-radius: 0;
+  color: #000;
+  font-size: 18px;
+  border: none;
+  border-bottom: 1px solid #979797;
+  font-family: 'Playfair Display', serif;
+  background: transparent;
+  padding: 5px;
+  margin-top: 10px;
+}
+
+.input textarea:focus {
+  border-width: 2px;
+  padding-bottom: 5px;
+}
+

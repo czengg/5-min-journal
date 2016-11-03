@@ -1,0 +1,15 @@
+.dateContainer img {
+  width: 34px;
+  height: 35px;
+  vertical-align: middle;
+}
+
+.date {
+  display: inline-block;
+  vertical-align: middle;
+  padding-left: 15px;
+  font-size: 24px;
+  font-family: 'Raleway';
+  font-weight: 600;
+  margin-top: 3px;
+}

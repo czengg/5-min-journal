@@ -16,7 +16,8 @@
 .bannerTitle {
   margin: 0;
   padding: 10px;
-  font-family: 'Lobster', cursive;
-  font-weight: 300;
+  font-family: 'Playfair Display';
+  font-style: italic;
+  font-weight: 400;
   font-size: 30px;
 }

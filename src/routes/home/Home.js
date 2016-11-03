@@ -9,16 +9,26 @@
 
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import { connect } from 'react-redux';
 import Layout from '../../components/Layout';
 import MorningRoutine from '../../components/MorningRoutine';
+import DateCalendar from '../../components/DateCalendar';
 import s from './Home.css';
+import { setValues } from '../../actions/journal-actions';
 
-function Home({ date }) {
+function Home({ date, dailyQuote, setValues }) {
+  const { quote, author } = dailyQuote;
+
   return (
     <Layout header="fiveMinuteJournal">
       <div className={s.root}>
         <div className={s.container}>
-          <MorningRoutine date={date} />
+          <DateCalendar date={date} />
+          <div className={s.quoteContainer}>
+            <div className={s.quote}>{quote}</div>
+            <div className={s.author}>{author.toUpperCase()}</div>
+          </div>
+          <MorningRoutine dailyQuote={dailyQuote} onInputChange={setValues} />
         </div>
       </div>
     </Layout>
@@ -27,6 +37,18 @@ function Home({ date }) {
 
 Home.propTypes = {
   date: PropTypes.object.isRequired,
+  dailyQuote: PropTypes.object.isRequired,
+  setValues: PropTypes.func.isRequired,
 };
 
-export default withStyles(s)(Home);
+function mapStateToProps(state) {
+  return {};
+}
+
+function actions(dispatch) {
+  return {
+    setValues: (key, value) => dispatch(setValues(key, value)),
+  };
+}
+
+export default connect(mapStateToProps, actions)(withStyles(s)(Home));

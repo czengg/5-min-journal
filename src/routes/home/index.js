@@ -18,8 +18,13 @@ export default {
 
   async action() {
     const date = moment();
+    const dailyQuote = {
+      quote: 'Anyone who has a why to live can bear almost any what.',
+      author: 'Nietzche',
+    };
+
     return {
-      component: <Home date={date} />,
+      component: <Home date={date} dailyQuote={dailyQuote} />,
     };
   },
 
