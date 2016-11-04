@@ -63,11 +63,6 @@ function MorningRoutine({ onInputChange, show, hide, showContent }) {
             />
           </div>
         </div>
-        <div className={s.inputContainer}>
-          <button className={s.button} type="submit">
-            Save &rarr;
-          </button>
-        </div>
       </div>}
     </div>
   );

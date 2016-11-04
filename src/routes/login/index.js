@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import fetch from '../../core/fetch';
 import Login from './Login';
 
 const title = 'Log In';

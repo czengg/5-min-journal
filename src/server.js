@@ -17,6 +17,7 @@ import expressGraphQL from 'express-graphql';
 import jwt from 'jsonwebtoken';
 import mysql from 'mysql';
 import moment from 'moment';
+import session from 'express-session';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import UniversalRouter from 'universal-router';
@@ -48,29 +49,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(session({ secret: 'keyboard cat', cookie: { maxAge: 60000 }}))
 
-//
-// Authentication
-// -----------------------------------------------------------------------------
-app.use(expressJwt({
-  secret: auth.jwt.secret,
-  credentialsRequired: false,
-  getToken: req => req.cookies.id_token,
-}));
-app.use(passport.initialize());
-
-app.get('/login/facebook',
-  passport.authenticate('facebook', { scope: ['email', 'user_location'], session: false })
-);
-app.get('/login/facebook/return',
-  passport.authenticate('facebook', { failureRedirect: '/login', session: false }),
-  (req, res) => {
-    const expiresIn = 60 * 60 * 24 * 180; // 180 days
-    const token = jwt.sign(req.user, auth.jwt.secret, { expiresIn });
-    res.cookie('id_token', token, { maxAge: 1000 * expiresIn, httpOnly: true });
-    res.redirect('/');
-  }
-);
+const connection = mysql.createConnection({
+  host     : 'fiveMinJournal.db.10477243.hostedresource.com',
+  user     : 'fiveMinJournal',
+  password : 'JLpJTPrMDBBm@Ee9WJ',
+  database : 'fiveMinJournal',
+});
 
 app.post('/login', (req, res) => {
   const query = connection.query('SELECT * FROM users WHERE email="' + req.body.email + '"', (err, result) => {
@@ -78,7 +64,6 @@ app.post('/login', (req, res) => {
       res.redirect('/error');
     } else {
       if (result[0].password === req.body.password) {
-        req.session = req.session || {};
         req.session.user = result[0];
         res.redirect('/');
       } else {
@@ -94,7 +79,6 @@ app.post('/register', (req, res) => {
     if (err) {
       res.redirect('/error');
     } else {
-      req.session = req.session || {};
       req.session.user = user;
       res.redirect('/');
     }
@@ -104,16 +88,20 @@ app.post('/register', (req, res) => {
 //
 // Database connection
 // -----------------------------------------------------------------------------
-const connection = mysql.createConnection({
-  host     : 'fiveMinJournal.db.10477243.hostedresource.com',
-  user     : 'fiveMinJournal',
-  password : 'JLpJTPrMDBBm@Ee9WJ',
-  database : 'fiveMinJournal',
-});
+app.post('/save/:date', (req, res) => {
+  // check if entry already exists for date
+  const query1 = connection.query('SELECT * FROM entries WHERE date="' + req.params.date + '"', (err, result) => {
+    if (err) {
+      res.redirect('/error');
+    } else {
+      if (result.length) {
 
-app.get('/save/:date', (req, res) => {
+      } else {
+        console.log(req.body);
+      }
+    }
+  });
 
-  console.log(req.params.date);
   res.redirect('/');
 });
 

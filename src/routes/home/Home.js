@@ -26,7 +26,7 @@ import {
 function Home({
   date, dailyQuote, setValues, showMorningRoutine,
   hideMorningRoutine, showMorningContent, showEveningRoutine,
-  hideEveningRoutine, showEveningContent }) {
+  hideEveningRoutine, showEveningContent, onSave, entries }) {
   const { quote, author } = dailyQuote;
   let defaultShowMorning;
   if (date.get('hour') < 12) {
@@ -58,6 +58,11 @@ function Home({
             hide={hideEveningRoutine}
             showContent={showEveningContent === undefined ? !defaultShowMorning : showEveningContent}
           />
+          <div className={s.inputContainer}>
+            <button className={s.button} onClick={() => onSave(date.format('MM-DD-YYYY'), entries)} >
+              Save &rarr;
+            </button>
+          </div>
         </div>
       </div>
     </Layout>
@@ -74,12 +79,15 @@ Home.propTypes = {
   showEveningRoutine: PropTypes.func.isRequired,
   hideEveningRoutine: PropTypes.func.isRequired,
   showEveningContent: PropTypes.bool,
+  onSave: PropTypes.func.isRequired,
+  entries: PropTypes.object.isRequired,
 };
 
 function mapStateToProps(state) {
   return {
     showMorningContent: state.journal.showMorningContent,
     showEveningContent: state.journal.showEveningContent,
+    entries: state.journal,
   };
 }
 
