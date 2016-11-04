@@ -24,7 +24,7 @@ function MorningRoutine({ onInputChange, show, hide, showContent }) {
         <div className={s.headerTitle}>MORNING ROUTINE</div>
         <img className={s.icon} src={icon} style={{ transform: showContent ? 'rotate(180deg)' : 'rotate(0deg)' }} />
       </button>
-      {showContent && <form className={s.container} method="post">
+      {showContent && <div className={s.container}>
         <div className={s.inputContainer}>
           <div className={s.inputTitle}>I am grateful for...</div>
           <ol className={s.inputs}>
@@ -68,7 +68,7 @@ function MorningRoutine({ onInputChange, show, hide, showContent }) {
             Save &rarr;
           </button>
         </div>
-      </form>}
+      </div>}
     </div>
   );
 }

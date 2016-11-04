@@ -3262,8 +3262,8 @@ module.exports =
         })
       ),
       showContent && _react2.default.createElement(
-        'form',
-        { className: _MorningRoutine2.default.container, method: 'post', __source: {
+        'div',
+        { className: _MorningRoutine2.default.container, __source: {
             fileName: _jsxFileName,
             lineNumber: 27
           },
