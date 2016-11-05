@@ -10,29 +10,31 @@
 import React from 'react';
 import moment from 'moment';
 import fetch from 'node-fetch';
-import Home from './Home';
-const relativePath = 'http://localhost:3001/';
+import Journal from './Journal';
+import { host } from '../../config';
 
 export default {
 
-  path: '/',
+  path: '/journal/:date',
 
-  async action() {
-    const date = moment();
+  async action(route, params) {
+    const date = moment(params.date);
     const dailyQuote = {
       quote: 'Anyone who has a why to live can bear almost any what.',
       author: 'Nietzche',
     };
-    const onSave = (date, body) => {
-      fetch(relativePath + '/save/' + date, {
-          method: 'POST',
-          body:    JSON.stringify(body),
-          headers: { 'Content-Type': 'application/json' },
-      })
+
+    const onSave = (entryDate, body) => {
+      const path = 'http://localhost:3001';
+      fetch(`${path}/save/${entryDate}`, {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: { 'Content-Type': 'application/json' },
+      });
     };
 
     return {
-      component: <Home date={date} dailyQuote={dailyQuote} onSave={onSave} />,
+      component: <Journal date={date} dailyQuote={dailyQuote} onSave={onSave} />,
     };
   },
 

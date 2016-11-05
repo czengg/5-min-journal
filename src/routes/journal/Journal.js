@@ -14,7 +14,7 @@ import Layout from '../../components/Layout';
 import MorningRoutine from '../../components/MorningRoutine';
 import EveningRoutine from '../../components/EveningRoutine';
 import DateCalendar from '../../components/DateCalendar';
-import s from './Home.css';
+import s from './Journal.css';
 import {
   setValues,
   showMorningRoutine,
@@ -23,10 +23,10 @@ import {
   hideEveningRoutine,
 } from '../../actions/journal-actions';
 
-function Home({
+function Journal({
   date, dailyQuote, setValues, showMorningRoutine,
   hideMorningRoutine, showMorningContent, showEveningRoutine,
-  hideEveningRoutine, showEveningContent, onSave, entries }) {
+  hideEveningRoutine, showEveningContent, onSave, entry }) {
   const { quote, author } = dailyQuote;
   let defaultShowMorning;
   if (date.get('hour') < 12) {
@@ -56,10 +56,12 @@ function Home({
             onInputChange={setValues}
             show={showEveningRoutine}
             hide={hideEveningRoutine}
-            showContent={showEveningContent === undefined ? !defaultShowMorning : showEveningContent}
+            showContent={
+              showEveningContent === undefined ? !defaultShowMorning : showEveningContent
+            }
           />
           <div className={s.inputContainer}>
-            <button className={s.button} onClick={() => onSave(date.format('MM-DD-YYYY'), entries)} >
+            <button className={s.button} onClick={() => onSave(date.format('YYYY-MM-DD'), entry)} >
               Save &rarr;
             </button>
           </div>
@@ -69,7 +71,7 @@ function Home({
   );
 }
 
-Home.propTypes = {
+Journal.propTypes = {
   date: PropTypes.object.isRequired,
   dailyQuote: PropTypes.object.isRequired,
   setValues: PropTypes.func.isRequired,
@@ -80,14 +82,14 @@ Home.propTypes = {
   hideEveningRoutine: PropTypes.func.isRequired,
   showEveningContent: PropTypes.bool,
   onSave: PropTypes.func.isRequired,
-  entries: PropTypes.object.isRequired,
+  entry: PropTypes.object,
 };
 
 function mapStateToProps(state) {
   return {
     showMorningContent: state.journal.showMorningContent,
     showEveningContent: state.journal.showEveningContent,
-    entries: state.journal,
+    entry: state.journal.entry,
   };
 }
 
@@ -101,4 +103,4 @@ function actions(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, actions)(withStyles(s)(Home));
+export default connect(mapStateToProps, actions)(withStyles(s)(Journal));

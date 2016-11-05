@@ -72,6 +72,10 @@ module.exports =
   
   var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
   
+  var _assign = __webpack_require__(32);
+  
+  var _assign2 = _interopRequireDefault(_assign);
+  
   var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/server.js'; /**
                                                                                                                  * React Starter Kit (https://www.reactstarterkit.com/)
                                                                                                                  *
@@ -211,7 +215,7 @@ module.exports =
       } else {
         if (result[0].password === req.body.password) {
           req.session.user = result[0];
-          res.redirect('/');
+          res.redirect('/journal');
         } else {
           res.redirect('/error');
         }
@@ -226,7 +230,7 @@ module.exports =
         res.redirect('/error');
       } else {
         req.session.user = user;
-        res.redirect('/');
+        res.redirect('/journal');
       }
     });
   });
@@ -234,19 +238,40 @@ module.exports =
   //
   // Database connection
   // -----------------------------------------------------------------------------
-  app.post('/save/:date', function (req, res) {
+  app.post('/save/:date', function (req, res, next) {
+    var date = req.params.date;
+  
     // check if entry already exists for date
-    var query1 = connection.query('SELECT * FROM entries WHERE date="' + req.params.date + '"', function (err, result) {
+  
+    var query1 = connection.query('SELECT * FROM entries WHERE date="' + date + '"', function (err, result) {
       if (err) {
         res.redirect('/error');
       } else {
         if (result.length) {} else {
-          console.log(req.body);
+          var entry = (0, _assign2.default)({}, req.body, { user_id: req.session.user.id, date: date });
+          var query2 = connection.query('INSERT INTO entries SET ?', entry, function (err, result) {
+            if (err) {
+              res.redirect('/error');
+            } else {
+              next();
+            }
+          });
         }
       }
     });
+  });
   
-    res.redirect('/');
+  app.get('/journal', function (req, res) {
+    var today = (0, _moment2.default)().format('YYYY-MM-DD');
+    res.redirect('/journal/' + today);
+  });
+  
+  app.get('/journal/:date', function (req, res, next) {
+    if (!req.session.user) {
+      res.redirect('/login');
+    } else {
+      next();
+    }
   });
   
   //
@@ -324,7 +349,7 @@ module.exports =
                           _App2.default,
                           { context: context, __source: {
                               fileName: _jsxFileName,
-                              lineNumber: 147
+                              lineNumber: 167
                             },
                             __self: undefined
                           },
@@ -336,7 +361,7 @@ module.exports =
                         html = _server2.default.renderToStaticMarkup(_react2.default.createElement(_Html2.default, (0, _extends3.default)({}, data, {
                           __source: {
                             fileName: _jsxFileName,
-                            lineNumber: 151
+                            lineNumber: 171
                           },
                           __self: undefined
                         })));
@@ -404,13 +429,13 @@ module.exports =
         style: _ErrorPage3.default._getCss() // eslint-disable-line no-underscore-dangle
         , __source: {
           fileName: _jsxFileName,
-          lineNumber: 170
+          lineNumber: 190
         },
         __self: undefined
       },
       _server2.default.renderToString(_react2.default.createElement(_ErrorPage.ErrorPageWithoutStyle, { error: err, __source: {
           fileName: _jsxFileName,
-          lineNumber: 175
+          lineNumber: 195
         },
         __self: undefined
       }))
@@ -776,7 +801,8 @@ module.exports =
   
     switch (action.type) {
       case types.SET_VALUES:
-        return (0, _assign2.default)({}, state, action.payload);
+        var entry = (0, _assign2.default)(state.entry || {}, action.payload);
+        return (0, _assign2.default)({}, state, { entry: entry });
       case types.SHOW_MORNING_ROUTINE:
         return (0, _assign2.default)({}, state, { showMorningContent: true });
       case types.HIDE_MORNING_ROUTINE:
@@ -2686,14 +2712,14 @@ module.exports =
   
   var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
   
-  var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/routes/home/index.js'; /**
-                                                                                                                            * React Starter Kit (https://www.reactstarterkit.com/)
-                                                                                                                            *
-                                                                                                                            * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
-                                                                                                                            *
-                                                                                                                            * This source code is licensed under the MIT license found in the
-                                                                                                                            * LICENSE.txt file in the root directory of this source tree.
-                                                                                                                            */
+  var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/routes/journal/index.js'; /**
+                                                                                                                               * React Starter Kit (https://www.reactstarterkit.com/)
+                                                                                                                               *
+                                                                                                                               * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
+                                                                                                                               *
+                                                                                                                               * This source code is licensed under the MIT license found in the
+                                                                                                                               * LICENSE.txt file in the root directory of this source tree.
+                                                                                                                               */
   
   var _react = __webpack_require__(18);
   
@@ -2707,19 +2733,19 @@ module.exports =
   
   var _nodeFetch2 = _interopRequireDefault(_nodeFetch);
   
-  var _Home = __webpack_require__(71);
+  var _Journal = __webpack_require__(71);
   
-  var _Home2 = _interopRequireDefault(_Home);
+  var _Journal2 = _interopRequireDefault(_Journal);
+  
+  var _config = __webpack_require__(35);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
-  var relativePath = 'http://localhost:3001/';
-  
   exports.default = {
   
-    path: '/',
+    path: '/journal/:date',
   
-    action: function action() {
+    action: function action(route, params) {
       var _this = this;
   
       return (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
@@ -2728,14 +2754,15 @@ module.exports =
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                date = (0, _moment2.default)();
+                date = (0, _moment2.default)(params.date);
                 dailyQuote = {
                   quote: 'Anyone who has a why to live can bear almost any what.',
                   author: 'Nietzche'
                 };
   
-                onSave = function onSave(date, body) {
-                  (0, _nodeFetch2.default)(relativePath + '/save/' + date, {
+                onSave = function onSave(entryDate, body) {
+                  var path = 'http://localhost:3001';
+                  (0, _nodeFetch2.default)(path + '/save/' + entryDate, {
                     method: 'POST',
                     body: (0, _stringify2.default)(body),
                     headers: { 'Content-Type': 'application/json' }
@@ -2743,9 +2770,9 @@ module.exports =
                 };
   
                 return _context.abrupt('return', {
-                  component: _react2.default.createElement(_Home2.default, { date: date, dailyQuote: dailyQuote, onSave: onSave, __source: {
+                  component: _react2.default.createElement(_Journal2.default, { date: date, dailyQuote: dailyQuote, onSave: onSave, __source: {
                       fileName: _jsxFileName,
-                      lineNumber: 35
+                      lineNumber: 37
                     },
                     __self: _this
                   })
@@ -2770,14 +2797,14 @@ module.exports =
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
-  var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/routes/home/Home.js'; /**
-                                                                                                                           * React Starter Kit (https://www.reactstarterkit.com/)
-                                                                                                                           *
-                                                                                                                           * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
-                                                                                                                           *
-                                                                                                                           * This source code is licensed under the MIT license found in the
-                                                                                                                           * LICENSE.txt file in the root directory of this source tree.
-                                                                                                                           */
+  var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/routes/journal/Journal.js'; /**
+                                                                                                                                 * React Starter Kit (https://www.reactstarterkit.com/)
+                                                                                                                                 *
+                                                                                                                                 * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
+                                                                                                                                 *
+                                                                                                                                 * This source code is licensed under the MIT license found in the
+                                                                                                                                 * LICENSE.txt file in the root directory of this source tree.
+                                                                                                                                 */
   
   var _react = __webpack_require__(18);
   
@@ -2805,15 +2832,15 @@ module.exports =
   
   var _DateCalendar2 = _interopRequireDefault(_DateCalendar);
   
-  var _Home = __webpack_require__(91);
+  var _Journal = __webpack_require__(91);
   
-  var _Home2 = _interopRequireDefault(_Home);
+  var _Journal2 = _interopRequireDefault(_Journal);
   
   var _journalActions = __webpack_require__(93);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
-  function Home(_ref) {
+  function Journal(_ref) {
     var date = _ref.date,
         dailyQuote = _ref.dailyQuote,
         setValues = _ref.setValues,
@@ -2824,7 +2851,7 @@ module.exports =
         hideEveningRoutine = _ref.hideEveningRoutine,
         showEveningContent = _ref.showEveningContent,
         onSave = _ref.onSave,
-        entries = _ref.entries;
+        entry = _ref.entry;
     var quote = dailyQuote.quote,
         author = dailyQuote.author;
   
@@ -2845,7 +2872,7 @@ module.exports =
       },
       _react2.default.createElement(
         'div',
-        { className: _Home2.default.root, __source: {
+        { className: _Journal2.default.root, __source: {
             fileName: _jsxFileName,
             lineNumber: 40
           },
@@ -2853,7 +2880,7 @@ module.exports =
         },
         _react2.default.createElement(
           'div',
-          { className: _Home2.default.container, __source: {
+          { className: _Journal2.default.container, __source: {
               fileName: _jsxFileName,
               lineNumber: 41
             },
@@ -2867,7 +2894,7 @@ module.exports =
           }),
           _react2.default.createElement(
             'div',
-            { className: _Home2.default.quoteContainer, __source: {
+            { className: _Journal2.default.quoteContainer, __source: {
                 fileName: _jsxFileName,
                 lineNumber: 43
               },
@@ -2875,7 +2902,7 @@ module.exports =
             },
             _react2.default.createElement(
               'div',
-              { className: _Home2.default.quote, __source: {
+              { className: _Journal2.default.quote, __source: {
                   fileName: _jsxFileName,
                   lineNumber: 44
                 },
@@ -2885,7 +2912,7 @@ module.exports =
             ),
             _react2.default.createElement(
               'div',
-              { className: _Home2.default.author, __source: {
+              { className: _Journal2.default.author, __source: {
                   fileName: _jsxFileName,
                   lineNumber: 45
                 },
@@ -2920,19 +2947,19 @@ module.exports =
           }),
           _react2.default.createElement(
             'div',
-            { className: _Home2.default.inputContainer, __source: {
+            { className: _Journal2.default.inputContainer, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 61
+                lineNumber: 63
               },
               __self: this
             },
             _react2.default.createElement(
               'button',
-              { className: _Home2.default.button, onClick: function onClick() {
-                  return onSave(date.format('MM-DD-YYYY'), entries);
+              { className: _Journal2.default.button, onClick: function onClick() {
+                  return onSave(date.format('YYYY-MM-DD'), entry);
                 }, __source: {
                   fileName: _jsxFileName,
-                  lineNumber: 62
+                  lineNumber: 64
                 },
                 __self: this
               },
@@ -2944,7 +2971,7 @@ module.exports =
     );
   }
   
-  Home.propTypes = {
+  Journal.propTypes = {
     date: _react.PropTypes.object.isRequired,
     dailyQuote: _react.PropTypes.object.isRequired,
     setValues: _react.PropTypes.func.isRequired,
@@ -2955,14 +2982,14 @@ module.exports =
     hideEveningRoutine: _react.PropTypes.func.isRequired,
     showEveningContent: _react.PropTypes.bool,
     onSave: _react.PropTypes.func.isRequired,
-    entries: _react.PropTypes.object.isRequired
+    entry: _react.PropTypes.object
   };
   
   function mapStateToProps(state) {
     return {
       showMorningContent: state.journal.showMorningContent,
       showEveningContent: state.journal.showEveningContent,
-      entries: state.journal
+      entry: state.journal.entry
     };
   }
   
@@ -2986,7 +3013,7 @@ module.exports =
     };
   }
   
-  exports.default = (0, _reactRedux.connect)(mapStateToProps, actions)((0, _withStyles2.default)(_Home2.default)(Home));
+  exports.default = (0, _reactRedux.connect)(mapStateToProps, actions)((0, _withStyles2.default)(_Journal2.default)(Journal));
 
 /***/ },
 /* 72 */
@@ -3947,8 +3974,8 @@ module.exports =
       // Only activated in browser context
       if (false) {
         var removeCss = function() {};
-        module.hot.accept("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./Home.css", function() {
-          content = require("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./Home.css");
+        module.hot.accept("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./Journal.css", function() {
+          content = require("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./Journal.css");
   
           if (typeof content === 'string') {
             content = [[module.id, content, '']];
@@ -3969,16 +3996,16 @@ module.exports =
   
   
   // module
-  exports.push([module.id, "html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 0%;\n          flex: 1 1 0%;\n}\n\n.Home-root-2IMq2 {\n  margin-top: 3%;\n  width: 90%;\n}\n\n.Home-container-2Yejq {\n  margin: 0 auto;\n  padding: 0 0 40px;\n}\n\n.Home-quoteContainer-l7woL {\n  padding-left: 20px;\n  font-size: 20px;\n  font-family: 'Playfair Display', serif;\n  line-height: 34px;\n  margin-top: 20px;\n  margin-bottom: 5%;\n  color: #4A4A4A;\n  border-left: 1px solid #4A4A4A;\n}\n\n.Home-quote-2U1_8 {\n  font-style: italic;\n}\n\n.Home-author-WPfc4 {\n  font-style: normal;\n}\n\n.Home-button-3s-cX {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.Home-button-3s-cX:focus, .Home-button-3s-cX:hover {\n  color: #979797;\n}\n", "", {"version":3,"sources":["/./routes/home/Home.css"],"names":[],"mappings":"AAAA;EACE,YAAY;EACZ,aAAa;CACd;;AAED;EACE,UAAU;EACV,WAAW;EACX,0BAA0B;EAC1B,qBAAc;EAAd,qBAAc;EAAd,cAAc;EACd,oBAAQ;MAAR,iBAAQ;UAAR,aAAQ;CACT;;AAED;EACE,eAAe;EACf,WAAW;CACZ;;AAED;EACE,eAAe;EACf,kBAAkB;CACnB;;AAED;EACE,mBAAmB;EACnB,gBAAgB;EAChB,uCAAuC;EACvC,kBAAkB;EAClB,iBAAiB;EACjB,kBAAkB;EAClB,eAAe;EACf,+BAA+B;CAChC;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,UAAU;EACV,mBAAmB;EACnB,YAAY;EACZ,WAAW;EACX,eAAe;EACf,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,uBAAuB;EACvB,gBAAgB;EAChB,aAAa;EACb,wBAAwB;EACxB,uCAAuC;EACvC,oBAAoB;EACpB,gBAAgB;CACjB;;AAED;EACE,eAAe;CAChB","file":"Home.css","sourcesContent":["html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: flex;\n  flex: 1;\n}\n\n.root {\n  margin-top: 3%;\n  width: 90%;\n}\n\n.container {\n  margin: 0 auto;\n  padding: 0 0 40px;\n}\n\n.quoteContainer {\n  padding-left: 20px;\n  font-size: 20px;\n  font-family: 'Playfair Display', serif;\n  line-height: 34px;\n  margin-top: 20px;\n  margin-bottom: 5%;\n  color: #4A4A4A;\n  border-left: 1px solid #4A4A4A;\n}\n\n.quote {\n  font-style: italic;\n}\n\n.author {\n  font-style: normal;\n}\n\n.button {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.button:focus, .button:hover {\n  color: #979797;\n}\n"],"sourceRoot":"webpack://"}]);
+  exports.push([module.id, "html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 0%;\n          flex: 1 1 0%;\n}\n\n.Journal-root-2UgH5 {\n  margin-top: 3%;\n  width: 90%;\n}\n\n.Journal-container-eBOTk {\n  margin: 0 auto;\n  padding: 0 0 40px;\n}\n\n.Journal-quoteContainer-2oJHO {\n  padding-left: 20px;\n  font-size: 20px;\n  font-family: 'Playfair Display', serif;\n  line-height: 34px;\n  margin-top: 20px;\n  margin-bottom: 5%;\n  color: #4A4A4A;\n  border-left: 1px solid #4A4A4A;\n}\n\n.Journal-quote-xHXyy {\n  font-style: italic;\n}\n\n.Journal-author-1I6h9 {\n  font-style: normal;\n}\n\n.Journal-button-2HPHQ {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.Journal-button-2HPHQ:focus, .Journal-button-2HPHQ:hover {\n  color: #979797;\n}\n", "", {"version":3,"sources":["/./routes/journal/Journal.css"],"names":[],"mappings":"AAAA;EACE,YAAY;EACZ,aAAa;CACd;;AAED;EACE,UAAU;EACV,WAAW;EACX,0BAA0B;EAC1B,qBAAc;EAAd,qBAAc;EAAd,cAAc;EACd,oBAAQ;MAAR,iBAAQ;UAAR,aAAQ;CACT;;AAED;EACE,eAAe;EACf,WAAW;CACZ;;AAED;EACE,eAAe;EACf,kBAAkB;CACnB;;AAED;EACE,mBAAmB;EACnB,gBAAgB;EAChB,uCAAuC;EACvC,kBAAkB;EAClB,iBAAiB;EACjB,kBAAkB;EAClB,eAAe;EACf,+BAA+B;CAChC;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,UAAU;EACV,mBAAmB;EACnB,YAAY;EACZ,WAAW;EACX,eAAe;EACf,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,uBAAuB;EACvB,gBAAgB;EAChB,aAAa;EACb,wBAAwB;EACxB,uCAAuC;EACvC,oBAAoB;EACpB,gBAAgB;CACjB;;AAED;EACE,eAAe;CAChB","file":"Journal.css","sourcesContent":["html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: flex;\n  flex: 1;\n}\n\n.root {\n  margin-top: 3%;\n  width: 90%;\n}\n\n.container {\n  margin: 0 auto;\n  padding: 0 0 40px;\n}\n\n.quoteContainer {\n  padding-left: 20px;\n  font-size: 20px;\n  font-family: 'Playfair Display', serif;\n  line-height: 34px;\n  margin-top: 20px;\n  margin-bottom: 5%;\n  color: #4A4A4A;\n  border-left: 1px solid #4A4A4A;\n}\n\n.quote {\n  font-style: italic;\n}\n\n.author {\n  font-style: normal;\n}\n\n.button {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.button:focus, .button:hover {\n  color: #979797;\n}\n"],"sourceRoot":"webpack://"}]);
   
   // exports
   exports.locals = {
-  	"root": "Home-root-2IMq2",
-  	"container": "Home-container-2Yejq",
-  	"quoteContainer": "Home-quoteContainer-l7woL",
-  	"quote": "Home-quote-2U1_8",
-  	"author": "Home-author-WPfc4",
-  	"button": "Home-button-3s-cX"
+  	"root": "Journal-root-2UgH5",
+  	"container": "Journal-container-eBOTk",
+  	"quoteContainer": "Journal-quoteContainer-2oJHO",
+  	"quote": "Journal-quote-xHXyy",
+  	"author": "Journal-author-1I6h9",
+  	"button": "Journal-button-2HPHQ"
   };
 
 /***/ },

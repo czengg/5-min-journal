@@ -49,7 +49,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(session({ secret: 'keyboard cat', cookie: { maxAge: 60000 }}))
+app.use(session({ secret: 'keyboard cat', cookie: { maxAge: 60000 }}));
 
 const connection = mysql.createConnection({
   host     : 'fiveMinJournal.db.10477243.hostedresource.com',
@@ -65,7 +65,7 @@ app.post('/login', (req, res) => {
     } else {
       if (result[0].password === req.body.password) {
         req.session.user = result[0];
-        res.redirect('/');
+        res.redirect('/journal');
       } else {
         res.redirect('/error');
       }
@@ -80,7 +80,7 @@ app.post('/register', (req, res) => {
       res.redirect('/error');
     } else {
       req.session.user = user;
-      res.redirect('/');
+      res.redirect('/journal');
     }
   });
 });
@@ -88,21 +88,41 @@ app.post('/register', (req, res) => {
 //
 // Database connection
 // -----------------------------------------------------------------------------
-app.post('/save/:date', (req, res) => {
+app.post('/save/:date', (req, res, next) => {
+  const {date} = req.params;
+
   // check if entry already exists for date
-  const query1 = connection.query('SELECT * FROM entries WHERE date="' + req.params.date + '"', (err, result) => {
+  const query1 = connection.query('SELECT * FROM entries WHERE date="' + date + '"', (err, result) => {
     if (err) {
       res.redirect('/error');
     } else {
       if (result.length) {
 
       } else {
-        console.log(req.body);
+        const entry = Object.assign({}, req.body, { user_id: req.session.user.id, date });
+        const query2 = connection.query('INSERT INTO entries SET ?', entry, (err, result) => {
+          if (err) {
+            res.redirect('/error');
+          } else {
+            next();
+          }
+        });
       }
     }
   });
+});
 
-  res.redirect('/');
+app.get('/journal', (req, res) => {
+  const today = moment().format('YYYY-MM-DD');
+  res.redirect(`/journal/${today}`);
+});
+
+app.get('/journal/:date', (req, res, next) => {
+  if (!req.session.user) {
+    res.redirect('/login');
+  } else {
+    next();
+  }
 });
 
 //

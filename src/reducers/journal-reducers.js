@@ -8,7 +8,8 @@ const defaultState = {
 export default function journal(state = defaultState, action) {
   switch (action.type) {
     case types.SET_VALUES:
-      return Object.assign({}, state, action.payload);
+      const entry = Object.assign(state.entry || {}, action.payload);
+      return Object.assign({}, state, { entry });
     case types.SHOW_MORNING_ROUTINE:
       return Object.assign({}, state, { showMorningContent: true });
     case types.HIDE_MORNING_ROUTINE:
