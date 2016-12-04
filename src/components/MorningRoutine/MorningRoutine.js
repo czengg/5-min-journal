@@ -5,7 +5,7 @@ import s from './MorningRoutine.css';
 import Textarea from 'react-textarea-autosize';
 import icon from './arrow.png';
 
-function MorningRoutine({ onInputChange, show, hide, showContent }) {
+function MorningRoutine({ onInputChange, show, hide, showContent, entry }) {
   const gratefulForSample = [
     'I\'m grateful for the warm bed that I sleep in.',
     'I\'m grateful for my body that is working in perfect harmony.',
@@ -17,6 +17,8 @@ function MorningRoutine({ onInputChange, show, hide, showContent }) {
     'Sleep before 10pm',
   ];
   const affirmationSample = 'I am confident and comfortable in my own skin and I live with passion and purpose';
+
+  entry = entry || {};
 
   return (
     <div className={s.root}>
@@ -34,6 +36,7 @@ function MorningRoutine({ onInputChange, show, hide, showContent }) {
                   placeholder={placeholder}
                   minRows={1}
                   onChange={(e) => onInputChange('grateful' + index, e.target.value)}
+                  defaultValue={entry['grateful' + index] || undefined}
                 />
               </li>
             )}
@@ -48,6 +51,7 @@ function MorningRoutine({ onInputChange, show, hide, showContent }) {
                   placeholder={placeholder}
                   minRows={1}
                   onChange={(e) => onInputChange('great' + index, e.target.value)}
+                  defaultValue={entry['great' + index] || undefined}
                 />
               </li>
             )}
@@ -60,6 +64,7 @@ function MorningRoutine({ onInputChange, show, hide, showContent }) {
               placeholder={affirmationSample}
               minRows={1}
               onChange={(e) => onInputChange('affirmation', e.target.value)}
+              value={entry['affirmation'] || undefined}
             />
           </div>
         </div>
@@ -73,6 +78,7 @@ MorningRoutine.propTypes = {
   show: PropTypes.func.isRequired,
   hide: PropTypes.func.isRequired,
   showContent: PropTypes.bool.isRequired,
+  entry: PropTypes.object,
 };
 
 export default withStyles(s)(MorningRoutine);

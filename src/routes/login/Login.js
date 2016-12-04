@@ -42,9 +42,9 @@ function Login({ handleSubmit }) {
               />
             </div>
             <div className={s.formGroup}>
-              <button className={s.button} type="submit">
+              <a href='/login/facebook'>
                 Log In &rarr;
-              </button>
+              </a>
             </div>
           </form>
         </div>

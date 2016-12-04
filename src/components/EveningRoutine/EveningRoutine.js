@@ -5,7 +5,7 @@ import s from './EveningRoutine.css';
 import Textarea from 'react-textarea-autosize';
 import icon from './arrow.png';
 
-function EveningRoutine({ onInputChange, show, hide, showContent }) {
+function EveningRoutine({ onInputChange, show, hide, showContent, entry }) {
   const happenedSample = [
     'I remembered to floss.',
     'A friend recommended a wonderful book for me.',
@@ -15,6 +15,8 @@ function EveningRoutine({ onInputChange, show, hide, showContent }) {
     'I wake up right when the alarm goes off.',
     'I go to the gym in the morning.',
   ];
+
+  entry = entry || {};
 
   return (
     <div className={s.root}>
@@ -32,6 +34,7 @@ function EveningRoutine({ onInputChange, show, hide, showContent }) {
                   placeholder={placeholder}
                   minRows={1}
                   onChange={(e) => onInputChange('happened' + index, e.target.value)}
+                  defaultValue={entry['happened' + index] || undefined}
                 />
               </li>
             )}
@@ -46,6 +49,7 @@ function EveningRoutine({ onInputChange, show, hide, showContent }) {
                   placeholder={placeholder}
                   minRows={1}
                   onChange={(e) => onInputChange('better' + index, e.target.value)}
+                  defaultValue={entry['better' + index] || undefined}
                 />
               </li>
             )}
@@ -61,6 +65,7 @@ EveningRoutine.propTypes = {
   show: PropTypes.func.isRequired,
   hide: PropTypes.func.isRequired,
   showContent: PropTypes.bool.isRequired,
+  entry: PropTypes.object,
 };
 
 export default withStyles(s)(EveningRoutine);

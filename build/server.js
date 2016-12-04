@@ -72,7 +72,7 @@ module.exports =
   
   var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
   
-  var _assign = __webpack_require__(32);
+  var _assign = __webpack_require__(7);
   
   var _assign2 = _interopRequireDefault(_assign);
   
@@ -87,103 +87,88 @@ module.exports =
   
   // eslint-disable-line import/no-unresolved
   
-  __webpack_require__(7);
+  __webpack_require__(8);
   
-  var _path = __webpack_require__(8);
+  var _path = __webpack_require__(9);
   
   var _path2 = _interopRequireDefault(_path);
   
-  var _express = __webpack_require__(9);
+  var _express = __webpack_require__(10);
   
   var _express2 = _interopRequireDefault(_express);
   
-  var _cookieParser = __webpack_require__(10);
-  
-  var _cookieParser2 = _interopRequireDefault(_cookieParser);
-  
-  var _bodyParser = __webpack_require__(11);
-  
-  var _bodyParser2 = _interopRequireDefault(_bodyParser);
-  
-  var _expressJwt = __webpack_require__(12);
-  
-  var _expressJwt2 = _interopRequireDefault(_expressJwt);
-  
-  var _expressGraphql = __webpack_require__(13);
-  
-  var _expressGraphql2 = _interopRequireDefault(_expressGraphql);
-  
-  var _jsonwebtoken = __webpack_require__(14);
-  
-  var _jsonwebtoken2 = _interopRequireDefault(_jsonwebtoken);
-  
-  var _mysql = __webpack_require__(15);
-  
-  var _mysql2 = _interopRequireDefault(_mysql);
-  
-  var _moment = __webpack_require__(16);
-  
-  var _moment2 = _interopRequireDefault(_moment);
-  
-  var _expressSession = __webpack_require__(17);
+  var _expressSession = __webpack_require__(11);
   
   var _expressSession2 = _interopRequireDefault(_expressSession);
   
-  var _react = __webpack_require__(18);
+  var _cookieParser = __webpack_require__(12);
+  
+  var _cookieParser2 = _interopRequireDefault(_cookieParser);
+  
+  var _bodyParser = __webpack_require__(13);
+  
+  var _bodyParser2 = _interopRequireDefault(_bodyParser);
+  
+  var _moment = __webpack_require__(14);
+  
+  var _moment2 = _interopRequireDefault(_moment);
+  
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _server = __webpack_require__(19);
+  var _server = __webpack_require__(16);
   
   var _server2 = _interopRequireDefault(_server);
   
-  var _universalRouter = __webpack_require__(20);
+  var _universalRouter = __webpack_require__(17);
   
   var _universalRouter2 = _interopRequireDefault(_universalRouter);
   
-  var _prettyError = __webpack_require__(21);
+  var _prettyError = __webpack_require__(18);
   
   var _prettyError2 = _interopRequireDefault(_prettyError);
+  
+  var _passport = __webpack_require__(19);
+  
+  var _passport2 = _interopRequireDefault(_passport);
+  
+  var _passportFacebook = __webpack_require__(20);
+  
+  var _mongodb = __webpack_require__(21);
   
   var _App = __webpack_require__(22);
   
   var _App2 = _interopRequireDefault(_App);
   
-  var _Html = __webpack_require__(34);
+  var _Html = __webpack_require__(33);
   
   var _Html2 = _interopRequireDefault(_Html);
   
-  var _ErrorPage = __webpack_require__(36);
+  var _ErrorPage = __webpack_require__(35);
   
-  var _ErrorPage2 = __webpack_require__(38);
+  var _ErrorPage2 = __webpack_require__(37);
   
   var _ErrorPage3 = _interopRequireDefault(_ErrorPage2);
   
-  var _passport = __webpack_require__(45);
-  
-  var _passport2 = _interopRequireDefault(_passport);
-  
-  var _models = __webpack_require__(48);
+  var _models = __webpack_require__(44);
   
   var _models2 = _interopRequireDefault(_models);
   
-  var _schema = __webpack_require__(55);
-  
-  var _schema2 = _interopRequireDefault(_schema);
-  
-  var _routes = __webpack_require__(69);
+  var _routes = __webpack_require__(51);
   
   var _routes2 = _interopRequireDefault(_routes);
   
-  var _assets = __webpack_require__(111);
+  var _assets = __webpack_require__(94);
   
   var _assets2 = _interopRequireDefault(_assets);
   
-  var _config = __webpack_require__(35);
+  var _config = __webpack_require__(34);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
   var app = (0, _express2.default)();
+  var url = 'mongodb://localhost:27017/fiveminutejournal';
   
   //
   // Tell any CSS tooling (such as Material UI) to use all vendor prefixes if the
@@ -199,32 +184,63 @@ module.exports =
   app.use((0, _cookieParser2.default)());
   app.use(_bodyParser2.default.urlencoded({ extended: true }));
   app.use(_bodyParser2.default.json());
-  app.use((0, _expressSession2.default)({ secret: 'keyboard cat', cookie: { maxAge: 60000 } }));
+  app.use(_passport2.default.initialize());
+  app.use((0, _expressSession2.default)({
+    secret: 'keyboard cat',
+    resave: true,
+    saveUninitialized: true,
+    cookie: { secure: false }
+  }));
+  app.use(_passport2.default.session());
   
-  var connection = _mysql2.default.createConnection({
-    host: 'fiveMinJournal.db.10477243.hostedresource.com',
-    user: 'fiveMinJournal',
-    password: 'JLpJTPrMDBBm@Ee9WJ',
-    database: 'fiveMinJournal'
+  // passport authentication
+  _passport2.default.use(new _passportFacebook.Strategy({
+    clientID: _config.auth.facebook.id,
+    clientSecret: _config.auth.facebook.secret,
+    callbackURL: 'http://localhost:3001/login/facebook/return'
+  }, function (accessToken, refreshToken, profile, cb) {
+    cb(null, profile);
+  }));
+  
+  _passport2.default.serializeUser(function (user, done) {
+    console.log('serial', user);
+    done(null, user.id);
   });
   
-  app.post('/login', function (req, res) {
-    var query = connection.query('SELECT * FROM users WHERE email="' + req.body.email + '"', function (err, result) {
-      if (err) {
-        res.redirect('/error');
-      } else {
-        if (result[0].password === req.body.password) {
-          req.session.user = result[0];
-          res.redirect('/journal');
-        } else {
-          res.redirect('/error');
-        }
-      }
+  _passport2.default.deserializeUser(function (user, done) {
+    console.log('deserial', user);
+    done(null, user);
+  });
+  
+  // app.post('/login', (req, res) => {
+  //   connection.query(`SELECT * FROM users WHERE email="${req.body.email}"`, (err, result) => {
+  //     if (err) {
+  //       res.redirect('/error');
+  //     } else {
+  //       if (result[0].password === password) {
+  //         req.session.user = result[0];
+  //         res.redirect('/journal');
+  //       } else {
+  //         res.redirect('/error');
+  
+  //     }
+  //   });
+  // });
+  
+  app.get('/login/facebook', _passport2.default.authenticate('facebook'));
+  
+  var redirects = { successRedirect: '/journal', failureRedirect: '/login' };
+  app.get('/login/facebook/return', _passport2.default.authenticate('facebook', redirects), function (req, res) {
+    console.log('in here');
+    req.session.save(function () {
+      console.log(req.session);
+      res.redirect('/success');
     });
   });
   
   app.post('/register', function (req, res) {
-    var user = { email: req.body.email, password: req.body.password };
+    var password = CryptoJS.AES.encrypt(req.body.password, secret).toString();
+    var user = { email: req.body.email, password: password };
     var query = connection.query('INSERT INTO users SET ?', user, function (err, result) {
       if (err) {
         res.redirect('/error');
@@ -241,15 +257,26 @@ module.exports =
   app.post('/save/:date', function (req, res, next) {
     var date = req.params.date;
   
-    // check if entry already exists for date
+    var user_id = req.session.user.id;
   
-    var query1 = connection.query('SELECT * FROM entries WHERE date="' + date + '"', function (err, result) {
+    // check if entry already exists for date
+    connection.query('SELECT * FROM entries WHERE date="' + date + '" AND user_id="' + user_id + '"', function (err, result) {
       if (err) {
         res.redirect('/error');
       } else {
-        if (result.length) {} else {
-          var entry = (0, _assign2.default)({}, req.body, { user_id: req.session.user.id, date: date });
-          var query2 = connection.query('INSERT INTO entries SET ?', entry, function (err, result) {
+        var entry = (0, _assign2.default)({}, req.body, { user_id: user_id, date: date });
+        if (result.length) {
+          var id = result[0].id;
+  
+          connection.query('UPDATE entries SET ? WHERE id="' + id + '"', entry, function (err, result) {
+            if (err) {
+              res.redirect('/error');
+            } else {
+              next();
+            }
+          });
+        } else {
+          connection.query('INSERT INTO entries SET ?', entry, function (err, result) {
             if (err) {
               res.redirect('/error');
             } else {
@@ -267,24 +294,42 @@ module.exports =
   });
   
   app.get('/journal/:date', function (req, res, next) {
-    if (!req.session.user) {
+    console.log(req.session);
+    if (!req.session.passport || !req.session.passport.user) {
       res.redirect('/login');
     } else {
       next();
     }
   });
   
-  //
-  // Register API middleware
-  // -----------------------------------------------------------------------------
-  app.use('/graphql', (0, _expressGraphql2.default)(function (req) {
-    return {
-      schema: _schema2.default,
-      graphiql: true,
-      rootValue: { request: req },
-      pretty: ("development") !== 'production'
-    };
-  }));
+  app.post('/journal/:date', function (req, res, next) {
+    console.log(req.session);
+    if (req.session.passport && req.session.passport.user) {
+      var date = req.params.date;
+  
+      var user_id = req.session.passport.user.id;
+  
+      // connection.query(`SELECT * FROM entries WHERE date="${date}" AND user_id="${user_id}"`, (err, result) => {
+      //   if (err) {
+      //     res.json(400, {});
+      //   } else if (result.length) {
+      //     res.locals.entry = result[0];
+      //     delete result[0].id;
+      //     delete result[0].user_id;
+      //     delete result[0].updated;
+      //     res.json(result[0]);
+      //     next();
+      //   } else {
+      //     res.json({});
+      //     next();
+      //   }
+      // });
+      res.json({});
+    } else {
+      res.json({});
+      next();
+    }
+  });
   
   //
   // Register server-side rendering middleware
@@ -326,7 +371,7 @@ module.exports =
                         _context.next = 4;
                         return _universalRouter2.default.resolve(_routes2.default, {
                           path: req.path,
-                          query: req.query
+                          query: (0, _assign2.default)({}, req.query, req.params, res.locals)
                         });
   
                       case 4:
@@ -349,7 +394,7 @@ module.exports =
                           _App2.default,
                           { context: context, __source: {
                               fileName: _jsxFileName,
-                              lineNumber: 167
+                              lineNumber: 227
                             },
                             __self: undefined
                           },
@@ -361,7 +406,7 @@ module.exports =
                         html = _server2.default.renderToStaticMarkup(_react2.default.createElement(_Html2.default, (0, _extends3.default)({}, data, {
                           __source: {
                             fileName: _jsxFileName,
-                            lineNumber: 171
+                            lineNumber: 231
                           },
                           __self: undefined
                         })));
@@ -429,13 +474,13 @@ module.exports =
         style: _ErrorPage3.default._getCss() // eslint-disable-line no-underscore-dangle
         , __source: {
           fileName: _jsxFileName,
-          lineNumber: 190
+          lineNumber: 250
         },
         __self: undefined
       },
       _server2.default.renderToString(_react2.default.createElement(_ErrorPage.ErrorPageWithoutStyle, { error: err, __source: {
           fileName: _jsxFileName,
-          lineNumber: 195
+          lineNumber: 255
         },
         __self: undefined
       }))
@@ -497,91 +542,91 @@ module.exports =
 /* 7 */
 /***/ function(module, exports) {
 
-  module.exports = require("babel-polyfill");
+  module.exports = require("babel-runtime/core-js/object/assign");
 
 /***/ },
 /* 8 */
 /***/ function(module, exports) {
 
-  module.exports = require("path");
+  module.exports = require("babel-polyfill");
 
 /***/ },
 /* 9 */
 /***/ function(module, exports) {
 
-  module.exports = require("express");
+  module.exports = require("path");
 
 /***/ },
 /* 10 */
 /***/ function(module, exports) {
 
-  module.exports = require("cookie-parser");
+  module.exports = require("express");
 
 /***/ },
 /* 11 */
 /***/ function(module, exports) {
 
-  module.exports = require("body-parser");
+  module.exports = require("express-session");
 
 /***/ },
 /* 12 */
 /***/ function(module, exports) {
 
-  module.exports = require("express-jwt");
+  module.exports = require("cookie-parser");
 
 /***/ },
 /* 13 */
 /***/ function(module, exports) {
 
-  module.exports = require("express-graphql");
+  module.exports = require("body-parser");
 
 /***/ },
 /* 14 */
 /***/ function(module, exports) {
 
-  module.exports = require("jsonwebtoken");
+  module.exports = require("moment");
 
 /***/ },
 /* 15 */
 /***/ function(module, exports) {
 
-  module.exports = require("mysql");
+  module.exports = require("react");
 
 /***/ },
 /* 16 */
 /***/ function(module, exports) {
 
-  module.exports = require("moment");
+  module.exports = require("react-dom/server");
 
 /***/ },
 /* 17 */
 /***/ function(module, exports) {
 
-  module.exports = require("express-session");
+  module.exports = require("universal-router");
 
 /***/ },
 /* 18 */
 /***/ function(module, exports) {
 
-  module.exports = require("react");
+  module.exports = require("pretty-error");
 
 /***/ },
 /* 19 */
 /***/ function(module, exports) {
 
-  module.exports = require("react-dom/server");
+  module.exports = require("passport");
 
 /***/ },
 /* 20 */
 /***/ function(module, exports) {
 
-  module.exports = require("universal-router");
+  module.exports = require("passport-facebook");
 
 /***/ },
 /* 21 */
 /***/ function(module, exports) {
 
-  module.exports = require("pretty-error");
+  module.exports = require("mongodb");
 
 /***/ },
 /* 22 */
@@ -622,7 +667,7 @@ module.exports =
                                                                                                                          * LICENSE.txt file in the root directory of this source tree.
                                                                                                                          */
   
-  var _react = __webpack_require__(18);
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
@@ -776,13 +821,13 @@ module.exports =
     value: true
   });
   
-  var _assign = __webpack_require__(32);
+  var _assign = __webpack_require__(7);
   
   var _assign2 = _interopRequireDefault(_assign);
   
   exports.default = journal;
   
-  var _actionTypes = __webpack_require__(33);
+  var _actionTypes = __webpack_require__(32);
   
   var types = _interopRequireWildcard(_actionTypes);
   
@@ -820,12 +865,6 @@ module.exports =
 /* 32 */
 /***/ function(module, exports) {
 
-  module.exports = require("babel-runtime/core-js/object/assign");
-
-/***/ },
-/* 33 */
-/***/ function(module, exports) {
-
   'use strict';
   
   Object.defineProperty(exports, "__esModule", {
@@ -838,7 +877,7 @@ module.exports =
   var HIDE_EVENING_ROUTINE = exports.HIDE_EVENING_ROUTINE = 'HIDE_EVENING_ROUTINE';
 
 /***/ },
-/* 34 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -855,11 +894,11 @@ module.exports =
                                                                                                                           * LICENSE.txt file in the root directory of this source tree.
                                                                                                                           */
   
-  var _react = __webpack_require__(18);
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _config = __webpack_require__(35);
+  var _config = __webpack_require__(34);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
@@ -999,7 +1038,7 @@ module.exports =
   exports.default = Html;
 
 /***/ },
-/* 35 */
+/* 34 */
 /***/ function(module, exports) {
 
   'use strict';
@@ -1037,8 +1076,8 @@ module.exports =
   
     // https://developers.facebook.com/
     facebook: {
-      id: process.env.FACEBOOK_APP_ID || '186244551745631',
-      secret: process.env.FACEBOOK_APP_SECRET || 'a970ae3240ab4b9b8aae0f9f0661c6fc'
+      id: process.env.FACEBOOK_APP_ID || '1788343081389727',
+      secret: process.env.FACEBOOK_APP_SECRET || 'bd5073289fcd4a2accc23c5a24bd1e39'
     },
   
     // https://cloud.google.com/console/project
@@ -1056,7 +1095,7 @@ module.exports =
   };
 
 /***/ },
-/* 36 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -1074,15 +1113,15 @@ module.exports =
                                                                                                                                  * LICENSE.txt file in the root directory of this source tree.
                                                                                                                                  */
   
-  var _react = __webpack_require__(18);
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _withStyles = __webpack_require__(37);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _ErrorPage = __webpack_require__(38);
+  var _ErrorPage = __webpack_require__(37);
   
   var _ErrorPage2 = _interopRequireDefault(_ErrorPage);
   
@@ -1179,18 +1218,18 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_ErrorPage2.default)(ErrorPage);
 
 /***/ },
-/* 37 */
+/* 36 */
 /***/ function(module, exports) {
 
   module.exports = require("isomorphic-style-loader/lib/withStyles");
 
 /***/ },
-/* 38 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(39);
-      var insertCss = __webpack_require__(41);
+      var content = __webpack_require__(38);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -1219,10 +1258,10 @@ module.exports =
     
 
 /***/ },
-/* 39 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(40)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
@@ -1233,7 +1272,7 @@ module.exports =
 
 
 /***/ },
-/* 40 */
+/* 39 */
 /***/ function(module, exports) {
 
   /*
@@ -1289,24 +1328,24 @@ module.exports =
 
 
 /***/ },
-/* 41 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
   
-  var _assign = __webpack_require__(32);
+  var _assign = __webpack_require__(7);
   
   var _assign2 = _interopRequireDefault(_assign);
   
-  var _stringify = __webpack_require__(42);
+  var _stringify = __webpack_require__(41);
   
   var _stringify2 = _interopRequireDefault(_stringify);
   
-  var _slicedToArray2 = __webpack_require__(43);
+  var _slicedToArray2 = __webpack_require__(42);
   
   var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
   
-  var _getIterator2 = __webpack_require__(44);
+  var _getIterator2 = __webpack_require__(43);
   
   var _getIterator3 = _interopRequireDefault(_getIterator2);
   
@@ -1450,241 +1489,25 @@ module.exports =
   module.exports = insertCss;
 
 /***/ },
-/* 42 */
+/* 41 */
 /***/ function(module, exports) {
 
   module.exports = require("babel-runtime/core-js/json/stringify");
 
 /***/ },
-/* 43 */
+/* 42 */
 /***/ function(module, exports) {
 
   module.exports = require("babel-runtime/helpers/slicedToArray");
 
 /***/ },
-/* 44 */
+/* 43 */
 /***/ function(module, exports) {
 
   module.exports = require("babel-runtime/core-js/get-iterator");
 
 /***/ },
-/* 45 */
-/***/ function(module, exports, __webpack_require__) {
-
-  'use strict';
-  
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  
-  var _regenerator = __webpack_require__(2);
-  
-  var _regenerator2 = _interopRequireDefault(_regenerator);
-  
-  var _asyncToGenerator2 = __webpack_require__(6);
-  
-  var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
-  
-  var _passport = __webpack_require__(46);
-  
-  var _passport2 = _interopRequireDefault(_passport);
-  
-  var _passportFacebook = __webpack_require__(47);
-  
-  var _models = __webpack_require__(48);
-  
-  var _config = __webpack_require__(35);
-  
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-  
-  /**
-   * Sign in with Facebook.
-   */
-  /**
-   * React Starter Kit (https://www.reactstarterkit.com/)
-   *
-   * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE.txt file in the root directory of this source tree.
-   */
-  
-  /**
-   * Passport.js reference implementation.
-   * The database schema used in this sample is available at
-   * https://github.com/membership/membership.db/tree/master/postgres
-   */
-  
-  _passport2.default.use(new _passportFacebook.Strategy({
-    clientID: _config.auth.facebook.id,
-    clientSecret: _config.auth.facebook.secret,
-    callbackURL: '/login/facebook/return',
-    profileFields: ['name', 'email', 'link', 'locale', 'timezone'],
-    passReqToCallback: true
-  }, function (req, accessToken, refreshToken, profile, done) {
-    /* eslint-disable no-underscore-dangle */
-    var loginName = 'facebook';
-    var claimType = 'urn:facebook:access_token';
-    var fooBar = function () {
-      var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
-        var userLogin, user, users, _user;
-  
-        return _regenerator2.default.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                if (!req.user) {
-                  _context.next = 14;
-                  break;
-                }
-  
-                _context.next = 3;
-                return _models.UserLogin.findOne({
-                  attributes: ['name', 'key'],
-                  where: { name: loginName, key: profile.id }
-                });
-  
-              case 3:
-                userLogin = _context.sent;
-  
-                if (!userLogin) {
-                  _context.next = 8;
-                  break;
-                }
-  
-                // There is already a Facebook account that belongs to you.
-                // Sign in with that account or delete it, then link it with your current account.
-                done();
-                _context.next = 12;
-                break;
-  
-              case 8:
-                _context.next = 10;
-                return _models.User.create({
-                  id: req.user.id,
-                  email: profile._json.email,
-                  logins: [{ name: loginName, key: profile.id }],
-                  claims: [{ type: claimType, value: profile.id }],
-                  profile: {
-                    displayName: profile.displayName,
-                    gender: profile._json.gender,
-                    picture: 'https://graph.facebook.com/' + profile.id + '/picture?type=large'
-                  }
-                }, {
-                  include: [{ model: _models.UserLogin, as: 'logins' }, { model: _models.UserClaim, as: 'claims' }, { model: _models.UserProfile, as: 'profile' }]
-                });
-  
-              case 10:
-                user = _context.sent;
-  
-                done(null, {
-                  id: user.id,
-                  email: user.email
-                });
-  
-              case 12:
-                _context.next = 32;
-                break;
-  
-              case 14:
-                _context.next = 16;
-                return _models.User.findAll({
-                  attributes: ['id', 'email'],
-                  where: { '$logins.name$': loginName, '$logins.key$': profile.id },
-                  include: [{
-                    attributes: ['name', 'key'],
-                    model: _models.UserLogin,
-                    as: 'logins',
-                    required: true
-                  }]
-                });
-  
-              case 16:
-                users = _context.sent;
-  
-                if (!users.length) {
-                  _context.next = 21;
-                  break;
-                }
-  
-                done(null, users[0]);
-                _context.next = 32;
-                break;
-  
-              case 21:
-                _context.next = 23;
-                return _models.User.findOne({ where: { email: profile._json.email } });
-  
-              case 23:
-                _user = _context.sent;
-  
-                if (!_user) {
-                  _context.next = 28;
-                  break;
-                }
-  
-                // There is already an account using this email address. Sign in to
-                // that account and link it with Facebook manually from Account Settings.
-                done(null);
-                _context.next = 32;
-                break;
-  
-              case 28:
-                _context.next = 30;
-                return _models.User.create({
-                  email: profile._json.email,
-                  emailConfirmed: true,
-                  logins: [{ name: loginName, key: profile.id }],
-                  claims: [{ type: claimType, value: accessToken }],
-                  profile: {
-                    displayName: profile.displayName,
-                    gender: profile._json.gender,
-                    picture: 'https://graph.facebook.com/' + profile.id + '/picture?type=large'
-                  }
-                }, {
-                  include: [{ model: _models.UserLogin, as: 'logins' }, { model: _models.UserClaim, as: 'claims' }, { model: _models.UserProfile, as: 'profile' }]
-                });
-  
-              case 30:
-                _user = _context.sent;
-  
-                done(null, {
-                  id: _user.id,
-                  email: _user.email
-                });
-  
-              case 32:
-              case 'end':
-                return _context.stop();
-            }
-          }
-        }, _callee, undefined);
-      }));
-  
-      return function fooBar() {
-        return _ref.apply(this, arguments);
-      };
-    }();
-  
-    fooBar().catch(done);
-  }));
-  
-  exports.default = _passport2.default;
-
-/***/ },
-/* 46 */
-/***/ function(module, exports) {
-
-  module.exports = require("passport");
-
-/***/ },
-/* 47 */
-/***/ function(module, exports) {
-
-  module.exports = require("passport-facebook");
-
-/***/ },
-/* 48 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -1694,23 +1517,23 @@ module.exports =
   });
   exports.UserProfile = exports.UserClaim = exports.UserLogin = exports.User = undefined;
   
-  var _sequelize = __webpack_require__(49);
+  var _sequelize = __webpack_require__(45);
   
   var _sequelize2 = _interopRequireDefault(_sequelize);
   
-  var _User = __webpack_require__(51);
+  var _User = __webpack_require__(47);
   
   var _User2 = _interopRequireDefault(_User);
   
-  var _UserLogin = __webpack_require__(52);
+  var _UserLogin = __webpack_require__(48);
   
   var _UserLogin2 = _interopRequireDefault(_UserLogin);
   
-  var _UserClaim = __webpack_require__(53);
+  var _UserClaim = __webpack_require__(49);
   
   var _UserClaim2 = _interopRequireDefault(_UserClaim);
   
-  var _UserProfile = __webpack_require__(54);
+  var _UserProfile = __webpack_require__(50);
   
   var _UserProfile2 = _interopRequireDefault(_UserProfile);
   
@@ -1755,7 +1578,7 @@ module.exports =
   exports.UserProfile = _UserProfile2.default;
 
 /***/ },
-/* 49 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -1764,11 +1587,11 @@ module.exports =
     value: true
   });
   
-  var _sequelize = __webpack_require__(50);
+  var _sequelize = __webpack_require__(46);
   
   var _sequelize2 = _interopRequireDefault(_sequelize);
   
-  var _config = __webpack_require__(35);
+  var _config = __webpack_require__(34);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
@@ -1790,13 +1613,13 @@ module.exports =
   exports.default = sequelize;
 
 /***/ },
-/* 50 */
+/* 46 */
 /***/ function(module, exports) {
 
   module.exports = require("sequelize");
 
 /***/ },
-/* 51 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -1805,11 +1628,11 @@ module.exports =
     value: true
   });
   
-  var _sequelize = __webpack_require__(50);
+  var _sequelize = __webpack_require__(46);
   
   var _sequelize2 = _interopRequireDefault(_sequelize);
   
-  var _sequelize3 = __webpack_require__(49);
+  var _sequelize3 = __webpack_require__(45);
   
   var _sequelize4 = _interopRequireDefault(_sequelize3);
   
@@ -1851,7 +1674,7 @@ module.exports =
   exports.default = User;
 
 /***/ },
-/* 52 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -1860,11 +1683,11 @@ module.exports =
     value: true
   });
   
-  var _sequelize = __webpack_require__(50);
+  var _sequelize = __webpack_require__(46);
   
   var _sequelize2 = _interopRequireDefault(_sequelize);
   
-  var _sequelize3 = __webpack_require__(49);
+  var _sequelize3 = __webpack_require__(45);
   
   var _sequelize4 = _interopRequireDefault(_sequelize3);
   
@@ -1896,7 +1719,7 @@ module.exports =
   exports.default = UserLogin;
 
 /***/ },
-/* 53 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -1905,11 +1728,11 @@ module.exports =
     value: true
   });
   
-  var _sequelize = __webpack_require__(50);
+  var _sequelize = __webpack_require__(46);
   
   var _sequelize2 = _interopRequireDefault(_sequelize);
   
-  var _sequelize3 = __webpack_require__(49);
+  var _sequelize3 = __webpack_require__(45);
   
   var _sequelize4 = _interopRequireDefault(_sequelize3);
   
@@ -1939,7 +1762,7 @@ module.exports =
   exports.default = UserClaim;
 
 /***/ },
-/* 54 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -1948,11 +1771,11 @@ module.exports =
     value: true
   });
   
-  var _sequelize = __webpack_require__(50);
+  var _sequelize = __webpack_require__(46);
   
   var _sequelize2 = _interopRequireDefault(_sequelize);
   
-  var _sequelize3 = __webpack_require__(49);
+  var _sequelize3 = __webpack_require__(45);
   
   var _sequelize4 = _interopRequireDefault(_sequelize3);
   
@@ -1990,633 +1813,7 @@ module.exports =
   exports.default = UserProfile;
 
 /***/ },
-/* 55 */
-/***/ function(module, exports, __webpack_require__) {
-
-  'use strict';
-  
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  
-  var _graphql = __webpack_require__(56);
-  
-  var _me = __webpack_require__(57);
-  
-  var _me2 = _interopRequireDefault(_me);
-  
-  var _content = __webpack_require__(59);
-  
-  var _content2 = _interopRequireDefault(_content);
-  
-  var _news = __webpack_require__(65);
-  
-  var _news2 = _interopRequireDefault(_news);
-  
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-  
-  /**
-   * React Starter Kit (https://www.reactstarterkit.com/)
-   *
-   * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE.txt file in the root directory of this source tree.
-   */
-  
-  var schema = new _graphql.GraphQLSchema({
-    query: new _graphql.GraphQLObjectType({
-      name: 'Query',
-      fields: {
-        me: _me2.default,
-        content: _content2.default,
-        news: _news2.default
-      }
-    })
-  });
-  
-  exports.default = schema;
-
-/***/ },
-/* 56 */
-/***/ function(module, exports) {
-
-  module.exports = require("graphql");
-
-/***/ },
-/* 57 */
-/***/ function(module, exports, __webpack_require__) {
-
-  'use strict';
-  
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  
-  var _UserType = __webpack_require__(58);
-  
-  var _UserType2 = _interopRequireDefault(_UserType);
-  
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-  
-  var me = {
-    type: _UserType2.default,
-    resolve: function resolve(_ref) {
-      var request = _ref.request;
-  
-      return request.user && {
-        id: request.user.id,
-        email: request.user.email
-      };
-    }
-  }; /**
-      * React Starter Kit (https://www.reactstarterkit.com/)
-      *
-      * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
-      *
-      * This source code is licensed under the MIT license found in the
-      * LICENSE.txt file in the root directory of this source tree.
-      */
-  
-  exports.default = me;
-
-/***/ },
-/* 58 */
-/***/ function(module, exports, __webpack_require__) {
-
-  'use strict';
-  
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  
-  var _graphql = __webpack_require__(56);
-  
-  var UserType = new _graphql.GraphQLObjectType({
-    name: 'User',
-    fields: {
-      id: { type: new _graphql.GraphQLNonNull(_graphql.GraphQLID) },
-      email: { type: _graphql.GraphQLString }
-    }
-  }); /**
-       * React Starter Kit (https://www.reactstarterkit.com/)
-       *
-       * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
-       *
-       * This source code is licensed under the MIT license found in the
-       * LICENSE.txt file in the root directory of this source tree.
-       */
-  
-  exports.default = UserType;
-
-/***/ },
-/* 59 */
-/***/ function(module, exports, __webpack_require__) {
-
-  'use strict';
-  
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  
-  var _getIterator2 = __webpack_require__(44);
-  
-  var _getIterator3 = _interopRequireDefault(_getIterator2);
-  
-  var _regenerator = __webpack_require__(2);
-  
-  var _regenerator2 = _interopRequireDefault(_regenerator);
-  
-  var _asyncToGenerator2 = __webpack_require__(6);
-  
-  var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
-  
-  var _assign = __webpack_require__(32);
-  
-  var _assign2 = _interopRequireDefault(_assign);
-  
-  var resolveExtension = function () {
-    var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee(path, extension) {
-      var fileNameBase, ext, fileName;
-      return _regenerator2.default.wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              fileNameBase = (0, _path.join)(CONTENT_DIR, '' + (path === '/' ? '/index' : path));
-              ext = extension;
-  
-              if (!ext.startsWith('.')) {
-                ext = '.' + extension;
-              }
-  
-              fileName = fileNameBase + ext;
-              _context.next = 6;
-              return fileExists(fileName);
-  
-            case 6:
-              if (_context.sent) {
-                _context.next = 9;
-                break;
-              }
-  
-              fileNameBase = (0, _path.join)(CONTENT_DIR, path + '/index');
-              fileName = fileNameBase + ext;
-  
-            case 9:
-              _context.next = 11;
-              return fileExists(fileName);
-  
-            case 11:
-              if (_context.sent) {
-                _context.next = 13;
-                break;
-              }
-  
-              return _context.abrupt('return', { success: false });
-  
-            case 13:
-              return _context.abrupt('return', { success: true, fileName: fileName });
-  
-            case 14:
-            case 'end':
-              return _context.stop();
-          }
-        }
-      }, _callee, this);
-    }));
-  
-    return function resolveExtension(_x, _x2) {
-      return _ref.apply(this, arguments);
-    };
-  }();
-  
-  var resolveFileName = function () {
-    var _ref2 = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(path) {
-      var extensions, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, extension, maybeFileName;
-  
-      return _regenerator2.default.wrap(function _callee2$(_context2) {
-        while (1) {
-          switch (_context2.prev = _context2.next) {
-            case 0:
-              extensions = ['.md', '.html'];
-              _iteratorNormalCompletion = true;
-              _didIteratorError = false;
-              _iteratorError = undefined;
-              _context2.prev = 4;
-              _iterator = (0, _getIterator3.default)(extensions);
-  
-            case 6:
-              if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-                _context2.next = 16;
-                break;
-              }
-  
-              extension = _step.value;
-              _context2.next = 10;
-              return resolveExtension(path, extension);
-  
-            case 10:
-              maybeFileName = _context2.sent;
-  
-              if (!maybeFileName.success) {
-                _context2.next = 13;
-                break;
-              }
-  
-              return _context2.abrupt('return', { success: true, fileName: maybeFileName.fileName, extension: extension });
-  
-            case 13:
-              _iteratorNormalCompletion = true;
-              _context2.next = 6;
-              break;
-  
-            case 16:
-              _context2.next = 22;
-              break;
-  
-            case 18:
-              _context2.prev = 18;
-              _context2.t0 = _context2['catch'](4);
-              _didIteratorError = true;
-              _iteratorError = _context2.t0;
-  
-            case 22:
-              _context2.prev = 22;
-              _context2.prev = 23;
-  
-              if (!_iteratorNormalCompletion && _iterator.return) {
-                _iterator.return();
-              }
-  
-            case 25:
-              _context2.prev = 25;
-  
-              if (!_didIteratorError) {
-                _context2.next = 28;
-                break;
-              }
-  
-              throw _iteratorError;
-  
-            case 28:
-              return _context2.finish(25);
-  
-            case 29:
-              return _context2.finish(22);
-  
-            case 30:
-              return _context2.abrupt('return', { success: false, fileName: null, extension: null });
-  
-            case 31:
-            case 'end':
-              return _context2.stop();
-          }
-        }
-      }, _callee2, this, [[4, 18, 22, 30], [23,, 25, 29]]);
-    }));
-  
-    return function resolveFileName(_x3) {
-      return _ref2.apply(this, arguments);
-    };
-  }();
-  
-  var _fs = __webpack_require__(60);
-  
-  var _fs2 = _interopRequireDefault(_fs);
-  
-  var _path = __webpack_require__(8);
-  
-  var _bluebird = __webpack_require__(61);
-  
-  var _bluebird2 = _interopRequireDefault(_bluebird);
-  
-  var _frontMatter = __webpack_require__(62);
-  
-  var _frontMatter2 = _interopRequireDefault(_frontMatter);
-  
-  var _markdownIt = __webpack_require__(63);
-  
-  var _markdownIt2 = _interopRequireDefault(_markdownIt);
-  
-  var _graphql = __webpack_require__(56);
-  
-  var _ContentType = __webpack_require__(64);
-  
-  var _ContentType2 = _interopRequireDefault(_ContentType);
-  
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-  
-  var md = new _markdownIt2.default();
-  
-  // A folder with Markdown/HTML content pages
-  /**
-   * React Starter Kit (https://www.reactstarterkit.com/)
-   *
-   * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE.txt file in the root directory of this source tree.
-   */
-  
-  var CONTENT_DIR = (0, _path.join)(__dirname, './content');
-  
-  // Extract 'front matter' metadata and generate HTML
-  var parseContent = function parseContent(path, fileContent, extension) {
-    var fmContent = (0, _frontMatter2.default)(fileContent);
-    var htmlContent = void 0;
-    switch (extension) {
-      case '.md':
-        htmlContent = md.render(fmContent.body);
-        break;
-      case '.html':
-        htmlContent = fmContent.body;
-        break;
-      default:
-        return null;
-    }
-    return (0, _assign2.default)({ path: path, content: htmlContent }, fmContent.attributes);
-  };
-  
-  var readFile = _bluebird2.default.promisify(_fs2.default.readFile);
-  var fileExists = function fileExists(filename) {
-    return new _bluebird2.default(function (resolve) {
-      _fs2.default.exists(filename, resolve);
-    });
-  };
-  
-  var content = {
-    type: _ContentType2.default,
-    args: {
-      path: { type: new _graphql.GraphQLNonNull(_graphql.GraphQLString) }
-    },
-    resolve: function resolve(_ref3, _ref4) {
-      var _this = this;
-  
-      var request = _ref3.request;
-      var path = _ref4.path;
-      return (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee3() {
-        var _ref5, success, fileName, extension, source;
-  
-        return _regenerator2.default.wrap(function _callee3$(_context3) {
-          while (1) {
-            switch (_context3.prev = _context3.next) {
-              case 0:
-                _context3.next = 2;
-                return resolveFileName(path);
-  
-              case 2:
-                _ref5 = _context3.sent;
-                success = _ref5.success;
-                fileName = _ref5.fileName;
-                extension = _ref5.extension;
-  
-                if (success) {
-                  _context3.next = 8;
-                  break;
-                }
-  
-                return _context3.abrupt('return', null);
-  
-              case 8:
-                _context3.next = 10;
-                return readFile(fileName, { encoding: 'utf8' });
-  
-              case 10:
-                source = _context3.sent;
-                return _context3.abrupt('return', parseContent(path, source, extension));
-  
-              case 12:
-              case 'end':
-                return _context3.stop();
-            }
-          }
-        }, _callee3, _this);
-      }))();
-    }
-  };
-  
-  exports.default = content;
-
-/***/ },
-/* 60 */
-/***/ function(module, exports) {
-
-  module.exports = require("fs");
-
-/***/ },
-/* 61 */
-/***/ function(module, exports) {
-
-  module.exports = require("bluebird");
-
-/***/ },
-/* 62 */
-/***/ function(module, exports) {
-
-  module.exports = require("front-matter");
-
-/***/ },
-/* 63 */
-/***/ function(module, exports) {
-
-  module.exports = require("markdown-it");
-
-/***/ },
-/* 64 */
-/***/ function(module, exports, __webpack_require__) {
-
-  'use strict';
-  
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  
-  var _graphql = __webpack_require__(56);
-  
-  var ContentType = new _graphql.GraphQLObjectType({
-    name: 'Content',
-    fields: {
-      path: { type: new _graphql.GraphQLNonNull(_graphql.GraphQLString) },
-      title: { type: new _graphql.GraphQLNonNull(_graphql.GraphQLString) },
-      content: { type: new _graphql.GraphQLNonNull(_graphql.GraphQLString) },
-      component: { type: new _graphql.GraphQLNonNull(_graphql.GraphQLString) }
-    }
-  }); /**
-       * React Starter Kit (https://www.reactstarterkit.com/)
-       *
-       * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
-       *
-       * This source code is licensed under the MIT license found in the
-       * LICENSE.txt file in the root directory of this source tree.
-       */
-  
-  exports.default = ContentType;
-
-/***/ },
-/* 65 */
-/***/ function(module, exports, __webpack_require__) {
-
-  'use strict';
-  
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  
-  var _graphql = __webpack_require__(56);
-  
-  var _fetch = __webpack_require__(66);
-  
-  var _fetch2 = _interopRequireDefault(_fetch);
-  
-  var _NewsItemType = __webpack_require__(68);
-  
-  var _NewsItemType2 = _interopRequireDefault(_NewsItemType);
-  
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-  
-  // React.js News Feed (RSS)
-  var url = 'http://ajax.googleapis.com/ajax/services/feed/load' + '?v=1.0&num=10&q=https://reactjsnews.com/feed.xml'; /**
-                                                                                                                        * React Starter Kit (https://www.reactstarterkit.com/)
-                                                                                                                        *
-                                                                                                                        * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
-                                                                                                                        *
-                                                                                                                        * This source code is licensed under the MIT license found in the
-                                                                                                                        * LICENSE.txt file in the root directory of this source tree.
-                                                                                                                        */
-  
-  var items = [];
-  var lastFetchTask = void 0;
-  var lastFetchTime = new Date(1970, 0, 1);
-  
-  var news = {
-    type: new _graphql.GraphQLList(_NewsItemType2.default),
-    resolve: function resolve() {
-      if (lastFetchTask) {
-        return lastFetchTask;
-      }
-  
-      if (new Date() - lastFetchTime > 1000 * 60 * 10 /* 10 mins */) {
-          lastFetchTime = new Date();
-          lastFetchTask = (0, _fetch2.default)(url).then(function (response) {
-            return response.json();
-          }).then(function (data) {
-            if (data.responseStatus === 200) {
-              items = data.responseData.feed.entries;
-            }
-  
-            return items;
-          }).finally(function () {
-            lastFetchTask = null;
-          });
-  
-          if (items.length) {
-            return items;
-          }
-  
-          return lastFetchTask;
-        }
-  
-      return items;
-    }
-  };
-  
-  exports.default = news;
-
-/***/ },
-/* 66 */
-/***/ function(module, exports, __webpack_require__) {
-
-  'use strict';
-  
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.Response = exports.Headers = exports.Request = exports.default = undefined;
-  
-  var _bluebird = __webpack_require__(61);
-  
-  var _bluebird2 = _interopRequireDefault(_bluebird);
-  
-  var _nodeFetch = __webpack_require__(67);
-  
-  var _nodeFetch2 = _interopRequireDefault(_nodeFetch);
-  
-  var _config = __webpack_require__(35);
-  
-  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-  
-  _nodeFetch2.default.Promise = _bluebird2.default; /**
-                                                     * React Starter Kit (https://www.reactstarterkit.com/)
-                                                     *
-                                                     * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
-                                                     *
-                                                     * This source code is licensed under the MIT license found in the
-                                                     * LICENSE.txt file in the root directory of this source tree.
-                                                     */
-  
-  _nodeFetch.Response.Promise = _bluebird2.default;
-  
-  function localUrl(url) {
-    if (url.startsWith('//')) {
-      return 'https:' + url;
-    }
-  
-    if (url.startsWith('http')) {
-      return url;
-    }
-  
-    return 'http://' + _config.host + url;
-  }
-  
-  function localFetch(url, options) {
-    return (0, _nodeFetch2.default)(localUrl(url), options);
-  }
-  
-  exports.default = localFetch;
-  exports.Request = _nodeFetch.Request;
-  exports.Headers = _nodeFetch.Headers;
-  exports.Response = _nodeFetch.Response;
-
-/***/ },
-/* 67 */
-/***/ function(module, exports) {
-
-  module.exports = require("node-fetch");
-
-/***/ },
-/* 68 */
-/***/ function(module, exports, __webpack_require__) {
-
-  'use strict';
-  
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  
-  var _graphql = __webpack_require__(56);
-  
-  var NewsItemType = new _graphql.GraphQLObjectType({
-    name: 'NewsItem',
-    fields: {
-      title: { type: new _graphql.GraphQLNonNull(_graphql.GraphQLString) },
-      link: { type: new _graphql.GraphQLNonNull(_graphql.GraphQLString) },
-      author: { type: _graphql.GraphQLString },
-      publishedDate: { type: new _graphql.GraphQLNonNull(_graphql.GraphQLString) },
-      contentSnippet: { type: _graphql.GraphQLString }
-    }
-  }); /**
-       * React Starter Kit (https://www.reactstarterkit.com/)
-       *
-       * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
-       *
-       * This source code is licensed under the MIT license found in the
-       * LICENSE.txt file in the root directory of this source tree.
-       */
-  
-  exports.default = NewsItemType;
-
-/***/ },
-/* 69 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -2652,10 +1849,10 @@ module.exports =
     path: '/',
   
     // Keep in mind, routes are evaluated in order
-    children: [__webpack_require__(70).default, __webpack_require__(94).default, __webpack_require__(98).default, __webpack_require__(102).default,
+    children: [__webpack_require__(52).default, __webpack_require__(77).default, __webpack_require__(81).default, __webpack_require__(85).default,
   
     // place new routes before...
-    __webpack_require__(107).default],
+    __webpack_require__(90).default],
   
     action: function action(_ref) {
       var _this = this;
@@ -2691,7 +1888,7 @@ module.exports =
   };
 
 /***/ },
-/* 70 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -2704,7 +1901,7 @@ module.exports =
   
   var _regenerator2 = _interopRequireDefault(_regenerator);
   
-  var _stringify = __webpack_require__(42);
+  var _stringify = __webpack_require__(41);
   
   var _stringify2 = _interopRequireDefault(_stringify);
   
@@ -2721,25 +1918,27 @@ module.exports =
                                                                                                                                * LICENSE.txt file in the root directory of this source tree.
                                                                                                                                */
   
-  var _react = __webpack_require__(18);
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _moment = __webpack_require__(16);
+  var _moment = __webpack_require__(14);
   
   var _moment2 = _interopRequireDefault(_moment);
   
-  var _nodeFetch = __webpack_require__(67);
+  var _nodeFetch = __webpack_require__(53);
   
   var _nodeFetch2 = _interopRequireDefault(_nodeFetch);
   
-  var _Journal = __webpack_require__(71);
+  var _Journal = __webpack_require__(54);
   
   var _Journal2 = _interopRequireDefault(_Journal);
   
-  var _config = __webpack_require__(35);
+  var _config = __webpack_require__(34);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+  
+  var title = 'Journal';
   
   exports.default = {
   
@@ -2749,7 +1948,7 @@ module.exports =
       var _this = this;
   
       return (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
-        var date, dailyQuote, onSave;
+        var date, dailyQuote, path, onSave, resp, data;
         return _regenerator2.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -2759,9 +1958,9 @@ module.exports =
                   quote: 'Anyone who has a why to live can bear almost any what.',
                   author: 'Nietzche'
                 };
+                path = 'http://localhost:3001';
   
                 onSave = function onSave(entryDate, body) {
-                  var path = 'http://localhost:3001';
                   (0, _nodeFetch2.default)(path + '/save/' + entryDate, {
                     method: 'POST',
                     body: (0, _stringify2.default)(body),
@@ -2769,16 +1968,29 @@ module.exports =
                   });
                 };
   
+                _context.next = 6;
+                return (0, _nodeFetch2.default)(path + '/journal/' + params.date, {
+                  method: 'POST'
+                });
+  
+              case 6:
+                resp = _context.sent;
+                _context.next = 9;
+                return resp.json();
+  
+              case 9:
+                data = _context.sent;
                 return _context.abrupt('return', {
-                  component: _react2.default.createElement(_Journal2.default, { date: date, dailyQuote: dailyQuote, onSave: onSave, __source: {
+                  title: title,
+                  component: _react2.default.createElement(_Journal2.default, { date: date, dailyQuote: dailyQuote, onSave: onSave, data: data, __source: {
                       fileName: _jsxFileName,
-                      lineNumber: 37
+                      lineNumber: 45
                     },
                     __self: _this
                   })
                 });
   
-              case 4:
+              case 11:
               case 'end':
                 return _context.stop();
             }
@@ -2789,7 +2001,13 @@ module.exports =
   };
 
 /***/ },
-/* 71 */
+/* 53 */
+/***/ function(module, exports) {
+
+  module.exports = require("node-fetch");
+
+/***/ },
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -2806,37 +2024,37 @@ module.exports =
                                                                                                                                  * LICENSE.txt file in the root directory of this source tree.
                                                                                                                                  */
   
-  var _react = __webpack_require__(18);
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _withStyles = __webpack_require__(37);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
   var _reactRedux = __webpack_require__(28);
   
-  var _Layout = __webpack_require__(72);
+  var _Layout = __webpack_require__(55);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _MorningRoutine = __webpack_require__(78);
+  var _MorningRoutine = __webpack_require__(61);
   
   var _MorningRoutine2 = _interopRequireDefault(_MorningRoutine);
   
-  var _EveningRoutine = __webpack_require__(83);
+  var _EveningRoutine = __webpack_require__(66);
   
   var _EveningRoutine2 = _interopRequireDefault(_EveningRoutine);
   
-  var _DateCalendar = __webpack_require__(87);
+  var _DateCalendar = __webpack_require__(70);
   
   var _DateCalendar2 = _interopRequireDefault(_DateCalendar);
   
-  var _Journal = __webpack_require__(91);
+  var _Journal = __webpack_require__(74);
   
   var _Journal2 = _interopRequireDefault(_Journal);
   
-  var _journalActions = __webpack_require__(93);
+  var _journalActions = __webpack_require__(76);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
@@ -2851,7 +2069,8 @@ module.exports =
         hideEveningRoutine = _ref.hideEveningRoutine,
         showEveningContent = _ref.showEveningContent,
         onSave = _ref.onSave,
-        entry = _ref.entry;
+        entry = _ref.entry,
+        data = _ref.data;
     var quote = dailyQuote.quote,
         author = dailyQuote.author;
   
@@ -2927,6 +2146,7 @@ module.exports =
             show: showMorningRoutine,
             hide: hideMorningRoutine,
             showContent: showMorningContent === undefined ? defaultShowMorning : showMorningContent,
+            entry: data,
             __source: {
               fileName: _jsxFileName,
               lineNumber: 47
@@ -2939,9 +2159,10 @@ module.exports =
             show: showEveningRoutine,
             hide: hideEveningRoutine,
             showContent: showEveningContent === undefined ? !defaultShowMorning : showEveningContent,
+            entry: data,
             __source: {
               fileName: _jsxFileName,
-              lineNumber: 54
+              lineNumber: 55
             },
             __self: this
           }),
@@ -2949,7 +2170,7 @@ module.exports =
             'div',
             { className: _Journal2.default.inputContainer, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 63
+                lineNumber: 65
               },
               __self: this
             },
@@ -2959,7 +2180,7 @@ module.exports =
                   return onSave(date.format('YYYY-MM-DD'), entry);
                 }, __source: {
                   fileName: _jsxFileName,
-                  lineNumber: 64
+                  lineNumber: 66
                 },
                 __self: this
               },
@@ -2982,7 +2203,8 @@ module.exports =
     hideEveningRoutine: _react.PropTypes.func.isRequired,
     showEveningContent: _react.PropTypes.bool,
     onSave: _react.PropTypes.func.isRequired,
-    entry: _react.PropTypes.object
+    entry: _react.PropTypes.object,
+    data: _react.PropTypes.object
   };
   
   function mapStateToProps(state) {
@@ -3016,7 +2238,7 @@ module.exports =
   exports.default = (0, _reactRedux.connect)(mapStateToProps, actions)((0, _withStyles2.default)(_Journal2.default)(Journal));
 
 /***/ },
-/* 72 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -3033,19 +2255,19 @@ module.exports =
                                                                                                                                    * LICENSE.txt file in the root directory of this source tree.
                                                                                                                                    */
   
-  var _react = __webpack_require__(18);
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _withStyles = __webpack_require__(37);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _Layout = __webpack_require__(73);
+  var _Layout = __webpack_require__(56);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _FiveMinuteJournalHeader = __webpack_require__(75);
+  var _FiveMinuteJournalHeader = __webpack_require__(58);
   
   var _FiveMinuteJournalHeader2 = _interopRequireDefault(_FiveMinuteJournalHeader);
   
@@ -3082,12 +2304,12 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_Layout2.default)(Layout);
 
 /***/ },
-/* 73 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(74);
-      var insertCss = __webpack_require__(41);
+      var content = __webpack_require__(57);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -3116,10 +2338,10 @@ module.exports =
     
 
 /***/ },
-/* 74 */
+/* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(40)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
@@ -3132,7 +2354,7 @@ module.exports =
   };
 
 /***/ },
-/* 75 */
+/* 58 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -3142,15 +2364,15 @@ module.exports =
   });
   var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/components/FiveMinuteJournalHeader/FiveMinuteJournalHeader.js';
   
-  var _react = __webpack_require__(18);
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _withStyles = __webpack_require__(37);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _FiveMinuteJournalHeader = __webpack_require__(76);
+  var _FiveMinuteJournalHeader = __webpack_require__(59);
   
   var _FiveMinuteJournalHeader2 = _interopRequireDefault(_FiveMinuteJournalHeader);
   
@@ -3199,12 +2421,12 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_FiveMinuteJournalHeader2.default)(Header);
 
 /***/ },
-/* 76 */
+/* 59 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(77);
-      var insertCss = __webpack_require__(41);
+      var content = __webpack_require__(60);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -3233,10 +2455,10 @@ module.exports =
     
 
 /***/ },
-/* 77 */
+/* 60 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(40)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
@@ -3252,7 +2474,7 @@ module.exports =
   };
 
 /***/ },
-/* 78 */
+/* 61 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -3262,25 +2484,25 @@ module.exports =
   });
   var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/components/MorningRoutine/MorningRoutine.js';
   
-  var _react = __webpack_require__(18);
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
   var _reactRedux = __webpack_require__(28);
   
-  var _withStyles = __webpack_require__(37);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _MorningRoutine = __webpack_require__(79);
+  var _MorningRoutine = __webpack_require__(62);
   
   var _MorningRoutine2 = _interopRequireDefault(_MorningRoutine);
   
-  var _reactTextareaAutosize = __webpack_require__(81);
+  var _reactTextareaAutosize = __webpack_require__(64);
   
   var _reactTextareaAutosize2 = _interopRequireDefault(_reactTextareaAutosize);
   
-  var _arrow = __webpack_require__(82);
+  var _arrow = __webpack_require__(65);
   
   var _arrow2 = _interopRequireDefault(_arrow);
   
@@ -3292,17 +2514,20 @@ module.exports =
     var onInputChange = _ref.onInputChange,
         show = _ref.show,
         hide = _ref.hide,
-        showContent = _ref.showContent;
+        showContent = _ref.showContent,
+        entry = _ref.entry;
   
     var gratefulForSample = ['I\'m grateful for the warm bed that I sleep in.', 'I\'m grateful for my body that is working in perfect harmony.', 'I\'m grateful for the incredible firends in my life.'];
     var todayGreatSample = ['Take extra time for myself before leaving work', 'Give a thank you note to Mom', 'Sleep before 10pm'];
     var affirmationSample = 'I am confident and comfortable in my own skin and I live with passion and purpose';
   
+    entry = entry || {};
+  
     return _react2.default.createElement(
       'div',
       { className: _MorningRoutine2.default.root, __source: {
           fileName: _jsxFileName,
-          lineNumber: 22
+          lineNumber: 24
         },
         __self: this
       },
@@ -3310,7 +2535,7 @@ module.exports =
         'button',
         { className: _MorningRoutine2.default.header, onClick: showContent ? hide : show, __source: {
             fileName: _jsxFileName,
-            lineNumber: 23
+            lineNumber: 25
           },
           __self: this
         },
@@ -3318,7 +2543,7 @@ module.exports =
           'div',
           { className: _MorningRoutine2.default.headerTitle, __source: {
               fileName: _jsxFileName,
-              lineNumber: 24
+              lineNumber: 26
             },
             __self: this
           },
@@ -3326,7 +2551,7 @@ module.exports =
         ),
         _react2.default.createElement('img', { className: _MorningRoutine2.default.icon, src: _arrow2.default, style: { transform: showContent ? 'rotate(180deg)' : 'rotate(0deg)' }, __source: {
             fileName: _jsxFileName,
-            lineNumber: 25
+            lineNumber: 27
           },
           __self: this
         })
@@ -3335,7 +2560,7 @@ module.exports =
         'div',
         { className: _MorningRoutine2.default.container, __source: {
             fileName: _jsxFileName,
-            lineNumber: 27
+            lineNumber: 29
           },
           __self: this
         },
@@ -3343,7 +2568,7 @@ module.exports =
           'div',
           { className: _MorningRoutine2.default.inputContainer, __source: {
               fileName: _jsxFileName,
-              lineNumber: 28
+              lineNumber: 30
             },
             __self: this
           },
@@ -3351,7 +2576,7 @@ module.exports =
             'div',
             { className: _MorningRoutine2.default.inputTitle, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 29
+                lineNumber: 31
               },
               __self: this
             },
@@ -3361,7 +2586,7 @@ module.exports =
             'ol',
             { className: _MorningRoutine2.default.inputs, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 30
+                lineNumber: 32
               },
               __self: this
             },
@@ -3370,7 +2595,7 @@ module.exports =
                 'li',
                 { className: _MorningRoutine2.default.input, key: 'grateful' + index, __source: {
                     fileName: _jsxFileName,
-                    lineNumber: 32
+                    lineNumber: 34
                   },
                   __self: _this
                 },
@@ -3380,9 +2605,10 @@ module.exports =
                   onChange: function onChange(e) {
                     return onInputChange('grateful' + index, e.target.value);
                   },
+                  defaultValue: entry['grateful' + index] || undefined,
                   __source: {
                     fileName: _jsxFileName,
-                    lineNumber: 33
+                    lineNumber: 35
                   },
                   __self: _this
                 })
@@ -3394,7 +2620,7 @@ module.exports =
           'div',
           { className: _MorningRoutine2.default.inputContainer, __source: {
               fileName: _jsxFileName,
-              lineNumber: 42
+              lineNumber: 45
             },
             __self: this
           },
@@ -3402,7 +2628,7 @@ module.exports =
             'div',
             { className: _MorningRoutine2.default.inputTitle, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 43
+                lineNumber: 46
               },
               __self: this
             },
@@ -3412,7 +2638,7 @@ module.exports =
             'ol',
             { className: _MorningRoutine2.default.inputs, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 44
+                lineNumber: 47
               },
               __self: this
             },
@@ -3421,7 +2647,7 @@ module.exports =
                 'li',
                 { className: _MorningRoutine2.default.input, key: 'great' + index, __source: {
                     fileName: _jsxFileName,
-                    lineNumber: 46
+                    lineNumber: 49
                   },
                   __self: _this
                 },
@@ -3431,9 +2657,10 @@ module.exports =
                   onChange: function onChange(e) {
                     return onInputChange('great' + index, e.target.value);
                   },
+                  defaultValue: entry['great' + index] || undefined,
                   __source: {
                     fileName: _jsxFileName,
-                    lineNumber: 47
+                    lineNumber: 50
                   },
                   __self: _this
                 })
@@ -3445,7 +2672,7 @@ module.exports =
           'div',
           { className: _MorningRoutine2.default.inputContainer, __source: {
               fileName: _jsxFileName,
-              lineNumber: 56
+              lineNumber: 60
             },
             __self: this
           },
@@ -3453,7 +2680,7 @@ module.exports =
             'div',
             { className: _MorningRoutine2.default.inputTitle, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 57
+                lineNumber: 61
               },
               __self: this
             },
@@ -3463,7 +2690,7 @@ module.exports =
             'div',
             { className: _MorningRoutine2.default.input, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 58
+                lineNumber: 62
               },
               __self: this
             },
@@ -3473,9 +2700,10 @@ module.exports =
               onChange: function onChange(e) {
                 return onInputChange('affirmation', e.target.value);
               },
+              value: entry['affirmation'] || undefined,
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 59
+                lineNumber: 63
               },
               __self: this
             })
@@ -3489,18 +2717,19 @@ module.exports =
     onInputChange: _react.PropTypes.func.isRequired,
     show: _react.PropTypes.func.isRequired,
     hide: _react.PropTypes.func.isRequired,
-    showContent: _react.PropTypes.bool.isRequired
+    showContent: _react.PropTypes.bool.isRequired,
+    entry: _react.PropTypes.object
   };
   
   exports.default = (0, _withStyles2.default)(_MorningRoutine2.default)(MorningRoutine);
 
 /***/ },
-/* 79 */
+/* 62 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(80);
-      var insertCss = __webpack_require__(41);
+      var content = __webpack_require__(63);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -3529,10 +2758,10 @@ module.exports =
     
 
 /***/ },
-/* 80 */
+/* 63 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(40)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
@@ -3553,19 +2782,19 @@ module.exports =
   };
 
 /***/ },
-/* 81 */
+/* 64 */
 /***/ function(module, exports) {
 
   module.exports = require("react-textarea-autosize");
 
 /***/ },
-/* 82 */
+/* 65 */
 /***/ function(module, exports) {
 
   module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAKCAYAAAC0VX7mAAAAAXNSR0IArs4c6QAAAORJREFUKBWdkT8LQWEUh1+RkCQyWGwGq1Jmm80XMPkI8iGkGCmT3aBkMkhKSRaTzWCSjZQiPG/dUydd+XPq6fzec37ndLvHGGM6cIAmeOHX8DHQArujbYen8HAYkAPwbQQxDkHm7S4Th4UqTtAR+BRRDDOQZXN0TIbCiLFqrtAJabrkJLU1yLIROvTq81PoK9MGnXo18U7DFmRZD23/o2vYo3RBzDt0Rjmz6L3qN9Ae1X8r62rIXi8HBTg69Tu5Cj9FDbd86Ql9cd5Xchn+igpTN5DFZ3Txr01qqIS2B1pCXtVd5RNIED0bdIaaMQAAAABJRU5ErkJggg=="
 
 /***/ },
-/* 83 */
+/* 66 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -3575,25 +2804,25 @@ module.exports =
   });
   var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/components/EveningRoutine/EveningRoutine.js';
   
-  var _react = __webpack_require__(18);
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
   var _reactRedux = __webpack_require__(28);
   
-  var _withStyles = __webpack_require__(37);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _EveningRoutine = __webpack_require__(84);
+  var _EveningRoutine = __webpack_require__(67);
   
   var _EveningRoutine2 = _interopRequireDefault(_EveningRoutine);
   
-  var _reactTextareaAutosize = __webpack_require__(81);
+  var _reactTextareaAutosize = __webpack_require__(64);
   
   var _reactTextareaAutosize2 = _interopRequireDefault(_reactTextareaAutosize);
   
-  var _arrow = __webpack_require__(86);
+  var _arrow = __webpack_require__(69);
   
   var _arrow2 = _interopRequireDefault(_arrow);
   
@@ -3605,16 +2834,19 @@ module.exports =
     var onInputChange = _ref.onInputChange,
         show = _ref.show,
         hide = _ref.hide,
-        showContent = _ref.showContent;
+        showContent = _ref.showContent,
+        entry = _ref.entry;
   
     var happenedSample = ['I remembered to floss.', 'A friend recommended a wonderful book for me.', 'I saw a cute stranger at the cafe'];
     var betterSample = ['I wake up right when the alarm goes off.', 'I go to the gym in the morning.'];
+  
+    entry = entry || {};
   
     return _react2.default.createElement(
       'div',
       { className: _EveningRoutine2.default.root, __source: {
           fileName: _jsxFileName,
-          lineNumber: 20
+          lineNumber: 22
         },
         __self: this
       },
@@ -3622,7 +2854,7 @@ module.exports =
         'button',
         { className: _EveningRoutine2.default.header, onClick: showContent ? hide : show, __source: {
             fileName: _jsxFileName,
-            lineNumber: 21
+            lineNumber: 23
           },
           __self: this
         },
@@ -3630,7 +2862,7 @@ module.exports =
           'div',
           { className: _EveningRoutine2.default.headerTitle, __source: {
               fileName: _jsxFileName,
-              lineNumber: 22
+              lineNumber: 24
             },
             __self: this
           },
@@ -3638,7 +2870,7 @@ module.exports =
         ),
         _react2.default.createElement('img', { className: _EveningRoutine2.default.icon, src: _arrow2.default, style: { transform: showContent ? 'rotate(180deg)' : 'rotate(0deg)' }, __source: {
             fileName: _jsxFileName,
-            lineNumber: 23
+            lineNumber: 25
           },
           __self: this
         })
@@ -3647,7 +2879,7 @@ module.exports =
         'div',
         { className: _EveningRoutine2.default.container, __source: {
             fileName: _jsxFileName,
-            lineNumber: 25
+            lineNumber: 27
           },
           __self: this
         },
@@ -3655,7 +2887,7 @@ module.exports =
           'div',
           { className: _EveningRoutine2.default.inputContainer, __source: {
               fileName: _jsxFileName,
-              lineNumber: 26
+              lineNumber: 28
             },
             __self: this
           },
@@ -3663,7 +2895,7 @@ module.exports =
             'div',
             { className: _EveningRoutine2.default.inputTitle, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 27
+                lineNumber: 29
               },
               __self: this
             },
@@ -3673,7 +2905,7 @@ module.exports =
             'ol',
             { className: _EveningRoutine2.default.inputs, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 28
+                lineNumber: 30
               },
               __self: this
             },
@@ -3682,7 +2914,7 @@ module.exports =
                 'li',
                 { className: _EveningRoutine2.default.input, key: 'happened' + index, __source: {
                     fileName: _jsxFileName,
-                    lineNumber: 30
+                    lineNumber: 32
                   },
                   __self: _this
                 },
@@ -3692,9 +2924,10 @@ module.exports =
                   onChange: function onChange(e) {
                     return onInputChange('happened' + index, e.target.value);
                   },
+                  defaultValue: entry['happened' + index] || undefined,
                   __source: {
                     fileName: _jsxFileName,
-                    lineNumber: 31
+                    lineNumber: 33
                   },
                   __self: _this
                 })
@@ -3706,7 +2939,7 @@ module.exports =
           'div',
           { className: _EveningRoutine2.default.inputContainer, __source: {
               fileName: _jsxFileName,
-              lineNumber: 40
+              lineNumber: 43
             },
             __self: this
           },
@@ -3714,7 +2947,7 @@ module.exports =
             'div',
             { className: _EveningRoutine2.default.inputTitle, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 41
+                lineNumber: 44
               },
               __self: this
             },
@@ -3724,7 +2957,7 @@ module.exports =
             'ol',
             { className: _EveningRoutine2.default.inputs, __source: {
                 fileName: _jsxFileName,
-                lineNumber: 42
+                lineNumber: 45
               },
               __self: this
             },
@@ -3733,7 +2966,7 @@ module.exports =
                 'li',
                 { className: _EveningRoutine2.default.input, key: 'better' + index, __source: {
                     fileName: _jsxFileName,
-                    lineNumber: 44
+                    lineNumber: 47
                   },
                   __self: _this
                 },
@@ -3743,9 +2976,10 @@ module.exports =
                   onChange: function onChange(e) {
                     return onInputChange('better' + index, e.target.value);
                   },
+                  defaultValue: entry['better' + index] || undefined,
                   __source: {
                     fileName: _jsxFileName,
-                    lineNumber: 45
+                    lineNumber: 48
                   },
                   __self: _this
                 })
@@ -3761,18 +2995,19 @@ module.exports =
     onInputChange: _react.PropTypes.func.isRequired,
     show: _react.PropTypes.func.isRequired,
     hide: _react.PropTypes.func.isRequired,
-    showContent: _react.PropTypes.bool.isRequired
+    showContent: _react.PropTypes.bool.isRequired,
+    entry: _react.PropTypes.object
   };
   
   exports.default = (0, _withStyles2.default)(_EveningRoutine2.default)(EveningRoutine);
 
 /***/ },
-/* 84 */
+/* 67 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(85);
-      var insertCss = __webpack_require__(41);
+      var content = __webpack_require__(68);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -3801,10 +3036,10 @@ module.exports =
     
 
 /***/ },
-/* 85 */
+/* 68 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(40)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
@@ -3824,13 +3059,13 @@ module.exports =
   };
 
 /***/ },
-/* 86 */
+/* 69 */
 /***/ function(module, exports) {
 
   module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAKCAYAAAC0VX7mAAAAAXNSR0IArs4c6QAAAORJREFUKBWdkT8LQWEUh1+RkCQyWGwGq1Jmm80XMPkI8iGkGCmT3aBkMkhKSRaTzWCSjZQiPG/dUydd+XPq6fzec37ndLvHGGM6cIAmeOHX8DHQArujbYen8HAYkAPwbQQxDkHm7S4Th4UqTtAR+BRRDDOQZXN0TIbCiLFqrtAJabrkJLU1yLIROvTq81PoK9MGnXo18U7DFmRZD23/o2vYo3RBzDt0Rjmz6L3qN9Ae1X8r62rIXi8HBTg69Tu5Cj9FDbd86Ql9cd5Xchn+igpTN5DFZ3Txr01qqIS2B1pCXtVd5RNIED0bdIaaMQAAAABJRU5ErkJggg=="
 
 /***/ },
-/* 87 */
+/* 70 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -3840,19 +3075,19 @@ module.exports =
   });
   var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/components/DateCalendar/DateCalendar.js';
   
-  var _react = __webpack_require__(18);
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _withStyles = __webpack_require__(37);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _DateCalendar = __webpack_require__(88);
+  var _DateCalendar = __webpack_require__(71);
   
   var _DateCalendar2 = _interopRequireDefault(_DateCalendar);
   
-  var _calendar = __webpack_require__(90);
+  var _calendar = __webpack_require__(73);
   
   var _calendar2 = _interopRequireDefault(_calendar);
   
@@ -3897,12 +3132,12 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_DateCalendar2.default)(DateCalendar);
 
 /***/ },
-/* 88 */
+/* 71 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(89);
-      var insertCss = __webpack_require__(41);
+      var content = __webpack_require__(72);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -3931,10 +3166,10 @@ module.exports =
     
 
 /***/ },
-/* 89 */
+/* 72 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(40)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
@@ -3948,18 +3183,18 @@ module.exports =
   };
 
 /***/ },
-/* 90 */
+/* 73 */
 /***/ function(module, exports) {
 
   module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEQAAABGCAYAAAB12zK5AAAAAXNSR0IArs4c6QAAB1dJREFUeAHtnH1o1VUYx3fv5ta2yJlzvqAlLI0Cw9LNEqMwTNqbU3OiuZT+mIQoREpWEBpotTCR9SKVuKC1wthi02GZmH8Ytg3fSCiHqdgQba5S5zbdS5/nds+Pc4+7u7/7grjtHDj3PM9znvM853x/z3n5/fj9ricuBik3N7cAM8Uej2fn7t2762Jg0rUJfK9FeZrX691YW1v7m+uGQRQTgshdizds2JDQ0NBQ2dvbm0KeQx4BML2uDUShWFBQML2rq+t9MdHd3T2cIicKc76m3mgNHDlyJFnA8NsZXlRUNCxam27bA0a6pjtKoyMmowYkYs93aMOgU4ar7iEkR1Im6X1PTk6+tmvXrn91WX80c1ymkIqg/lRD1uG7Fd/tIRX9CvR/dE9PT8AYWWuu1NTUXA1mI0CZ9cDb2Ni4DCPL8/LyZgFGotmwra2tl7q1LJ4fmHUmn5OTsxkbr5PNqoj46yQAztuzZ8+B/gwsWrQonn7+wJSabeoxtjj61Yp8L+BsYxz1uo4zZfLz8+9jcWygwRcozO4LDH9DD3Uv6kb6oZf0Uxd2FX5l4Z4XqiFgjEfnFjC0dvdCL2WsvwDw9pKSEmfd8wGyYMGC8azSh3H2mNYojlDvge/UM7IW+Hd1vWA0uqXkv/X2UdKnuao7g/lT8rq6unP4/Qy+rQ9/Ss1XMuaVzc3N38rsEIFvynR2dn4DPdanwQ/GPiXvSE9PP1FeXt6h5OGWhPYntJF82xO+S3AqOSDNnz9/JOPNQvg2Wco4QClgcqyDfC+BqVJIdMyUCkkAsQRjX//PDb7f6urqy4xqL+vMPpakcsBYJqOkfAPZdi/z6AU1bMCoGMxgqHFKyW7VnZaWtooxN/vl9wBQvhdkHtcUKzU6JFlYWDiR6NqkK7a3t29kTXKmn14XS5qdYgb21iibDOwBdr9VxcXFqUoWqqyoqLiCjnOrIVjIQjJGNUxISDih6FAlq/NLN27caMLIal2XiFvf0dFxhg4X6fJY0bL44ftj7B0mP6fs0o80fH/Y2tp6ivPHI0oeqgTI45rOGAHEOYuwgl/XKoOSDLaYDuzQ2xrKSTiqZH1aaMijZuvr6z/C98vBDFE3jqg9SLRMCqajy9F3Dnr0eZhvq9EVQtEsPHfT0HdD5dc9RbkY2RTKpeTTIseRl45tXbFixV3CxyJx5R/FzkrN1r74+Pi5XMip+H8FuUwB8S3RUqrpuSad6HDbgoVnIQ5Hiz6duJiYmDjTv3KL6Fe2tf1MpZPoyI3XhJaWFjlIybYedQJgiQyPGML3AU6ZcynVMfg4EXkUHTnFik6hnK+qqqr+FH23KewIwbBEgkpfamD4ZPCXIJxtG2B0fdUuolK3BRBlGhg+ezwPOQhxTBm/efNm2L7DBoROjVIO6dBlRRul3CuolKGIaEv8ObaYEn36RsfxjY6j79Z32IAwX88o44DzrKJViUzCdY7i6aCjr2RRlH+otti9xTe7zwj8T1c60GH7DhsQnFWTe8UpDp+mE5vkqZnwcpPE6l6K/Anh6XQP9HdCxyhVaXbW4et5xcuRHFrOUcP9sgvZ2dk/q3q3pYct1Dc4aZCUlJRurgl9GaIj2wjHNaqOgcsNn+w2DwKAdEylUm60XlNMtKXc1rOoH8KHHMpUOov/izBTkDvPXZDN49Rdo5SClXKeop0cIeQC1kQSIXE8qFlP+0PKCQbTyTPJDhgY/ykzM/MtpROLUo7bbLPLsXVeszcRvzPIOhhb3ICh2XDIiACRp1apqalPMWgBps2xBoHsGuvMq1lZWc+UlZXJo4OYJp52/Y5v2T124qvbMH4e37mAsdaQu2YjmjK6dcI4maN6NldoFNPoUkZGRn00jwx026Fozh3p+JyGnty/nOMiHGU9k2c4rpM5ZcI+mJme/M84Zf+/7Ylzh6xd3yvHRIYiIy4jmjIRexsADQMihCP3ZnaQjgHQ75h1kan+sG4sABAqS8h6/ZCj7ZQxLnlAhLCNbaHe1TMRw86AZZkRU+l8vhpAACDcyr/j5qSqGg+G0r/tOoDYKWNcVQuIBcRAwGBthFhADAQM1kaIBcRAwGBthFhADAQM1kaIBcRAwGBthFhADAQM1kaIBcRAwGBthFhADAQM1kaIBcRAwGBthFhADAQM1kaIBcRAwGBthFhADAQM1kaIBcRAwGBthFhADAQM1kZIf4Dwnau8lj3Ukj7mXokQ52V5Pq3IHGpo8MKMM2boVi9vDTUpEKBnKXqolPqYeem3SSJEfx/8zdvxAeGdAjZvXC4mKp5U/QGcGm9KSsp2iH9ESOUIPvLdzxvCWUppsJa8SiVvXH6ujY/3gGtP+hYUvohYQsVXqhKAulGWLzSPEUZXlXwwlIxrHOPIorxfG89fIvN9Iq+EILYaeiuK8Uo2RMoLfJ5bwEcFjTJeZ/BNTU31kydP/pHoeAj5hCEARhdjLWeci/mYUb718SV9D1ayOBabSUSKLDZjyQF/qOIoDVziCkCcZXz7+VhA/rkiIP0HWYznlOaAeaQAAAAASUVORK5CYII="
 
 /***/ },
-/* 91 */
+/* 74 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(92);
-      var insertCss = __webpack_require__(41);
+      var content = __webpack_require__(75);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -3988,10 +3223,10 @@ module.exports =
     
 
 /***/ },
-/* 92 */
+/* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(40)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
@@ -4009,7 +3244,7 @@ module.exports =
   };
 
 /***/ },
-/* 93 */
+/* 76 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -4023,7 +3258,7 @@ module.exports =
   exports.showEveningRoutine = showEveningRoutine;
   exports.hideEveningRoutine = hideEveningRoutine;
   
-  var _actionTypes = __webpack_require__(33);
+  var _actionTypes = __webpack_require__(32);
   
   var types = _interopRequireWildcard(_actionTypes);
   
@@ -4064,7 +3299,7 @@ module.exports =
   }
 
 /***/ },
-/* 94 */
+/* 77 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -4081,11 +3316,11 @@ module.exports =
                                                                                                                              * LICENSE.txt file in the root directory of this source tree.
                                                                                                                              */
   
-  var _react = __webpack_require__(18);
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _Login = __webpack_require__(95);
+  var _Login = __webpack_require__(78);
   
   var _Login2 = _interopRequireDefault(_Login);
   
@@ -4117,7 +3352,7 @@ module.exports =
   };
 
 /***/ },
-/* 95 */
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -4134,19 +3369,19 @@ module.exports =
                                                                                                                              * LICENSE.txt file in the root directory of this source tree.
                                                                                                                              */
   
-  var _react = __webpack_require__(18);
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _withStyles = __webpack_require__(37);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _Layout = __webpack_require__(72);
+  var _Layout = __webpack_require__(55);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _Login = __webpack_require__(96);
+  var _Login = __webpack_require__(79);
   
   var _Login2 = _interopRequireDefault(_Login);
   
@@ -4252,8 +3487,8 @@ module.exports =
                 __self: this
               },
               _react2.default.createElement(
-                'button',
-                { className: _Login2.default.button, type: 'submit', __source: {
+                'a',
+                { href: '/login/facebook', __source: {
                     fileName: _jsxFileName,
                     lineNumber: 45
                   },
@@ -4276,12 +3511,12 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_Login2.default)(Login);
 
 /***/ },
-/* 96 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(97);
-      var insertCss = __webpack_require__(41);
+      var content = __webpack_require__(80);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -4310,10 +3545,10 @@ module.exports =
     
 
 /***/ },
-/* 97 */
+/* 80 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(40)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
@@ -4331,7 +3566,7 @@ module.exports =
   };
 
 /***/ },
-/* 98 */
+/* 81 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -4348,11 +3583,11 @@ module.exports =
                                                                                                                                 * LICENSE.txt file in the root directory of this source tree.
                                                                                                                                 */
   
-  var _react = __webpack_require__(18);
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _Register = __webpack_require__(99);
+  var _Register = __webpack_require__(82);
   
   var _Register2 = _interopRequireDefault(_Register);
   
@@ -4378,7 +3613,7 @@ module.exports =
   };
 
 /***/ },
-/* 99 */
+/* 82 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -4395,19 +3630,19 @@ module.exports =
                                                                                                                                    * LICENSE.txt file in the root directory of this source tree.
                                                                                                                                    */
   
-  var _react = __webpack_require__(18);
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _withStyles = __webpack_require__(37);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _Layout = __webpack_require__(72);
+  var _Layout = __webpack_require__(55);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _Register = __webpack_require__(100);
+  var _Register = __webpack_require__(83);
   
   var _Register2 = _interopRequireDefault(_Register);
   
@@ -4529,12 +3764,12 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_Register2.default)(Register);
 
 /***/ },
-/* 100 */
+/* 83 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(101);
-      var insertCss = __webpack_require__(41);
+      var content = __webpack_require__(84);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -4563,10 +3798,10 @@ module.exports =
     
 
 /***/ },
-/* 101 */
+/* 84 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(40)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
@@ -4584,7 +3819,7 @@ module.exports =
   };
 
 /***/ },
-/* 102 */
+/* 85 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -4597,7 +3832,7 @@ module.exports =
   
   var _regenerator2 = _interopRequireDefault(_regenerator);
   
-  var _promise = __webpack_require__(103);
+  var _promise = __webpack_require__(86);
   
   var _promise2 = _interopRequireDefault(_promise);
   
@@ -4614,7 +3849,7 @@ module.exports =
                                                                                                                              * LICENSE.txt file in the root directory of this source tree.
                                                                                                                              */
   
-  var _react = __webpack_require__(18);
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
@@ -4647,7 +3882,7 @@ module.exports =
                 _context.next = 4;
                 return new _promise2.default(function (resolve) {
                   !/* require.ensure */(function (require) {
-                    return resolve(__webpack_require__(104).default);
+                    return resolve(__webpack_require__(87).default);
                   }(__webpack_require__));
                 });
   
@@ -4675,13 +3910,13 @@ module.exports =
   };
 
 /***/ },
-/* 103 */
+/* 86 */
 /***/ function(module, exports) {
 
   module.exports = require("babel-runtime/core-js/promise");
 
 /***/ },
-/* 104 */
+/* 87 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -4698,19 +3933,19 @@ module.exports =
                                                                                                                              * LICENSE.txt file in the root directory of this source tree.
                                                                                                                              */
   
-  var _react = __webpack_require__(18);
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _withStyles = __webpack_require__(37);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _Layout = __webpack_require__(72);
+  var _Layout = __webpack_require__(55);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _Admin = __webpack_require__(105);
+  var _Admin = __webpack_require__(88);
   
   var _Admin2 = _interopRequireDefault(_Admin);
   
@@ -4778,12 +4013,12 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_Admin2.default)(Admin);
 
 /***/ },
-/* 105 */
+/* 88 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(106);
-      var insertCss = __webpack_require__(41);
+      var content = __webpack_require__(89);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -4812,10 +4047,10 @@ module.exports =
     
 
 /***/ },
-/* 106 */
+/* 89 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(40)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
@@ -4829,7 +4064,7 @@ module.exports =
   };
 
 /***/ },
-/* 107 */
+/* 90 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -4846,11 +4081,11 @@ module.exports =
                                                                                                                                 * LICENSE.txt file in the root directory of this source tree.
                                                                                                                                 */
   
-  var _react = __webpack_require__(18);
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _NotFound = __webpack_require__(108);
+  var _NotFound = __webpack_require__(91);
   
   var _NotFound2 = _interopRequireDefault(_NotFound);
   
@@ -4877,7 +4112,7 @@ module.exports =
   };
 
 /***/ },
-/* 108 */
+/* 91 */
 /***/ function(module, exports, __webpack_require__) {
 
   'use strict';
@@ -4894,19 +4129,19 @@ module.exports =
                                                                                                                                    * LICENSE.txt file in the root directory of this source tree.
                                                                                                                                    */
   
-  var _react = __webpack_require__(18);
+  var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _withStyles = __webpack_require__(37);
+  var _withStyles = __webpack_require__(36);
   
   var _withStyles2 = _interopRequireDefault(_withStyles);
   
-  var _Layout = __webpack_require__(72);
+  var _Layout = __webpack_require__(55);
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _NotFound = __webpack_require__(109);
+  var _NotFound = __webpack_require__(92);
   
   var _NotFound2 = _interopRequireDefault(_NotFound);
   
@@ -4973,12 +4208,12 @@ module.exports =
   exports.default = (0, _withStyles2.default)(_NotFound2.default)(NotFound);
 
 /***/ },
-/* 109 */
+/* 92 */
 /***/ function(module, exports, __webpack_require__) {
 
   
-      var content = __webpack_require__(110);
-      var insertCss = __webpack_require__(41);
+      var content = __webpack_require__(93);
+      var insertCss = __webpack_require__(40);
   
       if (typeof content === 'string') {
         content = [[module.id, content, '']];
@@ -5007,10 +4242,10 @@ module.exports =
     
 
 /***/ },
-/* 110 */
+/* 93 */
 /***/ function(module, exports, __webpack_require__) {
 
-  exports = module.exports = __webpack_require__(40)();
+  exports = module.exports = __webpack_require__(39)();
   // imports
   
   
@@ -5024,7 +4259,7 @@ module.exports =
   };
 
 /***/ },
-/* 111 */
+/* 94 */
 /***/ function(module, exports) {
 
   module.exports = require("./assets");

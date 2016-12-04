@@ -13,6 +13,8 @@ import fetch from 'node-fetch';
 import Journal from './Journal';
 import { host } from '../../config';
 
+const title = 'Journal';
+
 export default {
 
   path: '/journal/:date',
@@ -23,9 +25,8 @@ export default {
       quote: 'Anyone who has a why to live can bear almost any what.',
       author: 'Nietzche',
     };
-
+    const path = 'http://localhost:3001';
     const onSave = (entryDate, body) => {
-      const path = 'http://localhost:3001';
       fetch(`${path}/save/${entryDate}`, {
         method: 'POST',
         body: JSON.stringify(body),
@@ -33,8 +34,15 @@ export default {
       });
     };
 
+    const resp = await fetch(`${path}/journal/${params.date}`, {
+      method: 'POST',
+    });
+
+    const data = await resp.json();
+
     return {
-      component: <Journal date={date} dailyQuote={dailyQuote} onSave={onSave} />,
+      title,
+      component: <Journal date={date} dailyQuote={dailyQuote} onSave={onSave} data={data}/>,
     };
   },
 
