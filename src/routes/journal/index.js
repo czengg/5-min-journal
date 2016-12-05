@@ -25,7 +25,7 @@ export default {
       quote: 'Anyone who has a why to live can bear almost any what.',
       author: 'Nietzche',
     };
-    const path = 'http://localhost:3001';
+    const path = 'http://journal.cindyzeng.com:3000';
     const onSave = (entryDate, body) => {
       fetch(`${path}/save/${entryDate}`, {
         method: 'POST',
