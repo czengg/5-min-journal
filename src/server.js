@@ -27,10 +27,10 @@ import { ErrorPageWithoutStyle } from './routes/error/ErrorPage';
 import errorPageStyle from './routes/error/ErrorPage.css';
 import routes from './routes';
 import assets from './assets'; // eslint-disable-line import/no-unresolved
-import { port, auth } from './config';
+import { port, host, auth, databaseUrl } from './config';
 
 const app = express();
-const url = 'mongodb://journal.cindyzeng.com:27017/fiveminutejournal';
+const journalUrl = `${databaseUrl}/fiveminutejournal`;
 
 //
 // Tell any CSS tooling (such as Material UI) to use all vendor prefixes if the
@@ -60,7 +60,7 @@ passport.use(new Strategy(
   {
     clientID: auth.facebook.id,
     clientSecret: auth.facebook.secret,
-    callbackURL: 'http://journal.cindyzeng.com:3000/login/facebook/return',
+    callbackURL: `${host}/login/facebook/return`,
   },
   (accessToken, refreshToken, profile, cb) => {
     cb(null, profile);
@@ -94,7 +94,7 @@ app.post('/save/:date', (req, res, next) => {
   const user_id = req.session.passport && req.session.passport.user;
 
   // check if entry already exists for date
-  MongoClient.connect(url, (err, db) => {
+  MongoClient.connect(journalUrl, (err, db) => {
     if (err || !user_id) {
       res.redirect('/error');
     }
@@ -124,7 +124,7 @@ app.post('/save/:date', (req, res, next) => {
 app.post('/quote', (req, res, next) => {
   const user_id = req.session.passport && req.session.passport.user;
 
-  MongoClient.connect(url, (err, db) => {
+  MongoClient.connect(journalUrl, (err, db) => {
     if (err) {
       console.log(err);
       res.redirect('/error');
@@ -170,7 +170,7 @@ app.post('/journal/:date', (req, res, next) => {
     const { date } = req.params;
     const user_id = req.session.passport.user;
 
-    MongoClient.connect(url, (err, db) => {
+    MongoClient.connect(journalUrl, (err, db) => {
       if (err) {
         res.json(400, {});
       }
