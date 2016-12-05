@@ -63,59 +63,28 @@ passport.use(new Strategy(
     clientSecret: auth.facebook.secret,
     callbackURL: 'http://localhost:3001/login/facebook/return',
   },
-  function(accessToken, refreshToken, profile, cb) {
+  (accessToken, refreshToken, profile, cb) => {
     cb(null, profile);
   })
 );
 
-passport.serializeUser(function(user, done) {
+passport.serializeUser((user, done) => {
   console.log('serial', user);
   done(null, user.id);
 });
 
-passport.deserializeUser(function(user, done) {
+passport.deserializeUser((user, done) => {
   console.log('deserial', user);
   done(null, user);
 });
 
-
-// app.post('/login', (req, res) => {
-//   connection.query(`SELECT * FROM users WHERE email="${req.body.email}"`, (err, result) => {
-//     if (err) {
-//       res.redirect('/error');
-//     } else {
-//       if (result[0].password === password) {
-//         req.session.user = result[0];
-//         res.redirect('/journal');
-//       } else {
-//         res.redirect('/error');
-      
-//     }
-//   });
-// });
-
 app.get('/login/facebook', passport.authenticate('facebook'));
 
 const redirects = { successRedirect: '/journal', failureRedirect: '/login' };
-app.get('/login/facebook/return', passport.authenticate('facebook', redirects), (req, res) => {
-  console.log('in here');
-  req.session.save(() => {
-    console.log(req.session);
-    res.redirect('/success');
-  });
-});
+app.get('/login/facebook/return', passport.authenticate('facebook', redirects));
 
-app.post('/register', (req, res) => {
-  const password = CryptoJS.AES.encrypt(req.body.password, secret).toString();
-  const user  = { email: req.body.email, password };
-  const query = connection.query('INSERT INTO users SET ?', user, (err, result) => {
-    if (err) {
-      res.redirect('/error');
-    } else {
-      req.session.user = user;
-      res.redirect('/journal');
-    }
-  });
+app.get('/register', (req, res) => {
+  res.redirect('/login');
 });
 
 //
@@ -123,33 +92,61 @@ app.post('/register', (req, res) => {
 // -----------------------------------------------------------------------------
 app.post('/save/:date', (req, res, next) => {
   const { date } = req.params;
-  const user_id = req.session.user.id;
+  const user_id = req.session.passport && req.session.passport.user;
 
   // check if entry already exists for date
-  connection.query(`SELECT * FROM entries WHERE date="${date}" AND user_id="${user_id}"`, (err, result) => {
-    if (err) {
+  MongoClient.connect(url, (err, db) => {
+    if (err || !user_id) {
       res.redirect('/error');
-    } else {
-      const entry = Object.assign({}, req.body, { user_id, date });
-      if (result.length) {
-        const { id } = result[0];
-        connection.query(`UPDATE entries SET ? WHERE id="${id}"`, entry, (err, result) => {
-          if (err) {
-            res.redirect('/error');
-          } else {
-            next();
-          }
-        });
-      } else {
-        connection.query('INSERT INTO entries SET ?', entry, (err, result) => {
-          if (err) {
-            res.redirect('/error');
-          } else {
-            next();
-          }
-        });
-      }
     }
+    console.log('Connected correctly to server');
+
+    const collection = db.collection('journals');
+    const entry = Object.assign({}, req.body);
+
+    // find journal entry
+    collection.findOneAndUpdate(
+      { date, user_id },
+      { $set: { entry } },
+      { upsert: true },
+      (error, result) => {
+        if (error) {
+          res.redirect('/error');
+        }
+
+        console.log(result);
+
+        next();
+      }
+    );
+  });
+});
+
+app.post('/quote', (req, res, next) => {
+  const user_id = req.session.passport && req.session.passport.user;
+
+  MongoClient.connect(url, (err, db) => {
+    if (err || !user_id) {
+      res.redirect('/error');
+    }
+    console.log('Connected correctly to server');
+
+    const collection = db.collection('quotes');
+    const entry = Object.assign({}, req.body);
+
+    // find journal entry
+    collection.insertOne(
+      entry,
+      (error, result) => {
+        if (error) {
+          res.redirect('/error');
+        }
+
+        res.redirect('/quote');
+
+        next();
+      }
+    );
   });
 });
 
@@ -159,7 +156,6 @@ app.get('/journal', (req, res) => {
 });
 
 app.get('/journal/:date', (req, res, next) => {
-  console.log(req.session);
   if (!req.session.passport || !req.session.passport.user) {
     res.redirect('/login');
   } else {
@@ -168,27 +164,39 @@ app.get('/journal/:date', (req, res, next) => {
 });
 
 app.post('/journal/:date', (req, res, next) => {
-  console.log(req.session);
   if (req.session.passport && req.session.passport.user) {
     const { date } = req.params;
-    const user_id = req.session.passport.user.id;
+    const user_id = req.session.passport.user;
 
-    // connection.query(`SELECT * FROM entries WHERE date="${date}" AND user_id="${user_id}"`, (err, result) => {
-    //   if (err) {
-    //     res.json(400, {});
-    //   } else if (result.length) {
-    //     res.locals.entry = result[0];
-    //     delete result[0].id;
-    //     delete result[0].user_id;
-    //     delete result[0].updated;
-    //     res.json(result[0]);
-    //     next();
-    //   } else {
-    //     res.json({});
-    //     next();
-    //   }
-    // });
-    res.json({});
+    MongoClient.connect(url, (err, db) => {
+      if (err) {
+        res.json(400, {});
+      }
+      console.log('Connected correctly to server');
+
+      const collection = db.collection('journals');
+      db.command({ count: 'quotes' }, (err, count) => {
+        db.collection('quotes').aggregate( [ { $sample: {size: 1} } ], (err, quotes) => {
+          if (err) {
+            res.json(400, {});
+          }
+
+          // find journal entry
+          collection.findOne({ date, user_id }, (err, result) => {
+            if (err) {
+              res.json(400, {});
+            }
+
+            res.json({
+              entry: (result && result.entry) || {},
+              quote: quotes[0],
+            });
+            db.close();
+            next();
+          });
+        });
+      });
+    });
   } else {
     res.json({});
     next();

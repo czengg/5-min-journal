@@ -212,43 +212,13 @@ module.exports =
     done(null, user);
   });
   
-  // app.post('/login', (req, res) => {
-  //   connection.query(`SELECT * FROM users WHERE email="${req.body.email}"`, (err, result) => {
-  //     if (err) {
-  //       res.redirect('/error');
-  //     } else {
-  //       if (result[0].password === password) {
-  //         req.session.user = result[0];
-  //         res.redirect('/journal');
-  //       } else {
-  //         res.redirect('/error');
-  
-  //     }
-  //   });
-  // });
-  
   app.get('/login/facebook', _passport2.default.authenticate('facebook'));
   
   var redirects = { successRedirect: '/journal', failureRedirect: '/login' };
-  app.get('/login/facebook/return', _passport2.default.authenticate('facebook', redirects), function (req, res) {
-    console.log('in here');
-    req.session.save(function () {
-      console.log(req.session);
-      res.redirect('/success');
-    });
-  });
+  app.get('/login/facebook/return', _passport2.default.authenticate('facebook', redirects));
   
-  app.post('/register', function (req, res) {
-    var password = CryptoJS.AES.encrypt(req.body.password, secret).toString();
-    var user = { email: req.body.email, password: password };
-    var query = connection.query('INSERT INTO users SET ?', user, function (err, result) {
-      if (err) {
-        res.redirect('/error');
-      } else {
-        req.session.user = user;
-        res.redirect('/journal');
-      }
-    });
+  app.get('/register', function (req, res) {
+    res.redirect('/login');
   });
   
   //
@@ -257,34 +227,53 @@ module.exports =
   app.post('/save/:date', function (req, res, next) {
     var date = req.params.date;
   
-    var user_id = req.session.user.id;
+    var user_id = req.session.passport && req.session.passport.user;
   
     // check if entry already exists for date
-    connection.query('SELECT * FROM entries WHERE date="' + date + '" AND user_id="' + user_id + '"', function (err, result) {
-      if (err) {
+    _mongodb.MongoClient.connect(url, function (err, db) {
+      if (err || !user_id) {
         res.redirect('/error');
-      } else {
-        var entry = (0, _assign2.default)({}, req.body, { user_id: user_id, date: date });
-        if (result.length) {
-          var id = result[0].id;
-  
-          connection.query('UPDATE entries SET ? WHERE id="' + id + '"', entry, function (err, result) {
-            if (err) {
-              res.redirect('/error');
-            } else {
-              next();
-            }
-          });
-        } else {
-          connection.query('INSERT INTO entries SET ?', entry, function (err, result) {
-            if (err) {
-              res.redirect('/error');
-            } else {
-              next();
-            }
-          });
-        }
       }
+      console.log('Connected correctly to server');
+  
+      var collection = db.collection('journals');
+      var entry = (0, _assign2.default)({}, req.body);
+  
+      // find journal entry
+      collection.findOneAndUpdate({ date: date, user_id: user_id }, { $set: { entry: entry } }, { upsert: true }, function (error, result) {
+        if (error) {
+          res.redirect('/error');
+        }
+  
+        console.log(result);
+  
+        next();
+      });
+    });
+  });
+  
+  app.post('/quote', function (req, res, next) {
+    var user_id = req.session.passport && req.session.passport.user;
+  
+    _mongodb.MongoClient.connect(url, function (err, db) {
+      if (err || !user_id) {
+        res.redirect('/error');
+      }
+      console.log('Connected correctly to server');
+  
+      var collection = db.collection('quotes');
+      var entry = (0, _assign2.default)({}, req.body);
+  
+      // find journal entry
+      collection.insertOne(entry, function (error, result) {
+        if (error) {
+          res.redirect('/error');
+        }
+  
+        res.redirect('/quote');
+  
+        next();
+      });
     });
   });
   
@@ -294,7 +283,6 @@ module.exports =
   });
   
   app.get('/journal/:date', function (req, res, next) {
-    console.log(req.session);
     if (!req.session.passport || !req.session.passport.user) {
       res.redirect('/login');
     } else {
@@ -303,28 +291,42 @@ module.exports =
   });
   
   app.post('/journal/:date', function (req, res, next) {
-    console.log(req.session);
     if (req.session.passport && req.session.passport.user) {
-      var date = req.params.date;
+      (function () {
+        var date = req.params.date;
   
-      var user_id = req.session.passport.user.id;
+        var user_id = req.session.passport.user;
   
-      // connection.query(`SELECT * FROM entries WHERE date="${date}" AND user_id="${user_id}"`, (err, result) => {
-      //   if (err) {
-      //     res.json(400, {});
-      //   } else if (result.length) {
-      //     res.locals.entry = result[0];
-      //     delete result[0].id;
-      //     delete result[0].user_id;
-      //     delete result[0].updated;
-      //     res.json(result[0]);
-      //     next();
-      //   } else {
-      //     res.json({});
-      //     next();
-      //   }
-      // });
-      res.json({});
+        _mongodb.MongoClient.connect(url, function (err, db) {
+          if (err) {
+            res.json(400, {});
+          }
+          console.log('Connected correctly to server');
+  
+          var collection = db.collection('journals');
+          db.command({ count: 'quotes' }, function (err, count) {
+            db.collection('quotes').aggregate([{ $sample: { size: 1 } }], function (err, quotes) {
+              if (err) {
+                res.json(400, {});
+              }
+  
+              // find journal entry
+              collection.findOne({ date: date, user_id: user_id }, function (err, result) {
+                if (err) {
+                  res.json(400, {});
+                }
+  
+                res.json({
+                  entry: result && result.entry || {},
+                  quote: quotes[0]
+                });
+                db.close();
+                next();
+              });
+            });
+          });
+        });
+      })();
     } else {
       res.json({});
       next();
@@ -336,7 +338,7 @@ module.exports =
   // -----------------------------------------------------------------------------
   app.get('*', function () {
     var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee2(req, res, next) {
-      var _ret;
+      var _ret2;
   
       return _regenerator2.default.wrap(function _callee2$(_context2) {
         while (1) {
@@ -394,7 +396,7 @@ module.exports =
                           _App2.default,
                           { context: context, __source: {
                               fileName: _jsxFileName,
-                              lineNumber: 227
+                              lineNumber: 235
                             },
                             __self: undefined
                           },
@@ -406,7 +408,7 @@ module.exports =
                         html = _server2.default.renderToStaticMarkup(_react2.default.createElement(_Html2.default, (0, _extends3.default)({}, data, {
                           __source: {
                             fileName: _jsxFileName,
-                            lineNumber: 231
+                            lineNumber: 239
                           },
                           __self: undefined
                         })));
@@ -424,14 +426,14 @@ module.exports =
               })(), 't0', 2);
   
             case 2:
-              _ret = _context2.t0;
+              _ret2 = _context2.t0;
   
-              if (!((typeof _ret === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret)) === "object")) {
+              if (!((typeof _ret2 === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret2)) === "object")) {
                 _context2.next = 5;
                 break;
               }
   
-              return _context2.abrupt('return', _ret.v);
+              return _context2.abrupt('return', _ret2.v);
   
             case 5:
               _context2.next = 10;
@@ -474,13 +476,13 @@ module.exports =
         style: _ErrorPage3.default._getCss() // eslint-disable-line no-underscore-dangle
         , __source: {
           fileName: _jsxFileName,
-          lineNumber: 250
+          lineNumber: 258
         },
         __self: undefined
       },
       _server2.default.renderToString(_react2.default.createElement(_ErrorPage.ErrorPageWithoutStyle, { error: err, __source: {
           fileName: _jsxFileName,
-          lineNumber: 255
+          lineNumber: 263
         },
         __self: undefined
       }))
@@ -1948,13 +1950,13 @@ module.exports =
       var _this = this;
   
       return (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
-        var date, dailyQuote, path, onSave, resp, data;
+        var date, defaultQuote, path, onSave, resp, data;
         return _regenerator2.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 date = (0, _moment2.default)(params.date);
-                dailyQuote = {
+                defaultQuote = {
                   quote: 'Anyone who has a why to live can bear almost any what.',
                   author: 'Nietzche'
                 };
@@ -1982,7 +1984,7 @@ module.exports =
                 data = _context.sent;
                 return _context.abrupt('return', {
                   title: title,
-                  component: _react2.default.createElement(_Journal2.default, { date: date, dailyQuote: dailyQuote, onSave: onSave, data: data, __source: {
+                  component: _react2.default.createElement(_Journal2.default, { date: date, dailyQuote: data.quote || defaultQuote, onSave: onSave, data: data.entry, __source: {
                       fileName: _jsxFileName,
                       lineNumber: 45
                     },
@@ -3415,87 +3417,32 @@ module.exports =
             __self: this
           },
           _react2.default.createElement(
-            'h1',
-            { className: _Login2.default.lead, __source: {
+            'a',
+            { href: '/login/facebook', __source: {
                 fileName: _jsxFileName,
                 lineNumber: 20
               },
               __self: this
             },
-            'Sign In'
-          ),
-          _react2.default.createElement(
-            'form',
-            {
-              method: 'post',
-              onSubmit: handleSubmit,
-              __source: {
-                fileName: _jsxFileName,
-                lineNumber: 21
-              },
-              __self: this
-            },
             _react2.default.createElement(
-              'div',
-              { className: _Login2.default.formGroup, __source: {
+              'h1',
+              { className: _Login2.default.lead, __source: {
                   fileName: _jsxFileName,
-                  lineNumber: 25
-                },
-                __self: this
-              },
-              _react2.default.createElement('input', {
-                className: _Login2.default.input,
-                id: 'email',
-                type: 'text',
-                name: 'email',
-                placeholder: 'email',
-                autoFocus: true,
-                __source: {
-                  fileName: _jsxFileName,
-                  lineNumber: 26
-                },
-                __self: this
-              })
-            ),
-            _react2.default.createElement(
-              'div',
-              { className: _Login2.default.formGroup, __source: {
-                  fileName: _jsxFileName,
-                  lineNumber: 35
-                },
-                __self: this
-              },
-              _react2.default.createElement('input', {
-                className: _Login2.default.input,
-                id: 'password',
-                type: 'password',
-                name: 'password',
-                placeholder: 'password',
-                __source: {
-                  fileName: _jsxFileName,
-                  lineNumber: 36
-                },
-                __self: this
-              })
-            ),
-            _react2.default.createElement(
-              'div',
-              { className: _Login2.default.formGroup, __source: {
-                  fileName: _jsxFileName,
-                  lineNumber: 44
+                  lineNumber: 21
                 },
                 __self: this
               },
               _react2.default.createElement(
-                'a',
-                { href: '/login/facebook', __source: {
+                'span',
+                { className: _Login2.default.underline, __source: {
                     fileName: _jsxFileName,
-                    lineNumber: 45
+                    lineNumber: 22
                   },
                   __self: this
                 },
-                'Log In \u2192'
-              )
+                'Sign In With Facebook'
+              ),
+              ' \u2192'
             )
           )
         )
@@ -3553,16 +3500,14 @@ module.exports =
   
   
   // module
-  exports.push([module.id, "html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 0%;\n          flex: 1 1 0%;\n}\n\n.Login-root-rQNQN {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.Login-container-2BVuU {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.Login-lead-1mJBN {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.Login-formGroup-25Tio {\n  margin-bottom: 15px;\n}\n\n.Login-input-1bTr- {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.Login-input-1bTr-:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.Login-button-11e1X {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.Login-button-11e1X:focus, .Login-button-11e1X:hover {\n  color: #979797;\n}\n", "", {"version":3,"sources":["/./routes/login/Login.css"],"names":[],"mappings":"AAAA;EACE,YAAY;EACZ,aAAa;CACd;;AAED;EACE,UAAU;EACV,WAAW;EACX,0BAA0B;EAC1B,qBAAc;EAAd,qBAAc;EAAd,cAAc;EACd,oBAAQ;MAAR,iBAAQ;UAAR,aAAQ;CACT;;AAED;EACE,WAAW;EACX,gBAAgB;CACjB;;AAED;EACE,eAAe;EACf,kBAAkB;EAClB,mBAAmB;CACpB;;AAED;EACE,gCAAgC;EAChC,gBAAgB;EAChB,eAAe;CAChB;;AAED;EACE,oBAAoB;CACrB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,YAAY;EACZ,aAAa;EACb,WAAW;EACX,iBAAiB;EACjB,eAAe;EACf,gBAAgB;EAChB,uBAAuB;EACvB,iFAAyE;EAAzE,yEAAyE;EACzE,aAAa;EACb,iCAAiC;EACjC,uCAAuC;EACvC,wBAAwB;CACzB;;AAED;EACE,kBAAkB;EAClB,kBAAkB;CACnB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,UAAU;EACV,mBAAmB;EACnB,YAAY;EACZ,WAAW;EACX,eAAe;EACf,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,uBAAuB;EACvB,gBAAgB;EAChB,aAAa;EACb,wBAAwB;EACxB,uCAAuC;EACvC,oBAAoB;EACpB,gBAAgB;CACjB;;AAED;EACE,eAAe;CAChB","file":"Login.css","sourcesContent":["html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: flex;\n  flex: 1;\n}\n\n.root {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.container {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.lead {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.formGroup {\n  margin-bottom: 15px;\n}\n\n.input {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.input:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.button {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.button:focus, .button:hover {\n  color: #979797;\n}\n"],"sourceRoot":"webpack://"}]);
+  exports.push([module.id, "html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 0%;\n          flex: 1 1 0%;\n}\n\na {\n  text-decoration: none;\n}\n\n.Login-root-rQNQN {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.Login-container-2BVuU {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.Login-lead-1mJBN {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.Login-lead-1mJBN:hover {\n  opacity: .9;\n}\n\n.Login-underline-1slMJ {\n  text-decoration: underline;\n  display: inline;\n}\n", "", {"version":3,"sources":["/./routes/login/Login.css"],"names":[],"mappings":"AAAA;EACE,YAAY;EACZ,aAAa;CACd;;AAED;EACE,UAAU;EACV,WAAW;EACX,0BAA0B;EAC1B,qBAAc;EAAd,qBAAc;EAAd,cAAc;EACd,oBAAQ;MAAR,iBAAQ;UAAR,aAAQ;CACT;;AAED;EACE,sBAAsB;CACvB;;AAED;EACE,WAAW;EACX,gBAAgB;CACjB;;AAED;EACE,eAAe;EACf,kBAAkB;EAClB,mBAAmB;CACpB;;AAED;EACE,gCAAgC;EAChC,gBAAgB;EAChB,eAAe;CAChB;;AAED;EACE,YAAY;CACb;;AAED;EACE,2BAA2B;EAC3B,gBAAgB;CACjB","file":"Login.css","sourcesContent":["html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: flex;\n  flex: 1;\n}\n\na {\n  text-decoration: none;\n}\n\n.root {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.container {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.lead {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.lead:hover {\n  opacity: .9;\n}\n\n.underline {\n  text-decoration: underline;\n  display: inline;\n}\n"],"sourceRoot":"webpack://"}]);
   
   // exports
   exports.locals = {
   	"root": "Login-root-rQNQN",
   	"container": "Login-container-2BVuU",
   	"lead": "Login-lead-1mJBN",
-  	"formGroup": "Login-formGroup-25Tio",
-  	"input": "Login-input-1bTr-",
-  	"button": "Login-button-11e1X"
+  	"underline": "Login-underline-1slMJ"
   };
 
 /***/ },
@@ -3574,35 +3519,35 @@ module.exports =
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
-  var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/routes/register/index.js'; /**
-                                                                                                                                * React Starter Kit (https://www.reactstarterkit.com/)
-                                                                                                                                *
-                                                                                                                                * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
-                                                                                                                                *
-                                                                                                                                * This source code is licensed under the MIT license found in the
-                                                                                                                                * LICENSE.txt file in the root directory of this source tree.
-                                                                                                                                */
+  var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/routes/quote/index.js'; /**
+                                                                                                                             * React Starter Kit (https://www.reactstarterkit.com/)
+                                                                                                                             *
+                                                                                                                             * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
+                                                                                                                             *
+                                                                                                                             * This source code is licensed under the MIT license found in the
+                                                                                                                             * LICENSE.txt file in the root directory of this source tree.
+                                                                                                                             */
   
   var _react = __webpack_require__(15);
   
   var _react2 = _interopRequireDefault(_react);
   
-  var _Register = __webpack_require__(82);
+  var _Quote = __webpack_require__(82);
   
-  var _Register2 = _interopRequireDefault(_Register);
+  var _Quote2 = _interopRequireDefault(_Quote);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
-  var title = 'New User Registration';
+  var title = 'Add Quote';
   
   exports.default = {
   
-    path: '/register',
+    path: '/quote',
   
     action: function action() {
       return {
         title: title,
-        component: _react2.default.createElement(_Register2.default, { title: title, __source: {
+        component: _react2.default.createElement(_Quote2.default, { title: title, __source: {
             fileName: _jsxFileName,
             lineNumber: 22
           },
@@ -3621,14 +3566,14 @@ module.exports =
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
-  var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/routes/register/Register.js'; /**
-                                                                                                                                   * React Starter Kit (https://www.reactstarterkit.com/)
-                                                                                                                                   *
-                                                                                                                                   * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
-                                                                                                                                   *
-                                                                                                                                   * This source code is licensed under the MIT license found in the
-                                                                                                                                   * LICENSE.txt file in the root directory of this source tree.
-                                                                                                                                   */
+  var _jsxFileName = '/Users/czengg/Documents/interestShit/sideProjects/fiveMinJournal/codebase/src/routes/quote/Quote.js'; /**
+                                                                                                                             * React Starter Kit (https://www.reactstarterkit.com/)
+                                                                                                                             *
+                                                                                                                             * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
+                                                                                                                             *
+                                                                                                                             * This source code is licensed under the MIT license found in the
+                                                                                                                             * LICENSE.txt file in the root directory of this source tree.
+                                                                                                                             */
   
   var _react = __webpack_require__(15);
   
@@ -3642,13 +3587,13 @@ module.exports =
   
   var _Layout2 = _interopRequireDefault(_Layout);
   
-  var _Register = __webpack_require__(83);
+  var _Quote = __webpack_require__(83);
   
-  var _Register2 = _interopRequireDefault(_Register);
+  var _Quote2 = _interopRequireDefault(_Quote);
   
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
-  function Register() {
+  function Quote() {
     return _react2.default.createElement(
       _Layout2.default,
       { header: 'fiveMinuteJournal', __source: {
@@ -3659,7 +3604,7 @@ module.exports =
       },
       _react2.default.createElement(
         'div',
-        { className: _Register2.default.root, __source: {
+        { className: _Quote2.default.root, __source: {
             fileName: _jsxFileName,
             lineNumber: 18
           },
@@ -3667,7 +3612,7 @@ module.exports =
         },
         _react2.default.createElement(
           'div',
-          { className: _Register2.default.container, __source: {
+          { className: _Quote2.default.container, __source: {
               fileName: _jsxFileName,
               lineNumber: 19
             },
@@ -3675,13 +3620,13 @@ module.exports =
           },
           _react2.default.createElement(
             'h1',
-            { className: _Register2.default.lead, __source: {
+            { className: _Quote2.default.lead, __source: {
                 fileName: _jsxFileName,
                 lineNumber: 20
               },
               __self: this
             },
-            'Sign Up'
+            'Add Quote'
           ),
           _react2.default.createElement(
             'form',
@@ -3693,18 +3638,18 @@ module.exports =
             },
             _react2.default.createElement(
               'div',
-              { className: _Register2.default.formGroup, __source: {
+              { className: _Quote2.default.formGroup, __source: {
                   fileName: _jsxFileName,
                   lineNumber: 22
                 },
                 __self: this
               },
               _react2.default.createElement('input', {
-                className: _Register2.default.input,
-                id: 'email',
+                className: _Quote2.default.input,
+                id: 'quote',
                 type: 'text',
-                name: 'email',
-                placeholder: 'email',
+                name: 'quote',
+                placeholder: 'quote',
                 autoFocus: true,
                 __source: {
                   fileName: _jsxFileName,
@@ -3715,18 +3660,18 @@ module.exports =
             ),
             _react2.default.createElement(
               'div',
-              { className: _Register2.default.formGroup, __source: {
+              { className: _Quote2.default.formGroup, __source: {
                   fileName: _jsxFileName,
                   lineNumber: 32
                 },
                 __self: this
               },
               _react2.default.createElement('input', {
-                className: _Register2.default.input,
-                id: 'password',
-                type: 'password',
-                name: 'password',
-                placeholder: 'password',
+                className: _Quote2.default.input,
+                id: 'author',
+                type: 'text',
+                name: 'author',
+                placeholder: 'author',
                 __source: {
                   fileName: _jsxFileName,
                   lineNumber: 33
@@ -3736,7 +3681,7 @@ module.exports =
             ),
             _react2.default.createElement(
               'div',
-              { className: _Register2.default.formGroup, __source: {
+              { className: _Quote2.default.formGroup, __source: {
                   fileName: _jsxFileName,
                   lineNumber: 41
                 },
@@ -3744,13 +3689,13 @@ module.exports =
               },
               _react2.default.createElement(
                 'button',
-                { className: _Register2.default.button, type: 'submit', __source: {
+                { className: _Quote2.default.button, type: 'submit', __source: {
                     fileName: _jsxFileName,
                     lineNumber: 42
                   },
                   __self: this
                 },
-                'Register \u2192'
+                'Add Quote \u2192'
               )
             )
           )
@@ -3759,9 +3704,9 @@ module.exports =
     );
   }
   
-  Register.propTypes = { title: _react.PropTypes.string.isRequired };
+  Quote.propTypes = { title: _react.PropTypes.string.isRequired };
   
-  exports.default = (0, _withStyles2.default)(_Register2.default)(Register);
+  exports.default = (0, _withStyles2.default)(_Quote2.default)(Quote);
 
 /***/ },
 /* 83 */
@@ -3784,8 +3729,8 @@ module.exports =
       // Only activated in browser context
       if (false) {
         var removeCss = function() {};
-        module.hot.accept("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./Register.css", function() {
-          content = require("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./Register.css");
+        module.hot.accept("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./Quote.css", function() {
+          content = require("!!./../../../node_modules/css-loader/index.js?{\"importLoaders\":1,\"sourceMap\":true,\"modules\":true,\"localIdentName\":\"[name]-[local]-[hash:base64:5]\",\"minimize\":false}!./../../../node_modules/postcss-loader/index.js?pack=default!./Quote.css");
   
           if (typeof content === 'string') {
             content = [[module.id, content, '']];
@@ -3806,16 +3751,16 @@ module.exports =
   
   
   // module
-  exports.push([module.id, "html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 0%;\n          flex: 1 1 0%;\n}\n\n.Register-root-1hu0P {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.Register-container-OjhIB {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.Register-lead-2Uwpf {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.Register-formGroup-3ZVSx {\n  margin-bottom: 15px;\n}\n\n.Register-input-2b_qn {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.Register-input-2b_qn:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.Register-button-3N6JT {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.Register-button-3N6JT:focus, .Register-button-3N6JT:hover {\n  color: #979797;\n}\n", "", {"version":3,"sources":["/./routes/register/Register.css"],"names":[],"mappings":"AAAA;EACE,YAAY;EACZ,aAAa;CACd;;AAED;EACE,UAAU;EACV,WAAW;EACX,0BAA0B;EAC1B,qBAAc;EAAd,qBAAc;EAAd,cAAc;EACd,oBAAQ;MAAR,iBAAQ;UAAR,aAAQ;CACT;;AAED;EACE,WAAW;EACX,gBAAgB;CACjB;;AAED;EACE,eAAe;EACf,kBAAkB;EAClB,mBAAmB;CACpB;;AAED;EACE,gCAAgC;EAChC,gBAAgB;EAChB,eAAe;CAChB;;AAED;EACE,oBAAoB;CACrB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,YAAY;EACZ,aAAa;EACb,WAAW;EACX,iBAAiB;EACjB,eAAe;EACf,gBAAgB;EAChB,uBAAuB;EACvB,iFAAyE;EAAzE,yEAAyE;EACzE,aAAa;EACb,iCAAiC;EACjC,uCAAuC;EACvC,wBAAwB;CACzB;;AAED;EACE,kBAAkB;EAClB,kBAAkB;CACnB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,UAAU;EACV,mBAAmB;EACnB,YAAY;EACZ,WAAW;EACX,eAAe;EACf,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,uBAAuB;EACvB,gBAAgB;EAChB,aAAa;EACb,wBAAwB;EACxB,uCAAuC;EACvC,oBAAoB;EACpB,gBAAgB;CACjB;;AAED;EACE,eAAe;CAChB","file":"Register.css","sourcesContent":["html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: flex;\n  flex: 1;\n}\n\n.root {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.container {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.lead {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.formGroup {\n  margin-bottom: 15px;\n}\n\n.input {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.input:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.button {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.button:focus, .button:hover {\n  color: #979797;\n}\n"],"sourceRoot":"webpack://"}]);
+  exports.push([module.id, "html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-flex: 1;\n      -ms-flex: 1 1 0%;\n          flex: 1 1 0%;\n}\n\n.Quote-root-1iUmM {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.Quote-container-4XgJ_ {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.Quote-lead-3cmwp {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.Quote-formGroup-25y4A {\n  margin-bottom: 15px;\n}\n\n.Quote-input-sdM1P {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.Quote-input-sdM1P:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.Quote-button-3BFv_ {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.Quote-button-3BFv_:focus, .Quote-button-3BFv_:hover {\n  color: #979797;\n}\n", "", {"version":3,"sources":["/./routes/quote/Quote.css"],"names":[],"mappings":"AAAA;EACE,YAAY;EACZ,aAAa;CACd;;AAED;EACE,UAAU;EACV,WAAW;EACX,0BAA0B;EAC1B,qBAAc;EAAd,qBAAc;EAAd,cAAc;EACd,oBAAQ;MAAR,iBAAQ;UAAR,aAAQ;CACT;;AAED;EACE,WAAW;EACX,gBAAgB;CACjB;;AAED;EACE,eAAe;EACf,kBAAkB;EAClB,mBAAmB;CACpB;;AAED;EACE,gCAAgC;EAChC,gBAAgB;EAChB,eAAe;CAChB;;AAED;EACE,oBAAoB;CACrB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,YAAY;EACZ,aAAa;EACb,WAAW;EACX,iBAAiB;EACjB,eAAe;EACf,gBAAgB;EAChB,uBAAuB;EACvB,iFAAyE;EAAzE,yEAAyE;EACzE,aAAa;EACb,iCAAiC;EACjC,uCAAuC;EACvC,wBAAwB;CACzB;;AAED;EACE,kBAAkB;EAClB,kBAAkB;CACnB;;AAED;EACE,eAAe;EACf,uBAAuB;EACvB,UAAU;EACV,mBAAmB;EACnB,YAAY;EACZ,WAAW;EACX,eAAe;EACf,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,uBAAuB;EACvB,gBAAgB;EAChB,aAAa;EACb,wBAAwB;EACxB,uCAAuC;EACvC,oBAAoB;EACpB,gBAAgB;CACjB;;AAED;EACE,eAAe;CAChB","file":"Quote.css","sourcesContent":["html {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #FEFEF6;\n  display: flex;\n  flex: 1;\n}\n\n.root {\n  width: 90%;\n  margin-top: 10%;\n}\n\n.container {\n  margin: 0 auto;\n  padding: 0 0 40px;\n  text-align: center;\n}\n\n.lead {\n  font-family: 'Lobster', cursive;\n  font-size: 48px;\n  color: #4A4A4A;\n}\n\n.formGroup {\n  margin-bottom: 15px;\n}\n\n.input {\n  display: block;\n  box-sizing: border-box;\n  width: 100%;\n  height: 46px;\n  outline: 0;\n  border-radius: 0;\n  color: #616161;\n  font-size: 18px;\n  line-height: 1.3333333;\n  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;\n  border: none;\n  border-bottom: 1px solid #979797;\n  font-family: 'Playfair Display', serif;\n  background: transparent;\n}\n\n.input:focus {\n  border-width: 2px;\n  padding-bottom: 0;\n}\n\n.button {\n  display: block;\n  box-sizing: border-box;\n  margin: 0;\n  padding: 10px 16px;\n  width: 100%;\n  outline: 0;\n  color: #4A4A4A;\n  text-align: center;\n  text-decoration: none;\n  font-size: 18px;\n  line-height: 1.3333333;\n  cursor: pointer;\n  border: none;\n  background: transparent;\n  font-family: 'Playfair Display', serif;\n  font-style: oblique;\n  font-size: 20px;\n}\n\n.button:focus, .button:hover {\n  color: #979797;\n}\n"],"sourceRoot":"webpack://"}]);
   
   // exports
   exports.locals = {
-  	"root": "Register-root-1hu0P",
-  	"container": "Register-container-OjhIB",
-  	"lead": "Register-lead-2Uwpf",
-  	"formGroup": "Register-formGroup-3ZVSx",
-  	"input": "Register-input-2b_qn",
-  	"button": "Register-button-3N6JT"
+  	"root": "Quote-root-1iUmM",
+  	"container": "Quote-container-4XgJ_",
+  	"lead": "Quote-lead-3cmwp",
+  	"formGroup": "Quote-formGroup-25y4A",
+  	"input": "Quote-input-sdM1P",
+  	"button": "Quote-button-3BFv_"
   };
 
 /***/ },

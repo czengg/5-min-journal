@@ -18,7 +18,7 @@ export default {
   children: [
     require('./journal').default,
     require('./login').default,
-    require('./register').default,
+    require('./quote').default,
     require('./admin').default,
 
     // place new routes before...

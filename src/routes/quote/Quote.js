@@ -10,37 +10,37 @@
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Layout from '../../components/Layout';
-import s from './Register.css';
+import s from './Quote.css';
 
-function Register() {
+function Quote() {
   return (
     <Layout header="fiveMinuteJournal">
       <div className={s.root}>
         <div className={s.container}>
-          <h1 className={s.lead}>Sign Up</h1>
+          <h1 className={s.lead}>Add Quote</h1>
           <form method="post">
             <div className={s.formGroup}>
               <input
                 className={s.input}
-                id="email"
+                id="quote"
                 type="text"
-                name="email"
-                placeholder="email"
+                name="quote"
+                placeholder="quote"
                 autoFocus
               />
             </div>
             <div className={s.formGroup}>
               <input
                 className={s.input}
-                id="password"
-                type="password"
-                name="password"
-                placeholder="password"
+                id="author"
+                type="text"
+                name="author"
+                placeholder="author"
               />
             </div>
             <div className={s.formGroup}>
               <button className={s.button} type="submit">
-                Register &rarr;
+                Add Quote &rarr;
               </button>
             </div>
           </form>
@@ -50,6 +50,6 @@ function Register() {
   );
 }
 
-Register.propTypes = { title: PropTypes.string.isRequired };
+Quote.propTypes = { title: PropTypes.string.isRequired };
 
-export default withStyles(s)(Register);
+export default withStyles(s)(Quote);

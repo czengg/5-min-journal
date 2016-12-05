@@ -8,18 +8,18 @@
  */
 
 import React from 'react';
-import Register from './Register';
+import Quote from './Quote';
 
-const title = 'New User Registration';
+const title = 'Add Quote';
 
 export default {
 
-  path: '/register',
+  path: '/quote',
 
   action() {
     return {
       title,
-      component: <Register title={title} />,
+      component: <Quote title={title} />,
     };
   },
 

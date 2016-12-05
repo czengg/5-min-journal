@@ -21,7 +21,7 @@ export default {
 
   async action(route, params) {
     const date = moment(params.date);
-    const dailyQuote = {
+    const defaultQuote = {
       quote: 'Anyone who has a why to live can bear almost any what.',
       author: 'Nietzche',
     };
@@ -42,7 +42,7 @@ export default {
 
     return {
       title,
-      component: <Journal date={date} dailyQuote={dailyQuote} onSave={onSave} data={data}/>,
+      component: <Journal date={date} dailyQuote={data.quote || defaultQuote} onSave={onSave} data={data.entry} />,
     };
   },
 

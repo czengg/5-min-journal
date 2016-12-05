@@ -17,36 +17,11 @@ function Login({ handleSubmit }) {
     <Layout header="fiveMinuteJournal">
       <div className={s.root}>
         <div className={s.container}>
-          <h1 className={s.lead}>Sign In</h1>
-          <form
-            method="post"
-            onSubmit={handleSubmit}
-          >
-            <div className={s.formGroup}>
-              <input
-                className={s.input}
-                id="email"
-                type="text"
-                name="email"
-                placeholder="email"
-                autoFocus
-              />
-            </div>
-            <div className={s.formGroup}>
-              <input
-                className={s.input}
-                id="password"
-                type="password"
-                name="password"
-                placeholder="password"
-              />
-            </div>
-            <div className={s.formGroup}>
-              <a href='/login/facebook'>
-                Log In &rarr;
-              </a>
-            </div>
-          </form>
+          <a href='/login/facebook'>
+            <h1 className={s.lead}>
+              <span className={s.underline}>Sign In With Facebook</span> &rarr;
+            </h1>
+          </a>
         </div>
       </div>
     </Layout>
