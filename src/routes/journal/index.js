@@ -33,7 +33,7 @@ export default {
       });
     };
 
-    const resp = await fetch(`${path}/journal/${params.date}`, {
+    const resp = await fetch(`${host}/journal/${params.date}`, {
       method: 'POST',
     });
 
