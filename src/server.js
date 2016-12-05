@@ -25,7 +25,6 @@ import App from './components/App';
 import Html from './components/Html';
 import { ErrorPageWithoutStyle } from './routes/error/ErrorPage';
 import errorPageStyle from './routes/error/ErrorPage.css';
-import models from './data/models';
 import routes from './routes';
 import assets from './assets'; // eslint-disable-line import/no-unresolved
 import { port, auth } from './config';
@@ -126,7 +125,8 @@ app.post('/quote', (req, res, next) => {
   const user_id = req.session.passport && req.session.passport.user;
 
   MongoClient.connect(url, (err, db) => {
-    if (err || !user_id) {
+    if (err) {
+      console.log(err);
       res.redirect('/error');
     }
     console.log('Connected correctly to server');
@@ -135,8 +135,10 @@ app.post('/quote', (req, res, next) => {
     const entry = Object.assign({}, req.body);
 
     // find journal entry
-    collection.insertOne(
+    collection.findOneAndUpdate(
       entry,
+      { $set: entry },
+      { upsert: true },
       (error, result) => {
         if (error) {
           res.redirect('/error');
@@ -271,9 +273,9 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
 // Launch the server
 // -----------------------------------------------------------------------------
 /* eslint-disable no-console */
-models.sync().catch(err => console.error(err.stack)).then(() => {
-  app.listen(port, () => {
-    console.log(`The server is running at http://localhost:${port}/`);
-  });
+
+app.listen(port, () => {
+  console.log(`The server is running at http://localhost:${port}/`);
 });
+
 /* eslint-enable no-console */

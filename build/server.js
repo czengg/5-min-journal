@@ -168,7 +168,7 @@ module.exports =
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   
   var app = (0, _express2.default)();
-  var url = 'mongodb://localhost:27017/fiveminutejournal';
+  var url = 'mongodb://journal.cindyzeng.com:27017/fiveminutejournal';
   
   //
   // Tell any CSS tooling (such as Material UI) to use all vendor prefixes if the
@@ -197,7 +197,7 @@ module.exports =
   _passport2.default.use(new _passportFacebook.Strategy({
     clientID: _config.auth.facebook.id,
     clientSecret: _config.auth.facebook.secret,
-    callbackURL: 'http://localhost:3001/login/facebook/return'
+    callbackURL: 'http://journal.cindyzeng.com:3000/login/facebook/return'
   }, function (accessToken, refreshToken, profile, cb) {
     cb(null, profile);
   }));
@@ -256,7 +256,8 @@ module.exports =
     var user_id = req.session.passport && req.session.passport.user;
   
     _mongodb.MongoClient.connect(url, function (err, db) {
-      if (err || !user_id) {
+      if (err) {
+        console.log(err);
         res.redirect('/error');
       }
       console.log('Connected correctly to server');
@@ -265,7 +266,7 @@ module.exports =
       var entry = (0, _assign2.default)({}, req.body);
   
       // find journal entry
-      collection.insertOne(entry, function (error, result) {
+      collection.findOneAndUpdate(entry, { $set: entry }, { upsert: true }, function (error, result) {
         if (error) {
           res.redirect('/error');
         }
@@ -396,7 +397,7 @@ module.exports =
                           _App2.default,
                           { context: context, __source: {
                               fileName: _jsxFileName,
-                              lineNumber: 235
+                              lineNumber: 238
                             },
                             __self: undefined
                           },
@@ -408,7 +409,7 @@ module.exports =
                         html = _server2.default.renderToStaticMarkup(_react2.default.createElement(_Html2.default, (0, _extends3.default)({}, data, {
                           __source: {
                             fileName: _jsxFileName,
-                            lineNumber: 239
+                            lineNumber: 242
                           },
                           __self: undefined
                         })));
@@ -476,13 +477,13 @@ module.exports =
         style: _ErrorPage3.default._getCss() // eslint-disable-line no-underscore-dangle
         , __source: {
           fileName: _jsxFileName,
-          lineNumber: 258
+          lineNumber: 261
         },
         __self: undefined
       },
       _server2.default.renderToString(_react2.default.createElement(_ErrorPage.ErrorPageWithoutStyle, { error: err, __source: {
           fileName: _jsxFileName,
-          lineNumber: 263
+          lineNumber: 266
         },
         __self: undefined
       }))
@@ -495,13 +496,11 @@ module.exports =
   // Launch the server
   // -----------------------------------------------------------------------------
   /* eslint-disable no-console */
-  _models2.default.sync().catch(function (err) {
-    return console.error(err.stack);
-  }).then(function () {
-    app.listen(_config.port, function () {
-      console.log('The server is running at http://localhost:' + _config.port + '/');
-    });
+  
+  app.listen(_config.port, function () {
+    console.log('The server is running at http://localhost:' + _config.port + '/');
   });
+  
   /* eslint-enable no-console */
 
 /***/ },
