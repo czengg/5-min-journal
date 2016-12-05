@@ -61,7 +61,7 @@ passport.use(new Strategy(
   {
     clientID: auth.facebook.id,
     clientSecret: auth.facebook.secret,
-    callbackURL: 'http://localhost:3001/login/facebook/return',
+    callbackURL: 'http://journal.cindyzeng.com:3000/login/facebook/return',
   },
   (accessToken, refreshToken, profile, cb) => {
     cb(null, profile);
