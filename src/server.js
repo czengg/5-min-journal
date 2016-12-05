@@ -31,7 +31,7 @@ import assets from './assets'; // eslint-disable-line import/no-unresolved
 import { port, auth } from './config';
 
 const app = express();
-const url = 'mongodb://localhost:27017/fiveminutejournal';
+const url = 'mongodb://journal.cindyzeng.com:27017/fiveminutejournal';
 
 //
 // Tell any CSS tooling (such as Material UI) to use all vendor prefixes if the
