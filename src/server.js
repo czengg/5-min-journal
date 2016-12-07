@@ -172,7 +172,8 @@ app.post('/journal/:date', (req, res, next) => {
 
     MongoClient.connect(journalUrl, (err, db) => {
       if (err) {
-        res.json(400, {});
+        res.status(400).json({});
+        next();
       }
       console.log('Connected correctly to server');
 
@@ -180,13 +181,13 @@ app.post('/journal/:date', (req, res, next) => {
       db.command({ count: 'quotes' }, (err, count) => {
         db.collection('quotes').aggregate( [ { $sample: {size: 1} } ], (err, quotes) => {
           if (err) {
-            res.json(400, {});
+            res.status(400).json({});
           }
 
           // find journal entry
           collection.findOne({ date, user_id }, (err, result) => {
             if (err) {
-              res.json(400, {});
+              res.status(400).json({});
             }
 
             res.json({
